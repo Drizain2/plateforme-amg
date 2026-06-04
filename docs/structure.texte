@@ -1,0 +1,84 @@
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── Auth/
+│   │   ├── Stock/
+│   │   │   ├── PartController.php
+│   │   │   ├── SupplierController.php
+│   │   │   └── StockMovementController.php
+│   │   ├── Ticket/
+│   │   │   ├── TicketController.php
+│   │   │   └── TicketEventController.php
+│   │   ├── InvoiceController.php
+│   │   ├── CustomerController.php
+│   │   └── DashboardController.php
+│   ├── Middleware/
+│   │   ├── HandleInertiaRequests.php
+│   │   └── EnsureTenantScope.php       ← middleware multi-tenant
+│   └── Requests/                        ← Form Requests (validation)
+│       ├── Stock/
+│       └── Ticket/
+├── Models/
+│   ├── Shop.php
+│   ├── User.php
+│   ├── Customer.php
+│   ├── Device.php
+│   ├── Ticket.php
+│   ├── TicketEvent.php
+│   ├── Part.php
+│   ├── Supplier.php
+│   ├── StockMovement.php
+│   └── Invoice.php
+├── Services/                            ← logique métier isolée
+│   ├── StockService.php
+│   ├── TicketService.php
+│   └── InvoiceService.php
+└── Policies/                            ← autorisation par ressource
+    ├── PartPolicy.php
+    └── TicketPolicy.php
+
+resources/js/
+├── Pages/
+│   ├── Auth/
+│   │   └── Login.vue
+│   ├── Dashboard/
+│   │   └── Index.vue
+│   ├── Stock/
+│   │   ├── Index.vue
+│   │   ├── Parts/
+│   │   │   ├── Index.vue
+│   │   │   ├── Create.vue
+│   │   │   └── Edit.vue
+│   │   └── Suppliers/
+│   │       └── Index.vue
+│   ├── Tickets/
+│   │   ├── Index.vue
+│   │   ├── Show.vue
+│   │   └── Create.vue
+│   ├── Customers/
+│   └── Invoices/
+├── Components/
+│   ├── UI/                              ← composants génériques
+│   │   ├── Button.vue
+│   │   ├── Input.vue
+│   │   ├── Modal.vue
+│   │   ├── DataTable.vue
+│   │   ├── Badge.vue
+│   │   └── Drawer.vue
+│   ├── Stock/
+│   │   ├── PartForm.vue
+│   │   ├── StockMovementDrawer.vue
+│   │   └── LowStockAlert.vue
+│   └── Tickets/
+│       ├── StatusBadge.vue
+│       └── Timeline.vue
+├── Layouts/
+│   ├── AppLayout.vue
+│   └── AuthLayout.vue
+├── Composables/
+│   ├── useToast.ts
+│   ├── useConfirm.ts
+│   └── usePermission.ts
+└── Types/
+    ├── models.d.ts                      ← types miroir des models Laravel
+    └── inertia.d.ts
