@@ -19,7 +19,8 @@ class Part extends Model
         "sku",
         "category_id",
         "brand_compat",
-        "unit_price",
+        "unit_price",//prix d'achat
+        "sell_price",//prix de vente
         "is_active",
     ];
 

@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('sku')->nullable();
             $table->foreignId('category_id')->constrained()->nullOnDelete();
             $table->json('brand_compat')->nullable();
-            $table->decimal('unit_price', 10, 2)->default(0);
+            $table->decimal('unit_price', 10, 2)->default(0);//prix d'achat
+            $table->decimal('sell_price', 10, 2)->default(0);//prix de vente
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
