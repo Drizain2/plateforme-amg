@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Database\Factories\PartFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\Builder;
 
 class Part extends Model
 {
@@ -21,9 +21,15 @@ class Part extends Model
         'sku',
         'category_id',
         'brand_compat',
-        'unit_price', // prix d'achat
-        'sell_price', // prix de vente
+        'unit_price',
+        'sell_price',
         'is_active',
+    ];
+
+    protected $casts = [
+        'brand_compat' => 'array',
+        'unit_price' => 'decimal:2',
+        'sell_price' => 'decimal:2',
     ];
 
     public function shop(): BelongsTo

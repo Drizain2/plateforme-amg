@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Shop;
 use Illuminate\Database\Seeder;
 
 class ShopSeeder extends Seeder
@@ -12,6 +12,12 @@ class ShopSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        Shop::factory()->create([
+            'name' => 'Atelier Demo',
+            'slug' => 'atelier-demo',
+            'email' => 'demo@atelier.fr',
+            'plan' => 'pro',
+        ]);
+        Shop::factory(10)->create();
     }
 }

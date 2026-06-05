@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
             $table->foreignId('depot_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('stock_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('stock_id')->constrained('stock_depots')->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('ticket_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('type', ['in', 'out', 'adjustment', 'transfer_in', 'transfer_out']);
