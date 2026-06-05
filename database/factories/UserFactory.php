@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -24,10 +25,13 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = \Faker\Factory::create('fr_FR');
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'shop_id'=>Shop::factory(),
+            'name' => $faker->name(),
+            'email' => $faker->email(),
             'email_verified_at' => now(),
+            "is_active"=>true,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
@@ -41,5 +45,24 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function admin(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole('admin');
+        });
+    }
+
+    public function technician(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole('technicien');
+        });
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(['is_active' => false]);
     }
 }

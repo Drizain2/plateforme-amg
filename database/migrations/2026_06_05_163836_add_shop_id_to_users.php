@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('shop_id')->after('id')->nullable()->constrained('shops')->nullOnDelete();
+            $table->boolean('is_active')->default(true)->after('is_verified');
         });
     }
 
@@ -22,8 +23,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-        $table->dropForeign(['shop_id']);
-        $table->dropColumn('shop_id');
+            $table->dropForeign(['shop_id']);
+            $table->dropColumn('shop_id');
+            $table->dropColumn('is_active');
         });
     }
 };
