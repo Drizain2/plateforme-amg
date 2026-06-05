@@ -37,11 +37,6 @@ class Depot extends Model
         return $this->belongsToMany(User::class);
     }
 
-    public function parts(): HasMany
-    {
-        return $this->hasMany(Part::class);
-    }
-
     public function movements(): HasMany
     {
         return $this->hasMany(StockMovement::class);

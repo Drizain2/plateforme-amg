@@ -5,10 +5,9 @@ namespace App\Http\Controllers\Stock;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stock\StoreMovementRequest;
 use App\Http\Requests\Stock\TransferStockRequest;
-use App\Http\Resources\PartResource;
+use App\Http\Resources\StockDepotResource;
 use App\Http\Resources\StockMovementResource;
 use App\Models\Depot;
-use App\Models\Part;
 use App\Models\StockDepot;
 use App\Models\StockMovement;
 use App\Services\StockService;
@@ -21,63 +20,55 @@ class StockMovementController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['part_id', 'depot_id', 'type', 'from', 'to', 'shop_id']);
-        $movements = StockMovement::with(['part:id,name,', 'depot:id,name', 'user:id,name', 'transferDepot:id,name'])
-            ->when($filters['part_id'], function ($query) use ($filters) {
-                $query->where('part_id', $filters['part_id']);
-            })
-            ->when($filters['depot_id'], function ($query) use ($filters) {
-                $query->where('depot_id', $filters['depot_id']);
-            })
-            ->when($filters['type'], function ($query) use ($filters) {
-                $query->where('type', $filters['type']);
-            })
-            ->when($filters['from'], function ($query) use ($filters) {
-                $query->where('created_at', '>=', $filters['from']);
-            })
-            ->when($filters['to'], function ($query) use ($filters) {
-                $query->where('created_at', '<=', $filters['to']);
-            })
-            ->when($filters['shop_id'], function ($query) use ($filters) {
-                $query->where('shop_id', $filters['shop_id']);
-            })
+        $filters = $request->only(['depot_id', 'type', 'from', 'to']);
+
+        $movements = StockMovement::with(['stock.part:id,name,sku', 'depot:id,name', 'user:id,name', 'transferDepot:id,name'])
+            ->when($filters['depot_id'] ?? null, fn ($q) => $q->where('depot_id', $filters['depot_id']))
+            ->when($filters['type'] ?? null, fn ($q) => $q->where('type', $filters['type']))
+            ->when($filters['from'] ?? null, fn ($q) => $q->where('created_at', '>=', $filters['from']))
+            ->when($filters['to'] ?? null, fn ($q) => $q->whereDate('created_at', '<=', $filters['to']))
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         return Inertia::render('Stock/Movement/Index', [
             'movements' => StockMovementResource::collection($movements),
-            'depots' => Depot::select('id', 'name')->get(),
+            'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
             'filters' => $filters,
         ]);
     }
 
     public function store(StoreMovementRequest $request)
     {
-        $part = Part::findOrFail($request->part_id);
+        $stock = StockDepot::findOrFail($request->stock_id);
 
         match ($request->type) {
-            'in' => $this->stockService->restock($part, $request->quantity, $request->note ?? 'reapprovisionnement'),
-            'out' => $this->stockService->consume($part, $request->quantity, $request->ticket_id, $request->user()),
-            'adjustment' => $this->stockService->adjustment($part, $request->quantity, $request->note, $request->user()),
+            'in' => $this->stockService->restock($stock, $request->quantity, $request->note ?? 'réapprovisionnement'),
+            'out' => $this->stockService->consume($stock, $request->quantity, $request->ticket_id, $request->user()),
+            'adjustment' => $this->stockService->adjustment($stock, $request->quantity, $request->note ?? '', $request->user()),
         };
+
         return back()->with('success', 'Mouvement enregistré.');
     }
 
     public function transfer(TransferStockRequest $request)
     {
-        $part = Part::findOrFail($request->part_id);
-        $targetDepot = Depot::findOrFail($request->target_depot_id);
+        $source = StockDepot::findOrFail($request->stock_id);
+        $targetDepot = Depot::findOrFail($request->to_depot_id);
 
-        $this->stockService->transfer($part, $targetDepot, $request->quantity, $request->user());
+        $this->stockService->transfer($source, $targetDepot, $request->quantity, $request->user());
 
-        return back()->with('success', 'Transfert effectué avec succès');
+        return back()->with('success', 'Transfert effectué avec succès.');
     }
 
     public function alerts()
     {
-        $alert = StockDepot::critical()
-            ->with('depot:id,name', 'part:id,name')
+        $alerts = StockDepot::critique()
+            ->with(['depot:id,name', 'part:id,name,sku'])
             ->get();
-        return Inertia::render('Stock/Alerts', ['alerts' => PartResource::collection(($alert))]);
+
+        return Inertia::render('Stock/Alerts', [
+            'alerts' => StockDepotResource::collection($alerts),
+        ]);
     }
 }

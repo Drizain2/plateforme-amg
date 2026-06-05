@@ -25,7 +25,7 @@ class StoreDepotRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'adresse' => ['required', 'string'],
+            'address' => ['required', 'string'],
             'phone' => ['nullable', 'string'],
         ];
     }
@@ -34,7 +34,7 @@ class StoreDepotRequest extends FormRequest
     {
         return [
             'name.required' => 'Le nom est requis',
-            'adresse.required' => "L'adresse est requise",
+            'address.required' => "L'address est requise",
             'phone.required' => 'Le telephone est requis',
         ];
     }
@@ -43,7 +43,7 @@ class StoreDepotRequest extends FormRequest
     {
         return [
             'name' => 'Nom',
-            'adresse' => 'Adresse',
+            'address' => 'Adresse',
             'phone' => 'Telephone',
         ];
     }

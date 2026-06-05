@@ -2,48 +2,71 @@
 
 namespace App\Http\Controllers\Stock;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Categorie;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class CategorieController extends Controller
 {
-    //
-    public function index()
+    public function index(): Response
     {
-        $categories = Categorie::all();
-
-        return view('stock.categories.index', compact('categories'));
+        return Inertia::render('Stock/Categories/Index', [
+            'categories' => Categorie::orderBy('name')->get(['id', 'name', 'is_active']),
+        ]);
     }
 
-    public function create()
+    public function store(Request $request): RedirectResponse
     {
-        return view('stock.categories.create');
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'is_active' => ['sometimes', 'boolean'],
+        ]);
+
+        Categorie::create($request->only('name', 'is_active'));
+
+        return back()->with('success', 'Catégorie ajoutée.');
     }
 
-    public function store(Request $request)
+    public function update(Request $request, Categorie $categorie): RedirectResponse
     {
-        $categorie = Categorie::create($request->all());
+        $this->authorizeAdmin();
 
-        return redirect()->route('categories.index');
+        $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'is_active' => ['sometimes', 'boolean'],
+        ]);
+
+        $categorie->update($request->only('name', 'is_active'));
+
+        return back()->with('success', 'Catégorie mise à jour.');
     }
 
-    public function edit(Categorie $categorie)
+    public function destroy(Categorie $categorie): RedirectResponse
     {
-        return view('stock.categories.edit', compact('categorie'));
-    }
+        $this->authorizeAdmin();
 
-    public function update(Request $request, Categorie $categorie)
-    {
-        $categorie->update($request->all());
+        if ($categorie->parts()->exists()) {
+            $categorie->update(['is_active' => false]);
 
-        return redirect()->route('categories.index');
-    }
+            return back()->with('success', 'Catégorie désactivée (pièces existantes).');
+        }
 
-    public function destroy(Categorie $categorie)
-    {
         $categorie->delete();
 
-        return redirect()->route('categories.index');
+        return back()->with('success', 'Catégorie supprimée.');
+    }
+
+    private function authorizeAdmin(): void
+    {
+        abort_unless(
+            request()->user()->hasRole(UserRole::Admin) || request()->user()->hasRole(UserRole::SuperAdmin),
+            403
+        );
     }
 }

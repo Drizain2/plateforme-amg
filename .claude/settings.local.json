@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(php artisan migrate:status 2>&1)"
+    ]
+  }
+}

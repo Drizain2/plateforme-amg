@@ -25,7 +25,7 @@ class UpdateDepotRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string'],
-            'adresse' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
             'phone' => ['nullable', 'string'],
             'is_active' => ['sometimes', 'boolean'],
         ];
@@ -35,7 +35,7 @@ class UpdateDepotRequest extends FormRequest
     {
         return [
             'name.sometimes' => "Le nom n'est pas requis",
-            'adresse.sometimes' => "L'adresse n'est pas requise",
+            'address.sometimes' => "L'address n'est pas requise",
             'phone.sometimes' => "Le telephone n'est pas requis",
             'is_active.sometimes' => "L'etat est requis",
         ];
@@ -45,7 +45,7 @@ class UpdateDepotRequest extends FormRequest
     {
         return [
             'name' => 'Nom',
-            'adresse' => 'Adresse',
+            'address' => 'Adresse',
             'phone' => 'Telephone',
         ];
     }

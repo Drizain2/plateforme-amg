@@ -1,9 +1,10 @@
 <?php
+
 namespace App\Services;
 
 use App\Exceptions\InsufficientStockException;
 use App\Models\Depot;
-use App\Models\Part;
+use App\Models\StockDepot;
 use App\Models\StockMovement;
 use App\Models\User;
 use App\Notifications\LowStockNotification;
@@ -11,102 +12,100 @@ use Illuminate\Support\Facades\DB;
 
 class StockService
 {
-    public function consume(Part $part, int $quantity, ?int $ticketId=null, User $by): void {
-        if($part->quantity < $quantity) throw new InsufficientStockException("");// a completer
-
-        DB::transaction(function () use($part,$quantity,$ticketId,$by) {
-            $part->decrement('quantity',$quantity);
-
-            StockMovement::create([
-                'part_id' => $part->id,
-                'quantity' => -$quantity,
-                'type' => 'out',
-                'reason' => 'vente',
-                'shop_id' => $part->shop_id,
-                'reference_ticket_id' => $ticketId ,
-                'user_id'=> $by->id,
-            ]);
-            
-            if($part->fresh()->is_critical)
-            {
-                // Notifier l'administrateur de stock
-                $part->shop->notify(new LowStockNotification($part));
-            }
-        });
-        
-    }
-
-    public function restock(Part $part, int $quantity, string $note="livraison"): void {
-        DB::transaction(function () use($part,$quantity,$note) {
-            $part->increment('quantity', $quantity);
-
-            StockMovement::create([
-                'part_id' => $part->id,
-                'quantity' => $quantity,
-                'type' => 'in',
-                'reason' => 'reapprovisionnement',
-                'note' => $note,
-                'shop_id' => $part->shop_id,
-            ]);
-
-        });
-        
-    }
-
-    public function transfer(Part $sourcePart,Depot $targetDepot, int $quantity,User $by): void
+    public function restock(StockDepot $stock, int $quantity, string $note = 'réapprovisionnement'): void
     {
-        if ($sourcePart->quantity < $quantity) {
-            throw new InsufficientStockException("Stock insuffisant");
+        DB::transaction(function () use ($stock, $quantity, $note) {
+            $stock->increment('quantity', $quantity);
+
+            StockMovement::create([
+                'depot_id' => $stock->depot_id,
+                'stock_id' => $stock->id,
+                'type' => 'in',
+                'quantity' => $quantity,
+                'note' => $note,
+            ]);
+        });
+    }
+
+    public function consume(StockDepot $stock, int $quantity, ?int $ticketId, User $by): void
+    {
+        if ($stock->quantity < $quantity) {
+            throw new InsufficientStockException('Stock insuffisant dans ce dépôt.');
         }
 
-        DB::transaction(function () use ($sourcePart, $targetDepot, $quantity, $by) {
-            // Retrait de la source
-            $sourcePart->decrement('quantity', $quantity);
+        DB::transaction(function () use ($stock, $quantity, $ticketId, $by) {
+            $stock->decrement('quantity', $quantity);
 
             StockMovement::create([
-                'part_id' => $sourcePart->id,
-                'quantity' => -$quantity,
-                'type' => 'out',
-                'reason' => 'transfert',
-                'note' => "Transfert vers {$targetDepot->name}",
-                'shop_id' => $sourcePart->shop_id,
+                'depot_id' => $stock->depot_id,
+                'stock_id' => $stock->id,
                 'user_id' => $by->id,
-                'depot_id' => $sourcePart->depot_id,
+                'ticket_id' => $ticketId,
+                'type' => 'out',
+                'quantity' => $quantity,
             ]);
 
-            // Ajout vers la destination
-            $targetPart = $sourcePart->replicate();
-            $targetPart->depot_id = $targetDepot->id;
-            $targetPart->save();
+            if ($stock->fresh()->is_critical) {
+                $stock->part->shop->notify(new LowStockNotification);
+            }
+        });
+    }
+
+    public function transfer(StockDepot $source, Depot $targetDepot, int $quantity, User $by): void
+    {
+        if ($source->quantity < $quantity) {
+            throw new InsufficientStockException('Stock insuffisant pour le transfert.');
+        }
+
+        if ($source->depot_id === $targetDepot->id) {
+            throw new \InvalidArgumentException('Le dépôt source et destination sont identiques.');
+        }
+
+        DB::transaction(function () use ($source, $targetDepot, $quantity, $by) {
+            $source->decrement('quantity', $quantity);
 
             StockMovement::create([
-                'part_id' => $targetPart->id,
-                'quantity' => $quantity,
-                'type' => 'in',
-                'reason' => 'transfert',
-                'note' => "Transfert depuis {$sourcePart->depot->name}",
-                'shop_id' => $targetPart->shop_id,
+                'depot_id' => $source->depot_id,
+                'stock_id' => $source->id,
                 'user_id' => $by->id,
-                'depot_id' => $targetPart->depot_id,
+                'type' => 'transfer_out',
+                'quantity' => $quantity,
+                'transfer_depot_id' => $targetDepot->id,
+                'note' => "Transfert vers {$targetDepot->name}",
+            ]);
+
+            $destination = StockDepot::firstOrCreate(
+                ['part_id' => $source->part_id, 'depot_id' => $targetDepot->id],
+                ['alert_quantity' => $source->alert_quantity]
+            );
+            $destination->increment('quantity', $quantity);
+
+            StockMovement::create([
+                'depot_id' => $targetDepot->id,
+                'stock_id' => $destination->id,
+                'user_id' => $by->id,
+                'type' => 'transfer_in',
+                'quantity' => $quantity,
+                'transfer_depot_id' => $source->depot_id,
+                'note' => "Transfert depuis {$source->depot->name}",
             ]);
         });
     }
 
-    public function adjustment(Part $part, int $newQuantity, string $note, User $by): void
+    public function adjustment(StockDepot $stock, int $newQuantity, string $note, User $by): void
     {
-        $diff = $newQuantity - $part->quantity;
-        
-        DB::transaction(function () use ($part, $newQuantity,$diff, $note, $by) {
-            $part->update(['quantity' => $newQuantity]);
+        $diff = $newQuantity - $stock->quantity;
+
+        DB::transaction(function () use ($stock, $newQuantity, $diff, $note, $by) {
+            $stock->update(['quantity' => $newQuantity]);
 
             StockMovement::create([
-                'part_id' => $part->id,
-                'quantity' => abs($diff), // différence positive ou négative
-                'type' => 'adjustment',
-                'reason' => 'ajustement', // ou 'inventaire'
-                'note' => $note,
-                'shop_id' => $part->shop_id,
+                'depot_id' => $stock->depot_id,
+                'stock_id' => $stock->id,
                 'user_id' => $by->id,
+                'type' => 'adjustment',
+                'quantity' => abs($diff),
+                'note' => $note,
             ]);
         });
     }
