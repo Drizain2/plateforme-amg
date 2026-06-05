@@ -3,63 +3,48 @@
 namespace App\Http\Controllers\Stock;
 
 use App\Http\Controllers\Controller;
+use App\Models\Supplier;
+use App\Http\Requests\Stock\StoreSupplierRequest;
+use App\Http\Requests\Stock\UpdateSupplierRequest;
+use App\Http\Resources\SupplierResource;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class SupplierController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+   public function index(): Response
     {
-        //
+        $suppliers = Supplier::withCount('parts')
+            ->orderBy('name')
+            ->paginate(20);
+
+        return Inertia::render('Stock/Suppliers/Index', [
+            'suppliers' => SupplierResource::collection($suppliers),
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreSupplierRequest $request): RedirectResponse
     {
-        //
+        Supplier::create($request->validated());
+        return back()->with('success', 'Fournisseur ajouté.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function update(UpdateSupplierRequest $request, Supplier $supplier): RedirectResponse
     {
-        //
+        $supplier->update($request->validated());
+        return back()->with('success', 'Fournisseur mis à jour.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function destroy(Supplier $supplier): RedirectResponse
     {
-        //
-    }
+        if ($supplier->parts()->exists()) {
+            $supplier->update(['is_active' => false]);
+            return back()->with('success', 'Fournisseur désactivé.');
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $supplier->delete();
+        return back()->with('success', 'Fournisseur supprimé.');
     }
 }
