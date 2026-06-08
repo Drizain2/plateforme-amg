@@ -38,6 +38,7 @@ class PartController extends Controller
             'filters' => $filters,
             'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
             'categories' => Categorie::select('id', 'name')->where('is_active', true)->get(),
+            'suppliers' => Supplier::select('id', 'name')->where('is_active', true)->get(),
         ]);
     }
 

@@ -50,4 +50,16 @@ class StockMovement extends Model
     {
         return $this->belongsTo(Ticket::class);
     }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return match ($this->type) {
+            'in' => 'Entrée',
+            'out' => 'Sortie',
+            'adjustment' => 'Ajustement',
+            'transfer_in' => 'Transfert entrant',
+            'transfer_out' => 'Transfert sortant',
+            default => $this->type,
+        };
+    }
 }

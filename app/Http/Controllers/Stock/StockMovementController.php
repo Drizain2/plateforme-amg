@@ -20,10 +20,11 @@ class StockMovementController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['depot_id', 'type', 'from', 'to']);
+        $filters = $request->only(['depot_id', 'type', 'from', 'part_id', 'to']);
 
         $movements = StockMovement::with(['stock.part:id,name,sku', 'depot:id,name', 'user:id,name', 'transferDepot:id,name'])
             ->when($filters['depot_id'] ?? null, fn ($q) => $q->where('depot_id', $filters['depot_id']))
+            ->when($filters['part_id'] ?? null, fn ($q) => $q->whereHas('stock', fn ($q) => $q->where('part_id', $filters['part_id'])))
             ->when($filters['type'] ?? null, fn ($q) => $q->where('type', $filters['type']))
             ->when($filters['from'] ?? null, fn ($q) => $q->where('created_at', '>=', $filters['from']))
             ->when($filters['to'] ?? null, fn ($q) => $q->whereDate('created_at', '<=', $filters['to']))
