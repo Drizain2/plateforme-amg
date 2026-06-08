@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
             $table->string('sku')->nullable();
-            $table->foreignId('category_id')->constrained()->nullOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->json('brand_compat')->nullable();
             $table->decimal('unit_price', 10, 2)->default(0);//prix d'achat
             $table->decimal('sell_price', 10, 2)->default(0);//prix de vente
