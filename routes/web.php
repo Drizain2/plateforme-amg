@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Stock\CategorieController;
 use App\Http\Controllers\Stock\DepotController;
 use App\Http\Controllers\Stock\PartController;
@@ -9,6 +10,14 @@ use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store']);
+});
+Route::post('/logout', [LoginController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
 
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
 

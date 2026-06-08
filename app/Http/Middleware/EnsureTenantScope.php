@@ -15,10 +15,18 @@ class EnsureTenantScope
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $shop = $request->user()?->shop;
-        if (!$shop) abort(403, 'Vous devez avoir un shop pour accéder à cette page');
+        $user = $request->user();
+        if (!$user) {
+            abort(403, 'Vous devez être connecté pour accéder à cette page');
+        }
+        if (!$user->shop) {
+            abort(403, 'Vous devez avoir un shop pour accéder à cette page');
+        }
+        if($user->shop->is_active){
+            abort(403, 'Votre shop est desactivé');
+        }
         // Injecter le shop_id dans tous les models via GlobalScope
-        app()->instance('current_shop', $shop);
+        app()->instance('current_shop', $user->shop);
         return $next($request);
     }
 }
