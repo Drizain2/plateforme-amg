@@ -1,8 +1,12 @@
+<script lang="ts">
+export type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
+</script>
+
 <script lang="ts" setup>
 import { computed } from 'vue';
 
 const props = defineProps<{
-    variant?: 'default' | 'success' | 'warning' | 'danger' | 'info'
+    variant?: BadgeVariant
 }>()
 const classes = computed(() => ({
     'default': 'bg-gray-100 text-gray-700',
