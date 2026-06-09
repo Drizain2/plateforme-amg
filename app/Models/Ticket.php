@@ -2,11 +2,81 @@
 
 namespace App\Models;
 
+use App\Enums\TicketStatus;
+use App\Enums\TicketPriority;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
     /** @use HasFactory<\Database\Factories\TicketFactory> */
     use HasFactory;
+
+     protected $fillable = [
+        'reference','shop_id','depot_id','customer_id','device_id',
+        'technician_id','status','priority','description',
+        'diagnosis','estimated_price','tracking_token',
+        'estimated_return_date','closed_at',
+    ];
+
+    protected $casts = [
+        'estimated_return_date' => 'datetime',
+        'closed_at'             => 'datetime',
+        'status'                => TicketStatus::class,
+        'priority'              => TicketPriority::class,
+    ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('shop', fn($q) =>
+            $q->where('shop_id', app('current_shop')->id)
+        );
+
+        static::creating(function ($m) {
+            $m->shop_id        = app('current_shop')->id;
+            $m->tracking_token = Str::uuid();
+            $m->reference      = static::generateReference();
+        });
+    }
+
+    public static function generateReference(): string
+    {
+        $year  = now()->year;
+        $count = static::withoutGlobalScopes()
+            ->whereYear('created_at', $year)
+            ->count() + 1;
+
+        return sprintf('SAV-%s-%05d', $year, $count);
+    }
+
+    public function shop(): BelongsTo       { return $this->belongsTo(Shop::class); }
+    public function depot(): BelongsTo      { return $this->belongsTo(Depot::class); }
+    public function customer(): BelongsTo   { return $this->belongsTo(Customer::class); }
+    public function device(): BelongsTo     { return $this->belongsTo(Device::class); }
+    public function technician(): BelongsTo { return $this->belongsTo(User::class, 'technician_id'); }
+    public function events(): HasMany       { return $this->hasMany(TicketEvent::class)->latest(); }
+    public function parts(): HasMany        { return $this->hasMany(TicketPart::class); }
+
+    public function scopeFilter(Builder $q, array $filters): Builder
+    {
+        return $q
+            ->when($filters['search'] ?? null, fn($q, $s) =>
+                $q->where(fn($q) =>
+                    $q->where('reference', 'like', "%$s%")
+                      ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%$s%"))
+                      ->orWhereHas('device', fn($q) =>
+                          $q->where('brand', 'like', "%$s%")
+                            ->orWhere('model', 'like', "%$s%")
+                      )
+                )
+            )
+            ->when($filters['status'] ?? null, fn($q, $v) => $q->where('status', $v))
+            ->when($filters['priority'] ?? null, fn($q, $v) => $q->where('priority', $v))
+            ->when($filters['depot_id'] ?? null, fn($q, $v) => $q->where('depot_id', $v))
+            ->when($filters['technician_id'] ?? null, fn($q, $v) => $q->where('technician_id', $v));
+    }
 }
