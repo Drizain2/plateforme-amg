@@ -12,14 +12,6 @@ class Customer extends Model
     use HasShopScope;
     protected $fillable = ['shop_id','name','email','phone','address','notes'];
 
-    protected static function booted(): void
-    {
-        static::addGlobalScope('shop', fn($q) =>
-            $q->where('shop_id', app('current_shop')->id)
-        );
-        static::creating(fn($m) => $m->shop_id = app('current_shop')->id);
-    }
-
     public function shop(): BelongsTo  { return $this->belongsTo(Shop::class); }
     public function devices(): HasMany { return $this->hasMany(Device::class); }
     public function tickets(): HasMany { return $this->hasMany(Ticket::class); }
