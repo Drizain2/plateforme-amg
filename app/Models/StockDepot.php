@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasShopScope;
 use Database\Factories\StockDepotFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class StockDepot extends Model
 {
     /** @use HasFactory<StockDepotFactory> */
-    use HasFactory;
+    use HasFactory, HasShopScope;
 
     protected $fillable = [
         'shop_id',
@@ -21,14 +22,6 @@ class StockDepot extends Model
         'quantity',
         'alert_quantity',
     ];
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope('shop', fn (Builder $q) => $q->where('shop_id', app('current_shop')->id)
-        );
-
-        static::creating(fn ($m) => $m->shop_id = app('current_shop')->id);
-    }
 
     public function shop(): BelongsTo
     {
@@ -55,7 +48,6 @@ class StockDepot extends Model
         return $this->quantity <= $this->alert_quantity;
     }
 
-    // Scopes
     public function scopeCritique(Builder $builder): Builder
     {
         return $builder->whereColumn('quantity', '<=', 'alert_quantity');

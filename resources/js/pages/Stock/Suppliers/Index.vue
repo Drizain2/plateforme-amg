@@ -20,7 +20,7 @@ const props = defineProps<{
 
 const { isAdmin } = usePermission()
 const { success, error } = useToast()
-const { applyFilter } = useFilters('stock.suppliers.index')
+const { applyFilter } = useFilters(SupplierController.index.url())
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {

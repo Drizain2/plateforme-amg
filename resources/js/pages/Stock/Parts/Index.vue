@@ -32,7 +32,7 @@ const props = defineProps<{
 
 const { isAdmin } = usePermission()
 const { success, error } = useToast()
-const { applyFilter } = useFilters('stock.parts.index')
+const { applyFilter } = useFilters(PartController.index.url())
 const page = usePage()
 
 // Flash messages
