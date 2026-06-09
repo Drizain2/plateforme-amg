@@ -15,6 +15,10 @@ export interface Depot {
     phone?:string;
     is_active:boolean;
     parts_count?:number
+    users?:{
+        id:number;
+        name:string;
+    }[]
 }
 export interface Supplier {
     id:number;

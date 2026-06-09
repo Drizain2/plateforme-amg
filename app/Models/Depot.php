@@ -21,10 +21,18 @@ class Depot extends Model
     {
         static::addGlobalScope(
             'shop',
-            fn (Builder $q) => $q->where('shop_id', app('current_shop')->id)
+            function (Builder $q) {
+                if (app()->has('current_shop')) {
+                    $q->where('shop_id', app('current_shop')->id);
+                }
+            }
         );
 
-        static::creating(fn ($m) => $m->shop_id = app('current_shop')->id);
+        static::creating(function ($m) {
+            if (app()->has('current_shop')) {
+                $m->shop_id = app('current_shop')->id;
+            }
+        });
     }
 
     public function shop(): BelongsTo

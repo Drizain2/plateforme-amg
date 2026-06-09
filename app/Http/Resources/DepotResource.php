@@ -15,6 +15,7 @@ class DepotResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            // 'shop_id' => $this->shop_id,
             'address' => $this->address,
             'phone' => $this->phone,
             'is_active' => $this->is_active,

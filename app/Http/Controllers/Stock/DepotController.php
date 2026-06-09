@@ -23,8 +23,14 @@ class DepotController extends Controller
             ->with("users:id,name")
             ->get();
 
-        return Inertia::render("Stock/Depots/Index", [
+        $shopUsers = User::where('shop_id', app('current_shop')->id)
+        ->role('technicien')
+        ->select('id', 'name')
+        ->get();
+        
+        return Inertia::render("Depot/Index", [
             "depots" => DepotResource::collection($depots),
+            "shopUsers" => $shopUsers,
         ]);
     }
 
@@ -43,7 +49,7 @@ class DepotController extends Controller
     {
         $depot = Depot::create($request->validated());
         $depot->users()->attach($request->users);
-        return Inertia::redirect()->route("stock.depots.index")->with("success", "Dépôt {$depot->name} enregistré");
+        return redirect()->route("stock.depots.index")->with("success", "Dépôt {$depot->name} enregistré");
     }
 
     /**
@@ -78,7 +84,7 @@ class DepotController extends Controller
     public function destroy(Depot $depot)
     {
         // Soft disable plutôt que suppression si des pièces existent
-        if($depot->stock()->exists()){
+        if($depot->stocks()->exists()){
             $depot->update(['is_active' => false]);
 
             return back()->with('success', 'Dépôt désactivé.');

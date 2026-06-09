@@ -17,11 +17,16 @@ class SupplierController extends Controller
    public function index(): Response
     {
         $suppliers = Supplier::withCount('parts')
-            ->orderBy('name')
-            ->paginate(20);
-
+           ->when(request('search'), fn($q, $s) =>
+            $q->where('name', 'like', "%$s%")
+              ->orWhere('email', 'like', "%$s%")
+        )
+        ->orderBy('name')
+        ->paginate(20)
+        ->withQueryString();
         return Inertia::render('Stock/Suppliers/Index', [
             'suppliers' => SupplierResource::collection($suppliers),
+            'filters'   => request()->only(['search']),
         ]);
     }
 

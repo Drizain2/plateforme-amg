@@ -1,10 +1,12 @@
 <!-- resources/js/Layouts/AppLayout.vue -->
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { Toaster } from 'vue-sonner'
 import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController'
+import DepotController from '@/actions/App/Http/Controllers/Stock/DepotController'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
+import SupplierController from '@/actions/App/Http/Controllers/Stock/SupplierController'
 
 defineProps<{ title?: string }>()
 
@@ -32,33 +34,36 @@ const navLinkClass = (prefix: string) =>
       </div>
 
       <nav class="flex-1 px-3 py-4 space-y-1">
-        <Link
-          href="/dashboard"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
-          :class="navLinkClass('/dashboard')"
-        >
+        <Link href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
+          :class="navLinkClass('/dashboard')">
           Dashboard
         </Link>
-        <Link
-          :href="PartController.index.url()"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
-          :class="navLinkClass('/stock')"
-        >
+        <Link :href="PartController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/stock/parts')">
           Stock
         </Link>
-        <Link
-          href="/tickets"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
-          :class="navLinkClass('/tickets')"
-        >
+        <Link href="/tickets" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
+          :class="navLinkClass('/tickets')">
           Tickets SAV
+        </Link>
+        <Link :href="DepotController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/stock/depots')">
+          Depots
+        </Link>
+        <Link :href="SupplierController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/stock/suppliers')">
+          Fournisseurs
         </Link>
       </nav>
 
       <!-- User footer -->
       <div class="px-4 py-4 border-t">
         <p class="text-sm font-medium text-gray-900">{{ page.props.auth.user.name }}</p>
-        <Link :href="LoginController.logout.url()" method="post" as="button" class="text-xs text-gray-400 hover:text-red-500 transition">
+        <Link :href="LoginController.logout.url()" method="post" as="button"
+          class="text-xs text-gray-400 hover:text-red-500 transition">
           Déconnexion
         </Link>
       </div>
@@ -77,4 +82,4 @@ const navLinkClass = (prefix: string) =>
 
     <Toaster position="bottom-right" rich-colors />
   </div>
-</template>
+</template>
