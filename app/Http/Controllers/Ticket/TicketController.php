@@ -57,8 +57,8 @@ class TicketController extends Controller
     public function create(): Response
     {
         return Inertia::render('Tickets/Create', [
-            'depots'      => Depot::select('id','name')->where('is_active', true)->get(),
-            'technicians' => User::role('technician')->select('id','name')->get(),
+            'depots'      => Depot::select('id', 'name')->where('is_active', true)->get(),
+            'technicians' => User::role('technician')->select('id', 'name')->get(),
             'priorities'  => array_map(fn($p) => [
                 'value' => $p->value,
                 'label' => $p->label(),
@@ -66,7 +66,7 @@ class TicketController extends Controller
         ]);
     }
 
-    public function store(StoreTicketRequest $request):RedirectResponse
+    public function store(StoreTicketRequest $request): RedirectResponse
     {
         DB::transaction(function () use ($request) {
             // Client — existant ou nouveau
@@ -110,18 +110,22 @@ class TicketController extends Controller
     public function show(Ticket $ticket): Response
     {
         $ticket->load([
-            'customer', 'device', 'technician', 'depot',
-            'events.user', 'parts.part',
+            'customer',
+            'device',
+            'technician',
+            'depot',
+            'events.user',
+            'parts.part',
         ]);
 
         return Inertia::render('Tickets/Show', [
             'ticket'      => new TicketResource($ticket),
-            'technicians' => User::role('technician')->select('id','name')->get(),
+            'technicians' => User::role('technician')->select('id', 'name')->get(),
             'depotParts'  => StockDepot::where('depot_id', $ticket->depot_id)
-                                ->where('is_active', true)
-                                ->where('quantity', '>', 0)
-                                ->select('id','name','quantity','unit_price')
-                                ->get(),
+                ->where('is_active', true)
+                ->where('quantity', '>', 0)
+                ->select('id', 'name', 'quantity', 'unit_price')
+                ->get(),
         ]);
     }
 
@@ -155,5 +159,4 @@ class TicketController extends Controller
         $this->ticketService->consumePart($ticket, $part, $request->quantity, $request->user());
         return back()->with('success', 'Pièce consommée.');
     }
-
 }

@@ -70,3 +70,82 @@ export interface StockMovement {
     user?: { id: number; name: string };
     created_at: string;
 }
+export interface Customer {
+    id: number;
+    name: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    notes?: string;
+}
+
+export interface Device {
+    id: number;
+    customer_id: number;
+    type: string;
+    brand: string;
+    model: string;
+    full_name: string;
+    serial_number?: string;
+    color?: string;
+    condition_in?: string;
+}
+
+export type TicketStatus =
+    | 'received'
+    | 'diagnosing'
+    | 'waiting_parts'
+    | 'repairing'
+    | 'done'
+    | 'returned'
+    | 'cancelled';
+
+export type TicketPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export type BadgeVariant =
+    | 'default'
+    | 'info'
+    | 'success'
+    | 'warning'
+    | 'danger';
+
+export interface TicketEvent {
+    id: number;
+    type: string;
+    note?: string;
+    metadata?: Record<string, unknown>;
+    created_at: string;
+    user?: { id: number; name: string };
+}
+
+export interface TicketPart {
+    id: number;
+    quantity: number;
+    unit_price: number;
+    total: number;
+    part: { id: number; name: string };
+}
+
+export interface Ticket {
+    id: number;
+    reference: string;
+    status: TicketStatus;
+    status_label: string;
+    status_color: BadgeVariant;
+    priority: TicketPriority;
+    priority_label: string;
+    priority_color: BadgeVariant;
+    description: string;
+    diagnosis?: string;
+    estimated_price?: number;
+    estimated_return_date?: string;
+    closed_at?: string;
+    created_at: string;
+    next_statuses: { value: TicketStatus; label: string }[];
+    customer?: Customer;
+    device?: Device;
+    technician?: { id: number; name: string } | null;
+    depot?: { id: number; name: string };
+    events?: TicketEvent[];
+    parts?: TicketPart[];
+}

@@ -7,6 +7,7 @@ import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController
 import DepotController from '@/actions/App/Http/Controllers/Stock/DepotController'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
 import SupplierController from '@/actions/App/Http/Controllers/Stock/SupplierController'
+import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
 
 defineProps<{ title?: string }>()
 
@@ -43,7 +44,7 @@ const navLinkClass = (prefix: string) =>
           :class="navLinkClass('/stock/parts')">
           Stock
         </Link>
-        <Link href="/tickets" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
+        <Link :href="TicketController.index.url()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
           :class="navLinkClass('/tickets')">
           Tickets SAV
         </Link>
