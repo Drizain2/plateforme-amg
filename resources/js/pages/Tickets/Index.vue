@@ -156,7 +156,7 @@ const priorityOptions = computed(() => props.priorities.map(p => ({ value: p.val
                                     </Badge>
                                 </td>
                                 <td class="px-4 py-3 text-gray-500 text-xs">
-                                    {{ ticket.technician?.name ?? '—' }}
+                                    {{ ticket.technicien?.name ?? '—' }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-400 text-xs">{{ ticket.created_at }}</td>
                                 <td class="px-4 py-3">

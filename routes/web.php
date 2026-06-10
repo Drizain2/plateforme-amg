@@ -1,14 +1,15 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Stock\CategorieController;
 use App\Http\Controllers\Stock\DepotController;
 use App\Http\Controllers\Stock\PartController;
 use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
 use App\Http\Controllers\Ticket\TicketController;
-use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +25,7 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
@@ -43,14 +44,27 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::get('/alerts', [StockMovementController::class, 'alerts'])->name('alerts');
     });
 
-Route::prefix('tickets')->name('tickets.')->group(function () {
-    Route::get('/',             [TicketController::class, 'index'])->name('index');
-    Route::get('/create',       [TicketController::class, 'create'])->name('create');
-    Route::post('/',            [TicketController::class, 'store'])->name('store');
-    Route::get('/{ticket}',     [TicketController::class, 'show'])->name('show');
-    Route::put('/{ticket}',     [TicketController::class, 'update'])->name('update');
-    Route::post('/{ticket}/transition', [TicketController::class, 'transition'])->name('transition');
-    Route::post('/{ticket}/notes',      [TicketController::class, 'addNote'])->name('notes.store');
-    Route::post('/{ticket}/parts',      [TicketController::class, 'consumePart'])->name('parts.store');
-});
+    Route::prefix('tickets')->name('tickets.')->group(function () {
+        Route::get('/', [TicketController::class, 'index'])->name('index');
+        Route::get('/create', [TicketController::class, 'create'])->name('create');
+        Route::post('/', [TicketController::class, 'store'])->name('store');
+        Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
+        Route::put('/{ticket}', [TicketController::class, 'update'])->name('update');
+        Route::post('/{ticket}/transition', [TicketController::class, 'transition'])->name('transition');
+        Route::post('/{ticket}/notes', [TicketController::class, 'addNote'])->name('notes.store');
+        Route::post('/{ticket}/parts', [TicketController::class, 'consumePart'])->name('parts.store');
+        Route::post('/tickets/{ticket}/invoice', [InvoiceController::class, 'fromTicket'])->name('tickets.invoice');
+    });
+
+    Route::prefix('invoices')->name('invoices.')->group(function () {
+        Route::get('/', [InvoiceController::class, 'index'])->name('index');
+        Route::get('/create', [InvoiceController::class, 'create'])->name('create');
+        Route::post('/', [InvoiceController::class, 'store'])->name('store');
+        Route::get('/{invoice}', [InvoiceController::class, 'show'])->name('show');
+        Route::put('/{invoice}', [InvoiceController::class, 'update'])->name('update');
+        Route::post('/{invoice}/transition', [InvoiceController::class, 'transition'])->name('transition');
+        Route::post('/{invoice}/lines', [InvoiceController::class, 'storeLine'])->name('lines.store');
+        Route::delete('/{invoice}/lines/{line}', [InvoiceController::class, 'destroyLine'])->name('lines.destroy');
+        Route::get('/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('pdf');
+    });
 });

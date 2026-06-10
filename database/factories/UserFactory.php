@@ -26,12 +26,13 @@ class UserFactory extends Factory
     public function definition(): array
     {
         $faker = \Faker\Factory::create('fr_FR');
+
         return [
-            'shop_id'=>Shop::factory(),
+            'shop_id' => Shop::factory(),
             'name' => $faker->name(),
             'email' => $faker->email(),
             'email_verified_at' => now(),
-            "is_active"=>true,
+            'is_active' => true,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
@@ -54,7 +55,7 @@ class UserFactory extends Factory
         });
     }
 
-    public function technician(): static
+    public function technicien(): static
     {
         return $this->afterCreating(function (User $user) {
             $user->assignRole('technicien');

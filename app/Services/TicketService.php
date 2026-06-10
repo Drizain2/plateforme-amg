@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Services;
 
 use App\Enums\TicketEventType;
 use App\Enums\TicketStatus;
-use App\Models\Part;
 use App\Models\StockDepot;
 use App\Models\Ticket;
 use App\Models\TicketEvent;
@@ -11,19 +11,21 @@ use App\Models\TicketPart;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class TicketService {
-    public function __construct(private StockService $stockService){}
+class TicketService
+{
+    public function __construct(private StockService $stockService) {}
 
-    public function create(array $data,User $by){
-        return DB::transaction(function () use ($data,$by){
+    public function create(array $data, User $by)
+    {
+        return DB::transaction(function () use ($data, $by) {
             $ticket = Ticket::create($data);
 
             TicketEvent::create([
-                'ticket_id'=>$ticket->id,
-                "user_id"=>$by->id,
-                'type'      => TicketEventType::StatusChanged->value,
-                'note'      => 'Ticket créé',
-                'metadata'  => ['to' => TicketStatus::Received->value],
+                'ticket_id' => $ticket->id,
+                'user_id' => $by->id,
+                'type' => TicketEventType::StatusChanged->value,
+                'note' => 'Ticket créé',
+                'metadata' => ['to' => TicketStatus::Received->value],
             ]);
 
             return $ticket;
@@ -32,8 +34,8 @@ class TicketService {
 
     public function transition(Ticket $ticket, TicketStatus $newStatus, User $by, string $note = ''): void
     {
-        if (!$ticket->status->canTransitionTo($newStatus)) {
-             throw new \InvalidArgumentException(
+        if (! $ticket->status->canTransitionTo($newStatus)) {
+            throw new \InvalidArgumentException(
                 "Transition impossible : {$ticket->status->value} → {$newStatus->value}"
             );
         }
@@ -42,18 +44,18 @@ class TicketService {
             $oldStatus = $ticket->status;
 
             $ticket->update([
-                'status'    => $newStatus,
+                'status' => $newStatus,
                 'closed_at' => $newStatus->isClosed() ? now() : null,
             ]);
-            
+
             TicketEvent::create([
                 'ticket_id' => $ticket->id,
                 'user_id' => $by->id,
                 'type' => TicketEventType::StatusChanged->value,
-                'note' => $note ?: "Transition vers " . $newStatus->label(),
-                'metadata'  => [
+                'note' => $note ?: 'Transition vers '.$newStatus->label(),
+                'metadata' => [
                     'from' => $oldStatus->value,
-                    'to'   => $newStatus->value,
+                    'to' => $newStatus->value,
                 ],
             ]);
         });
@@ -63,9 +65,9 @@ class TicketService {
     {
         TicketEvent::create([
             'ticket_id' => $ticket->id,
-            'user_id'   => $by->id,
-            'type'      => TicketEventType::NoteAdded->value,
-            'note'      => $note,
+            'user_id' => $by->id,
+            'type' => TicketEventType::NoteAdded->value,
+            'note' => $note,
         ]);
     }
 
@@ -73,16 +75,16 @@ class TicketService {
     {
         DB::transaction(function () use ($ticket, $diagnosis, $price, $by) {
             $ticket->update([
-                'diagnosis'       => $diagnosis,
+                'diagnosis' => $diagnosis,
                 'estimated_price' => $price,
             ]);
 
             TicketEvent::create([
                 'ticket_id' => $ticket->id,
-                'user_id'   => $by->id,
-                'type'      => TicketEventType::DiagnosisSet->value,
-                'note'      => $diagnosis,
-                'metadata'  => ['estimated_price' => $price],
+                'user_id' => $by->id,
+                'type' => TicketEventType::DiagnosisSet->value,
+                'note' => $diagnosis,
+                'metadata' => ['estimated_price' => $price],
             ]);
         });
     }
@@ -93,33 +95,33 @@ class TicketService {
             $this->stockService->consume($stockPart, $qty, $ticket->id, $by);
 
             TicketPart::create([
-                'ticket_id'  => $ticket->id,
+                'ticket_id' => $ticket->id,
                 'stock_depot_id' => $stockPart->id,
-                'quantity'   => $qty,
+                'quantity' => $qty,
                 'unit_price' => $stockPart->part->unit_price,
             ]);
 
             TicketEvent::create([
                 'ticket_id' => $ticket->id,
-                'user_id'   => $by->id,
-                'type'      => TicketEventType::PartConsumed->value,
-                'note'      => "{$qty}x {$stockPart->part->name}",
-                'metadata'  => ['stock_depot_id' => $stockPart->id, 'quantity' => $qty],
+                'user_id' => $by->id,
+                'type' => TicketEventType::PartConsumed->value,
+                'note' => "{$qty}x {$stockPart->part->name}",
+                'metadata' => ['stock_depot_id' => $stockPart->id, 'quantity' => $qty],
             ]);
         });
     }
 
-    public function assignTechnician(Ticket $ticket, User $technician, User $by): void
+    public function assignTechnician(Ticket $ticket, User $technicien, User $by): void
     {
-        DB::transaction(function () use ($ticket, $technician, $by) {
-            $ticket->update(['technician_id' => $technician->id]);
+        DB::transaction(function () use ($ticket, $technicien, $by) {
+            $ticket->update(['technician_id' => $technicien->id]);
 
             TicketEvent::create([
                 'ticket_id' => $ticket->id,
-                'user_id'   => $by->id,
-                'type'      => TicketEventType::TechAssigned->value,
-                'note'      => "Assigné à {$technician->name}",
-                'metadata'  => ['technician_id' => $technician->id],
+                'user_id' => $by->id,
+                'type' => TicketEventType::TechAssigned->value,
+                'note' => "Assigné à {$technicien->name}",
+                'metadata' => ['technician_id' => $technicien->id],
             ]);
         });
     }

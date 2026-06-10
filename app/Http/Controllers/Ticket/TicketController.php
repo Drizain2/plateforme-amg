@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers\Ticket;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\TransitionTicketRequest;
-use App\Http\Resources\TicketResource;
-use App\Models\Depot;
-use App\Models\Ticket;
-use App\Models\User;
-use App\Services\TicketService;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Enums\TicketStatus;
 use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\AddNoteRequest;
 use App\Http\Requests\ConsumePartRequest;
 use App\Http\Requests\StoreTicketRequest;
+use App\Http\Requests\TransitionTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
+use App\Http\Resources\TicketResource;
 use App\Models\Customer;
+use App\Models\Depot;
 use App\Models\Device;
 use App\Models\StockDepot;
+use App\Models\Ticket;
+use App\Models\User;
+use App\Services\TicketService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 use Inertia\Response;
 
 class TicketController extends Controller
@@ -39,15 +38,15 @@ class TicketController extends Controller
             ->withQueryString();
 
         return Inertia::render('Tickets/Index', [
-            'tickets'     => TicketResource::collection($tickets),
-            'filters'     => $filters,
-            'depots'      => Depot::select('id', 'name')->get(),
+            'tickets' => TicketResource::collection($tickets),
+            'filters' => $filters,
+            'depots' => Depot::select('id', 'name')->get(),
             'technicians' => User::role('technicien')->select('id', 'name')->get(),
-            'statuses'    => array_map(fn($s) => [
+            'statuses' => array_map(fn ($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ], TicketStatus::cases()),
-            'priorities'  => array_map(fn($p) => [
+            'priorities' => array_map(fn ($p) => [
                 'value' => $p->value,
                 'label' => $p->label(),
             ], TicketPriority::cases()),
@@ -57,9 +56,9 @@ class TicketController extends Controller
     public function create(): Response
     {
         return Inertia::render('Tickets/Create', [
-            'depots'      => Depot::select('id', 'name')->where('is_active', true)->get(),
+            'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
             'technicians' => User::role('technicien')->select('id', 'name')->get(),
-            'priorities'  => array_map(fn($p) => [
+            'priorities' => array_map(fn ($p) => [
                 'value' => $p->value,
                 'label' => $p->label(),
             ], TicketPriority::cases()),
@@ -73,7 +72,7 @@ class TicketController extends Controller
             $customer = $request->customer_id
                 ? Customer::findOrFail($request->customer_id)
                 : Customer::create([
-                    'name'  => $request->customer_name,
+                    'name' => $request->customer_name,
                     'email' => $request->customer_email,
                     'phone' => $request->customer_phone,
                 ]);
@@ -82,22 +81,22 @@ class TicketController extends Controller
             $device = $request->device_id
                 ? Device::findOrFail($request->device_id)
                 : Device::create([
-                    'customer_id'   => $customer->id,
-                    'type'          => $request->device_type,
-                    'brand'         => $request->device_brand,
-                    'model'         => $request->device_model,
+                    'customer_id' => $customer->id,
+                    'type' => $request->device_type,
+                    'brand' => $request->device_brand,
+                    'model' => $request->device_model,
                     'serial_number' => $request->device_serial,
-                    'color'         => $request->device_color,
-                    'condition_in'  => $request->condition_in,
+                    'color' => $request->device_color,
+                    'condition_in' => $request->condition_in,
                 ]);
 
             $this->ticketService->create([
-                'depot_id'              => $request->depot_id,
-                'customer_id'           => $customer->id,
-                'device_id'             => $device->id,
-                'technician_id'         => $request->technician_id,
-                'priority'              => $request->priority,
-                'description'           => $request->description,
+                'depot_id' => $request->depot_id,
+                'customer_id' => $customer->id,
+                'device_id' => $device->id,
+                'technician_id' => $request->technician_id,
+                'priority' => $request->priority,
+                'description' => $request->description,
                 'estimated_return_date' => $request->estimated_return_date,
             ], $request->user());
         });
@@ -112,26 +111,33 @@ class TicketController extends Controller
         $ticket->load([
             'customer',
             'device',
-            'technician',
+            'technicien',
             'depot',
             'events.user',
             'parts.part',
         ]);
 
         return Inertia::render('Tickets/Show', [
-            'ticket'      => new TicketResource($ticket),
+            'ticket' => new TicketResource($ticket),
             'technicians' => User::role('technicien')->select('id', 'name')->get(),
-            'depotParts'  => StockDepot::where('depot_id', $ticket->depot_id)
-                ->where('is_active', true)
+            'depotParts' => StockDepot::where('depot_id', $ticket->depot_id)
                 ->where('quantity', '>', 0)
-                ->select('id', 'name', 'quantity', 'unit_price')
-                ->get(),
+                ->with('part:id,name,unit_price')
+                ->select('id', 'part_id', 'quantity')
+                ->get()
+                ->map(fn (StockDepot $stock) => [
+                    'id' => $stock->id,
+                    'name' => $stock->part?->name ?? 'Pièce inconnue',
+                    'quantity' => $stock->quantity,
+                    'unit_price' => (float) ($stock->part?->unit_price ?? 0),
+                ]),
         ]);
     }
 
     public function update(UpdateTicketRequest $request, Ticket $ticket): RedirectResponse
     {
         $ticket->update($request->validated());
+
         return back()->with('success', 'Ticket mis à jour.');
     }
 
@@ -150,6 +156,7 @@ class TicketController extends Controller
     public function addNote(AddNoteRequest $request, Ticket $ticket): RedirectResponse
     {
         $this->ticketService->addNote($ticket, $request->note, $request->user());
+
         return back()->with('success', 'Note ajoutée.');
     }
 
@@ -157,6 +164,7 @@ class TicketController extends Controller
     {
         $part = StockDepot::findOrFail($request->part_id);
         $this->ticketService->consumePart($ticket, $part, $request->quantity, $request->user());
+
         return back()->with('success', 'Pièce consommée.');
     }
 }

@@ -144,8 +144,39 @@ export interface Ticket {
     next_statuses: { value: TicketStatus; label: string }[];
     customer?: Customer;
     device?: Device;
-    technician?: { id: number; name: string } | null;
+    technicien?: { id: number; name: string } | null;
     depot?: { id: number; name: string };
     events?: TicketEvent[];
     parts?: TicketPart[];
+}
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
+
+export interface InvoiceLine {
+    id: number;
+    type: 'service' | 'part';
+    label: string;
+    quantity: number;
+    unit_price: number;
+    total: number;
+}
+
+export interface Invoice {
+    id: number;
+    number: string;
+    status: InvoiceStatus;
+    status_label: string;
+    status_color: BadgeVariant;
+    total_ht: number;
+    tax_rate: number;
+    tax_amount: number;
+    total_ttc: number;
+    notes?: string;
+    issued_at?: string;
+    due_at?: string;
+    paid_at?: string;
+    can_edit: boolean;
+    next_statuses: { value: InvoiceStatus; label: string }[];
+    customer?: Customer;
+    ticket?: { id: number; reference: string } | null;
+    lines?: InvoiceLine[];
 }

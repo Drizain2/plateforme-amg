@@ -22,10 +22,10 @@ class UserSeeder extends Seeder
 
             // 2 techniciens par shop (connus pour la démo)
             if ($isDemo) {
-                User::factory()->for($shop)->technician()->create(['email' => 'tech1@atelier-demo.fr', 'name' => 'Technicien 1']);
-                User::factory()->for($shop)->technician()->create(['email' => 'tech2@atelier-demo.fr', 'name' => 'Technicien 2']);
+                User::factory()->for($shop)->technicien()->create(['email' => 'tech1@atelier-demo.fr', 'name' => 'Technicien 1']);
+                User::factory()->for($shop)->technicien()->create(['email' => 'tech2@atelier-demo.fr', 'name' => 'Technicien 2']);
             } else {
-                User::factory()->count(fake()->numberBetween(2, 3))->for($shop)->technician()->create();
+                User::factory()->count(fake()->numberBetween(2, 3))->for($shop)->technicien()->create();
             }
         });
     }
