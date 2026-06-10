@@ -2,7 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InvoiceStatus;
+use App\Enums\TicketStatus;
+use App\Http\Requests\Invoice\StoreInvoiceRequest;
+use App\Http\Requests\Invoice\UpdateInvoiceRequest;
+use App\Http\Resources\InvoiceResource;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use App\Models\Ticket;
+use App\Notifications\InvoiceSent;
+use App\Services\InvoiceService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
@@ -13,12 +30,14 @@ class InvoiceController extends Controller
         $filters = request()->only(['search', 'status', 'from', 'to']);
 
         $invoices = Invoice::with(['customer', 'ticket'])
-            ->when($filters['search'] ?? null, fn ($q, $s) => $q->where('number', 'like', "%$s%")
-                ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%$s%"))
+            ->when(
+                $filters['search'] ?? null,
+                fn($q, $s) => $q->where('number', 'like', "%$s%")
+                    ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%$s%"))
             )
-            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
-            ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '>=', $v))
-            ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '<=', $v))
+            ->when($filters['status'] ?? null, fn($q, $v) => $q->where('status', $v))
+            ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '>=', $v))
+            ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '<=', $v))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -26,7 +45,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Index', [
             'invoices' => InvoiceResource::collection($invoices),
             'filters' => $filters,
-            'statuses' => array_map(fn ($s) => [
+            'statuses' => array_map(fn($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ], InvoiceStatus::cases()),
@@ -45,11 +64,11 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Create', [
             'customers' => Customer::select('id', 'name', 'email')->get(),
             'tickets' => Ticket::where('status', TicketStatus::Done->value)
-                ->doesntHave('invoice')
+                // ->doesntHave('invoice')
                 ->with('customer:id,name', 'device:id,brand,model')
                 ->select('id', 'reference', 'customer_id', 'device_id', 'estimated_price')
                 ->get()
-                ->map(fn ($t) => [
+                ->map(fn($t) => [
                     'id' => $t->id,
                     'reference' => $t->reference,
                     'customer' => $t->customer->name,
@@ -116,7 +135,14 @@ class InvoiceController extends Controller
             'status' => ['required', Rule::enum(InvoiceStatus::class)],
         ]);
 
-        $this->invoiceService->transition($invoice, InvoiceStatus::from($request->status));
+        $newStatus = InvoiceStatus::from($request->status);
+        $this->invoiceService->transition($invoice, $newStatus);
+
+        // Notifier le client si envoi
+        if ($newStatus === InvoiceStatus::Sent) {
+            $invoice->customer->notify(new InvoiceSent($invoice->load('shop')));
+        }
+
 
         return back()->with('success', 'Statut mis à jour.');
     }

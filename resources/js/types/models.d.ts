@@ -180,3 +180,18 @@ export interface Invoice {
     ticket?: { id: number; reference: string } | null;
     lines?: InvoiceLine[];
 }
+
+export interface AppNotification {
+  id: string
+  data: {
+    type?: string
+    part_name?: string
+    quantity?: number
+    min_threshold?: number
+    depot_name?: string
+    reference?: string
+    status_label?: string
+  }
+  read_at?: string
+  created_at: string
+}

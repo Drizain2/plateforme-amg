@@ -1,4 +1,4 @@
-import type { Shop } from './models';
+import type { AppNotification, Shop } from './models';
 
 export type User = {
     id: number;
@@ -16,4 +16,5 @@ export type User = {
 export type Auth = {
     user: User;
     shop: Shop;
+    unread_count: AppNotification
 };

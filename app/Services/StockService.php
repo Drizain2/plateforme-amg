@@ -7,6 +7,7 @@ use App\Models\Depot;
 use App\Models\StockDepot;
 use App\Models\StockMovement;
 use App\Models\User;
+use App\Notifications\LowStockAlert;
 use App\Notifications\LowStockNotification;
 use Illuminate\Support\Facades\DB;
 
@@ -30,7 +31,7 @@ class StockService
     public function consume(StockDepot $stock, int $quantity, ?int $ticketId, User $by): void
     {
         if ($stock->quantity < $quantity) {
-            throw new InsufficientStockException('Stock insuffisant dans ce dépôt.');
+            throw new InsufficientStockException($stock);
         }
 
         DB::transaction(function () use ($stock, $quantity, $ticketId, $by) {
@@ -45,8 +46,13 @@ class StockService
                 'quantity' => $quantity,
             ]);
 
+            // Vérifier seuil après transaction
             if ($stock->fresh()->is_critical) {
-                $stock->part->shop->notify(new LowStockNotification);
+                $admin = User::where('shop_id', $stock->shop_id)
+                    ->role('admin')
+                    ->first();
+
+                $admin?->notify(new LowStockAlert($stock->load('depot')));
             }
         });
     }

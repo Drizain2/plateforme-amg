@@ -40,7 +40,8 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user()?->load('roles'),
-                'shop' => $request->user()?->shop
+                'shop' => $request->user()?->shop,
+                'unread_count' => $request->user()?->unreadNotifications()->count() ?? 0,
             ],
             'flash' => [
                 'success' => session('success'),

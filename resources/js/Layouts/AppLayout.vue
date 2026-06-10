@@ -4,10 +4,12 @@ import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { Toaster } from 'vue-sonner'
 import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController'
+import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
 import DepotController from '@/actions/App/Http/Controllers/Stock/DepotController'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
 import SupplierController from '@/actions/App/Http/Controllers/Stock/SupplierController'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
+import NotificationBell from '@/Components/UI/NotificationBell.vue'
 
 defineProps<{ title?: string }>()
 
@@ -58,6 +60,11 @@ const navLinkClass = (prefix: string) =>
           :class="navLinkClass('/stock/suppliers')">
           Fournisseurs
         </Link>
+        <Link :href="InvoiceController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/invoices')">
+          Factures
+        </Link>
       </nav>
 
       <!-- User footer -->
@@ -74,6 +81,7 @@ const navLinkClass = (prefix: string) =>
     <div class="flex-1 flex flex-col min-h-screen">
       <header class="bg-white border-b border-gray-200 px-8 py-4">
         <h2 class="text-sm font-medium text-gray-700">{{ title }}</h2>
+        <NotificationBell />
       </header>
 
       <main class="flex-1 px-8 py-6">

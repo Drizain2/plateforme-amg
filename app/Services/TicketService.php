@@ -9,6 +9,7 @@ use App\Models\Ticket;
 use App\Models\TicketEvent;
 use App\Models\TicketPart;
 use App\Models\User;
+use App\Notifications\TicketStatusChanged;
 use Illuminate\Support\Facades\DB;
 
 class TicketService
@@ -52,13 +53,17 @@ class TicketService
                 'ticket_id' => $ticket->id,
                 'user_id' => $by->id,
                 'type' => TicketEventType::StatusChanged->value,
-                'note' => $note ?: 'Transition vers '.$newStatus->label(),
+                'note' => $note ?: 'Transition vers ' . $newStatus->label(),
                 'metadata' => [
                     'from' => $oldStatus->value,
                     'to' => $newStatus->value,
                 ],
             ]);
         });
+
+        // Notifier le client après la transaction (async via queue)
+        $ticket->load('customer', 'device', 'shop');
+        $ticket->customer->notify(new TicketStatusChanged($ticket));
     }
 
     public function addNote(Ticket $ticket, string $note, User $by): void

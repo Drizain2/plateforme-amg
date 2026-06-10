@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Stock\CategorieController;
 use App\Http\Controllers\Stock\DepotController;
 use App\Http\Controllers\Stock\PartController;
@@ -66,5 +67,11 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/{invoice}/lines', [InvoiceController::class, 'storeLine'])->name('lines.store');
         Route::delete('/{invoice}/lines/{line}', [InvoiceController::class, 'destroyLine'])->name('lines.destroy');
         Route::get('/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('pdf');
+    });
+
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/',           [NotificationController::class, 'index'])->name('index');
+        Route::post('/read-all',  [NotificationController::class, 'markAllRead'])->name('read-all');
+        Route::post('/{id}/read', [NotificationController::class, 'markRead'])->name('read');
     });
 });
