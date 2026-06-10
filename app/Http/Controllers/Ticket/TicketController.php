@@ -29,7 +29,7 @@ class TicketController extends Controller
 
     public function index()
     {
-        $filters = request()->only(['search', 'status', 'priority', 'depot_id', 'technicien_id']);
+        $filters = request()->only(['search', 'status', 'priority', 'depot_id', 'technician_id']);
 
         $tickets = Ticket::with(['customer', 'device', 'technicien', 'depot'])
             ->filter($filters)
@@ -122,14 +122,14 @@ class TicketController extends Controller
             'technicians' => User::role('technicien')->select('id', 'name')->get(),
             'depotParts' => StockDepot::where('depot_id', $ticket->depot_id)
                 ->where('quantity', '>', 0)
-                ->with('part:id,name,unit_price')
+                ->with('part:id,name,sell_price')
                 ->select('id', 'part_id', 'quantity')
                 ->get()
                 ->map(fn (StockDepot $stock) => [
                     'id' => $stock->id,
                     'name' => $stock->part?->name ?? 'Pièce inconnue',
                     'quantity' => $stock->quantity,
-                    'unit_price' => (float) ($stock->part?->unit_price ?? 0),
+                    'unit_price' => (float) ($stock->part?->sell_price ?? 0),
                 ]),
         ]);
     }

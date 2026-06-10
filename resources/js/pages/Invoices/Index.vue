@@ -25,8 +25,13 @@ const { applyFilter }    = useFilters(InvoiceController.index.url())
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {
-  if (flash.success) success(flash.success)
-  if (flash.error)   error(flash.error)
+  if (flash.success) {
+success(flash.success)
+}
+
+  if (flash.error)   {
+error(flash.error)
+}
 }, { immediate: true })
 
 const search = ref(props.filters.search ?? '')
@@ -47,7 +52,10 @@ const fmt = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v)
 
 function goToPage(url: string | null) {
-  if (!url) return
+  if (!url) {
+return
+}
+
   router.visit(url, { preserveScroll: true, preserveState: true })
 }
 

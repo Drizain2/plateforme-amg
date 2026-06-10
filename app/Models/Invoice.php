@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Enums\InvoiceStatus;
+use App\Models\Concerns\HasShopScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
+    use HasShopScope;
+
     protected $fillable = [
         'number', 'shop_id', 'ticket_id', 'customer_id',
         'status', 'total_ht', 'tax_rate', 'tax_amount',
@@ -24,13 +27,7 @@ class Invoice extends Model
 
     protected static function booted(): void
     {
-        static::addGlobalScope('shop', fn ($q) => $q->where('shop_id', app('current_shop')->id)
-        );
-
-        static::creating(function ($m) {
-            $m->shop_id = app('current_shop')->id;
-            $m->number = static::generateNumber();
-        });
+        static::creating(fn ($m) => $m->number = static::generateNumber());
     }
 
     public static function generateNumber(): string
@@ -38,6 +35,7 @@ class Invoice extends Model
         $year = now()->year;
         $count = static::withoutGlobalScopes()
             ->whereYear('created_at', $year)
+            ->lockForUpdate()
             ->count() + 1;
 
         return sprintf('FAC-%s-%05d', $year, $count);

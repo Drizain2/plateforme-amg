@@ -13,13 +13,13 @@ use App\Models\InvoiceLine;
 use App\Models\Ticket;
 use App\Notifications\InvoiceSent;
 use App\Services\InvoiceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Validation\Rule;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
@@ -32,12 +32,12 @@ class InvoiceController extends Controller
         $invoices = Invoice::with(['customer', 'ticket'])
             ->when(
                 $filters['search'] ?? null,
-                fn($q, $s) => $q->where('number', 'like', "%$s%")
-                    ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%$s%"))
+                fn ($q, $s) => $q->where('number', 'like', "%$s%")
+                    ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%$s%"))
             )
-            ->when($filters['status'] ?? null, fn($q, $v) => $q->where('status', $v))
-            ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '>=', $v))
-            ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '<=', $v))
+            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
+            ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '>=', $v))
+            ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '<=', $v))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -45,7 +45,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Index', [
             'invoices' => InvoiceResource::collection($invoices),
             'filters' => $filters,
-            'statuses' => array_map(fn($s) => [
+            'statuses' => array_map(fn ($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ], InvoiceStatus::cases()),
@@ -64,11 +64,11 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Create', [
             'customers' => Customer::select('id', 'name', 'email')->get(),
             'tickets' => Ticket::where('status', TicketStatus::Done->value)
-                // ->doesntHave('invoice')
+                ->doesntHave('invoice')
                 ->with('customer:id,name', 'device:id,brand,model')
                 ->select('id', 'reference', 'customer_id', 'device_id', 'estimated_price')
                 ->get()
-                ->map(fn($t) => [
+                ->map(fn ($t) => [
                     'id' => $t->id,
                     'reference' => $t->reference,
                     'customer' => $t->customer->name,
@@ -143,7 +143,6 @@ class InvoiceController extends Controller
             $invoice->customer->notify(new InvoiceSent($invoice->load('shop')));
         }
 
-
         return back()->with('success', 'Statut mis à jour.');
     }
 
@@ -175,6 +174,18 @@ class InvoiceController extends Controller
         $pdf = Pdf::loadView('pdf.invoice', [
             'invoice' => $invoice,
             'shop' => app('current_shop'),
+        ]);
+
+        return $pdf->stream("facture-{$invoice->number}.pdf");
+    }
+
+    public function publicPdf(int $invoice): \Illuminate\Http\Response
+    {
+        $invoice = Invoice::withoutGlobalScopes()->with(['customer', 'ticket', 'lines', 'shop'])->findOrFail($invoice);
+
+        $pdf = Pdf::loadView('pdf.invoice', [
+            'invoice' => $invoice,
+            'shop' => $invoice->shop,
         ]);
 
         return $pdf->stream("facture-{$invoice->number}.pdf");

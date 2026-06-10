@@ -11,10 +11,17 @@ use App\Http\Controllers\Stock\PartController;
 use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
 use App\Http\Controllers\Ticket\TicketController;
+use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
-// Route::inertia('/', redirect()->route('/login'));
+Route::redirect('/', '/dashboard');
+
+Route::get('/track/{token}', [TrackController::class, 'show'])->name('track');
+
+Route::get('/invoices/{invoice}/pdf/public', [InvoiceController::class, 'publicPdf'])
+    ->name('invoices.pdf.public')
+    ->middleware('signed');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -28,6 +35,7 @@ Route::post('/logout', [LoginController::class, 'logout'])
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
     Route::prefix('stock')->name('stock.')->group(function () {
@@ -54,7 +62,7 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/{ticket}/transition', [TicketController::class, 'transition'])->name('transition');
         Route::post('/{ticket}/notes', [TicketController::class, 'addNote'])->name('notes.store');
         Route::post('/{ticket}/parts', [TicketController::class, 'consumePart'])->name('parts.store');
-        Route::post('/tickets/{ticket}/invoice', [InvoiceController::class, 'fromTicket'])->name('tickets.invoice');
+        Route::post('/{ticket}/invoice', [InvoiceController::class, 'fromTicket'])->name('invoice');
     });
 
     Route::prefix('invoices')->name('invoices.')->group(function () {
@@ -70,8 +78,8 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
     });
 
     Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/',           [NotificationController::class, 'index'])->name('index');
-        Route::post('/read-all',  [NotificationController::class, 'markAllRead'])->name('read-all');
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('/read-all', [NotificationController::class, 'markAllRead'])->name('read-all');
         Route::post('/{id}/read', [NotificationController::class, 'markRead'])->name('read');
     });
 });

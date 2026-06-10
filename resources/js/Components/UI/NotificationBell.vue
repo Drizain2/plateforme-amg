@@ -1,8 +1,8 @@
 <!-- resources/js/Components/UI/NotificationBell.vue -->
 <script setup lang="ts">
 import { usePage, router } from '@inertiajs/vue3'
-import { ref, onMounted, computed } from 'vue'
-import NotificationsController from '@/actions/Laravel/Telescope/Http/Controllers/NotificationsController'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import NotificationController from '@/actions/App/Http/Controllers/NotificationController'
 import type { AppNotification } from '@/types'
 
 
@@ -12,7 +12,7 @@ const open         = ref(false)
 const loading      = ref(false)
 const notifications= ref<AppNotification[]>([])
 
-const unreadCount = computed(() => page.props.auth.unread_count as number)
+const unreadCount = computed(() => page.props.auth.unread_count)
 
 async function fetchNotifications() {
   if (loading.value) {
@@ -21,7 +21,7 @@ return
 
   loading.value = true
 
-  const res     = await fetch(NotificationsController.index.url(), {
+  const res     = await fetch(NotificationController.index.url(), {
     headers: { Accept: 'application/json' }
   })
   const data    = await res.json()
@@ -30,7 +30,7 @@ return
 }
 
 async function markRead(id: string) {
-  await fetch(NotificationsController.read.url({id}), {
+  await fetch(NotificationController.markRead.url(id), {
     method:  'POST',
     headers: {
       'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content,
@@ -47,7 +47,7 @@ n.read_at = 'À l\'instant'
 }
 
 async function markAllRead() {
-  await fetch(route('notifications.read-all'), {
+  await fetch(NotificationController.markAllRead.url(), {
     method:  'POST',
     headers: {
       'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content,
@@ -76,6 +76,7 @@ open.value = false
 }
 
 onMounted(() => document.addEventListener('click', onClickOutside))
+onUnmounted(() => document.removeEventListener('click', onClickOutside))
 
 function notifLabel(n: AppNotification): string {
   if (n.data.type === 'low_stock') {

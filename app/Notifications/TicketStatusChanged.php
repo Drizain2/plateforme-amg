@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TicketStatusChanged extends Notification
+class TicketStatusChanged extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -36,16 +36,15 @@ class TicketStatusChanged extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $status = $this->ticket->status->label();
-        $url    = route('track', $this->ticket->tracking_token);
+        $url = url('/track/'.$this->ticket->tracking_token);
 
         return (new MailMessage)
             ->subject("Votre réparation — {$this->ticket->reference} : {$status}")
             ->greeting("Bonjour {$notifiable->name},")
-            ->line("Le statut de votre réparation a été mis à jour.")
+            ->line('Le statut de votre réparation a été mis à jour.')
             ->line("**Appareil :** {$this->ticket->device->full_name}")
             ->line("**Nouveau statut :** {$status}")
-            ->when($this->ticket->estimated_return_date, fn($m) =>
-                $m->line("**Date de retour estimée :** {$this->ticket->estimated_return_date->format('d/m/Y')}")
+            ->when($this->ticket->estimated_return_date, fn ($m) => $m->line("**Date de retour estimée :** {$this->ticket->estimated_return_date->format('d/m/Y')}")
             )
             ->action('Suivre ma réparation', $url)
             ->salutation("L'équipe {$this->ticket->shop->name}");
@@ -54,10 +53,10 @@ class TicketStatusChanged extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'ticket_id'     => $this->ticket->id,
-            'reference'     => $this->ticket->reference,
-            'status'        => $this->ticket->status->value,
-            'status_label'  => $this->ticket->status->label(),
+            'ticket_id' => $this->ticket->id,
+            'reference' => $this->ticket->reference,
+            'status' => $this->ticket->status->value,
+            'status_label' => $this->ticket->status->label(),
         ];
     }
 }

@@ -8,19 +8,19 @@ use App\Models\StockDepot;
 use App\Models\StockMovement;
 use App\Models\User;
 use App\Notifications\LowStockAlert;
-use App\Notifications\LowStockNotification;
 use Illuminate\Support\Facades\DB;
 
 class StockService
 {
-    public function restock(StockDepot $stock, int $quantity, string $note = 'réapprovisionnement'): void
+    public function restock(StockDepot $stock, int $quantity, User $by, string $note = 'réapprovisionnement'): void
     {
-        DB::transaction(function () use ($stock, $quantity, $note) {
+        DB::transaction(function () use ($stock, $quantity, $by, $note) {
             $stock->increment('quantity', $quantity);
 
             StockMovement::create([
                 'depot_id' => $stock->depot_id,
                 'stock_id' => $stock->id,
+                'user_id' => $by->id,
                 'type' => 'in',
                 'quantity' => $quantity,
                 'note' => $note,
@@ -31,7 +31,7 @@ class StockService
     public function consume(StockDepot $stock, int $quantity, ?int $ticketId, User $by): void
     {
         if ($stock->quantity < $quantity) {
-            throw new InsufficientStockException($stock);
+            throw new InsufficientStockException("Stock insuffisant (disponible : {$stock->quantity}, demandé : {$quantity}).");
         }
 
         DB::transaction(function () use ($stock, $quantity, $ticketId, $by) {

@@ -23,7 +23,7 @@ class ConsumePartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'part_id'  => ['required', 'exists:parts,id'],
+            'part_id' => ['required', 'exists:stock_depots,id'],
             'quantity' => ['required', 'integer', 'min:1'],
         ];
     }

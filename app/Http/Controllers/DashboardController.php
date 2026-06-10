@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\TicketStatus;
+use App\Models\Invoice;
 use App\Models\StockDepot;
 use App\Models\Ticket;
 use Carbon\Carbon;
@@ -41,10 +42,10 @@ class DashboardController extends Controller
 
             'low_stock_count' => StockDepot::critique()->count(),
 
-            // 'revenue_month' => Invoice::where('status', 'paid')
-            //     ->whereMonth('paid_at', $now->month)->whereYear('paid_at', $now->year)
-            //     ->sum('total_ttc'),
-            'revenue_month' => 0,
+            'revenue_month' => Invoice::where('status', 'paid')
+                ->whereMonth('paid_at', $now->month)
+                ->whereYear('paid_at', $now->year)
+                ->sum('total_ttc'),
 
             'avg_repair_days' => round(
                 Ticket::whereNotNull('closed_at')

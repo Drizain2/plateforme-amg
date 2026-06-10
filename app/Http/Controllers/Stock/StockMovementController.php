@@ -44,7 +44,7 @@ class StockMovementController extends Controller
         $stock = StockDepot::findOrFail($request->stock_id);
 
         match ($request->type) {
-            'in' => $this->stockService->restock($stock, $request->quantity, $request->note ?? 'réapprovisionnement'),
+            'in' => $this->stockService->restock($stock, $request->quantity, $request->user(), $request->note ?? 'réapprovisionnement'),
             'out' => $this->stockService->consume($stock, $request->quantity, $request->ticket_id, $request->user()),
             'adjustment' => $this->stockService->adjustment($stock, $request->quantity, $request->note ?? '', $request->user()),
         };

@@ -35,18 +35,17 @@ class InvoiceSent extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $pdfUrl = route('invoices.pdf', $this->invoice->id);
+        $pdfUrl = \URL::temporarySignedRoute('invoices.pdf.public', now()->addDays(7), ['invoice' => $this->invoice->id]);
 
         return (new MailMessage)
             ->subject("Votre facture {$this->invoice->number}")
             ->greeting("Bonjour {$notifiable->name},")
-            ->line("Veuillez trouver ci-joint votre facture.")
+            ->line('Veuillez trouver ci-joint votre facture.')
             ->line("**Numéro :** {$this->invoice->number}")
-            ->line("**Montant TTC :** " . number_format($this->invoice->total_ttc, 2, ',', ' ') . " €")
+            ->line('**Montant TTC :** '.number_format($this->invoice->total_ttc, 2, ',', ' ').' €')
             ->when(
                 $this->invoice->due_at,
-                fn($m) =>
-                $m->line("**Échéance :** {$this->invoice->due_at->format('d/m/Y')}")
+                fn ($m) => $m->line("**Échéance :** {$this->invoice->due_at->format('d/m/Y')}")
             )
             ->action('Télécharger la facture', $pdfUrl)
             ->salutation("L'équipe {$this->invoice->shop->name}");

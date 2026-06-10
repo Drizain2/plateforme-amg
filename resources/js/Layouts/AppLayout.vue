@@ -4,9 +4,12 @@ import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { Toaster } from 'vue-sonner'
 import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController'
+import CustomerController from '@/actions/App/Http/Controllers/Customer/CustomerController'
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
+import CategorieController from '@/actions/App/Http/Controllers/Stock/CategorieController'
 import DepotController from '@/actions/App/Http/Controllers/Stock/DepotController'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
+import StockMovementController from '@/actions/App/Http/Controllers/Stock/StockMovementController'
 import SupplierController from '@/actions/App/Http/Controllers/Stock/SupplierController'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
 import NotificationBell from '@/Components/UI/NotificationBell.vue'
@@ -60,10 +63,30 @@ const navLinkClass = (prefix: string) =>
           :class="navLinkClass('/stock/suppliers')">
           Fournisseurs
         </Link>
+        <Link :href="CustomerController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/customers')">
+          Clients
+        </Link>
         <Link :href="InvoiceController.index.url()"
           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
           :class="navLinkClass('/invoices')">
           Factures
+        </Link>
+        <Link :href="CategorieController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/stock/categories')">
+          Catégories
+        </Link>
+        <Link :href="StockMovementController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/stock/movements')">
+          Mouvements
+        </Link>
+        <Link :href="StockMovementController.alerts.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
+          :class="navLinkClass('/stock/alerts')">
+          Alertes stock
         </Link>
       </nav>
 
@@ -79,7 +102,7 @@ const navLinkClass = (prefix: string) =>
 
     <!-- Main -->
     <div class="flex-1 flex flex-col min-h-screen">
-      <header class="bg-white border-b border-gray-200 px-8 py-4">
+      <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <h2 class="text-sm font-medium text-gray-700">{{ title }}</h2>
         <NotificationBell />
       </header>
