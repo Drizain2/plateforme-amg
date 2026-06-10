@@ -1,17 +1,18 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\TrackController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ShopUserController;
 use App\Http\Controllers\Stock\CategorieController;
 use App\Http\Controllers\Stock\DepotController;
 use App\Http\Controllers\Stock\PartController;
 use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
 use App\Http\Controllers\Ticket\TicketController;
+use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
@@ -81,5 +82,14 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
         Route::post('/read-all', [NotificationController::class, 'markAllRead'])->name('read-all');
         Route::post('/{id}/read', [NotificationController::class, 'markRead'])->name('read');
+    });
+
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [ShopUserController::class, 'index'])->name('index');
+        Route::post('/', [ShopUserController::class, 'store'])->name('store');
+        Route::put('/{user}', [ShopUserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [ShopUserController::class, 'destroy'])->name('destroy');
+        Route::post('/{user}/toggle-active', [ShopUserController::class, 'toggleActive'])->name('toggle-active');
+        Route::post('/{user}/reset-password', [ShopUserController::class, 'resetPassword'])->name('reset-password');
     });
 });

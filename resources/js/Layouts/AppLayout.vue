@@ -6,6 +6,7 @@ import { Toaster } from 'vue-sonner'
 import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController'
 import CustomerController from '@/actions/App/Http/Controllers/Customer/CustomerController'
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
+import ShopUserController from '@/actions/App/Http/Controllers/ShopUserController'
 import CategorieController from '@/actions/App/Http/Controllers/Stock/CategorieController'
 import DepotController from '@/actions/App/Http/Controllers/Stock/DepotController'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
@@ -49,7 +50,8 @@ const navLinkClass = (prefix: string) =>
           :class="navLinkClass('/stock/parts')">
           Stock
         </Link>
-        <Link :href="TicketController.index.url()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
+        <Link :href="TicketController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
           :class="navLinkClass('/tickets')">
           Tickets SAV
         </Link>
@@ -87,6 +89,12 @@ const navLinkClass = (prefix: string) =>
           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer"
           :class="navLinkClass('/stock/alerts')">
           Alertes stock
+        </Link>
+        <!-- resources/js/Layouts/AppLayout.vue -->
+        <Link :href="ShopUserController.index.url()"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition"
+          :class="navLinkClass('/users')">
+          Utilisateurs
         </Link>
       </nav>
 
