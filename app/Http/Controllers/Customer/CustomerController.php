@@ -6,32 +6,29 @@ use App\Enums\TicketStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
-use App\Models\Customer;
 use App\Http\Resources\CustomerResource;
+use App\Models\Customer;
 use App\Models\Invoice;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CustomerController extends Controller
 {
-   public function index(): Response
+    public function index(): Response
     {
         $filters = request()->only(['search']);
 
         $customers = Customer::withCount(['tickets', 'devices'])
             ->withSum(
-                ['invoices as total_spent' => fn($q) => $q->where('status', 'paid')],
+                ['invoices as total_spent' => fn ($q) => $q->where('status', 'paid')],
                 'total_ttc'
             )
-            ->when($filters['search'] ?? null, fn($q, $s) =>
-                $q->where(fn($q) =>
-                    $q->where('name',  'like', "%$s%")
-                      ->orWhere('email', 'like', "%$s%")
-                      ->orWhere('phone', 'like', "%$s%")
-                )
+            ->when($filters['search'] ?? null, fn ($q, $s) => $q->where(fn ($q) => $q->where('name', 'like', "%$s%")
+                ->orWhere('email', 'like', "%$s%")
+                ->orWhere('phone', 'like', "%$s%")
+            )
             )
             ->orderBy('name')
             ->paginate(20)
@@ -39,7 +36,7 @@ class CustomerController extends Controller
 
         return Inertia::render('Customers/Index', [
             'customers' => CustomerResource::collection($customers),
-            'filters'   => $filters,
+            'filters' => $filters,
         ]);
     }
 
@@ -47,7 +44,7 @@ class CustomerController extends Controller
     {
         $customer->loadCount(['tickets', 'devices'])
             ->load([
-                'tickets' => fn($q) => $q->with('device')->latest()->limit(10),
+                'tickets' => fn ($q) => $q->with('device')->latest()->limit(10),
                 'devices',
             ]);
 
@@ -56,7 +53,7 @@ class CustomerController extends Controller
             ->sum('total_ttc');
 
         return Inertia::render('Customers/Show', [
-            'customer'    => new CustomerResource($customer),
+            'customer' => (new CustomerResource($customer))->resolve(),
             'total_spent' => $totalSpent,
         ]);
     }
@@ -95,13 +92,12 @@ class CustomerController extends Controller
 
     public function search(): JsonResponse
     {
-        $customers = Customer::where(fn($q) =>
-            $q->where('name',  'like', '%' . request('q') . '%')
-              ->orWhere('email', 'like', '%' . request('q') . '%')
-              ->orWhere('phone', 'like', '%' . request('q') . '%')
+        $customers = Customer::where(fn ($q) => $q->where('name', 'like', '%'.request('q').'%')
+            ->orWhere('email', 'like', '%'.request('q').'%')
+            ->orWhere('phone', 'like', '%'.request('q').'%')
         )
-        ->limit(5)
-        ->get(['id', 'name', 'email', 'phone']);
+            ->limit(5)
+            ->get(['id', 'name', 'email', 'phone']);
 
         return response()->json($customers);
     }

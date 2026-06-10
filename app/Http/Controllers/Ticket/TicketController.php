@@ -118,7 +118,7 @@ class TicketController extends Controller
         ]);
 
         return Inertia::render('Tickets/Show', [
-            'ticket' => new TicketResource($ticket),
+            'ticket' => (new TicketResource($ticket))->resolve(),
             'technicians' => User::role('technicien')->select('id', 'name')->get(),
             'depotParts' => StockDepot::where('depot_id', $ticket->depot_id)
                 ->where('quantity', '>', 0)

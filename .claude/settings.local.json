@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(php artisan migrate:status 2>&1)"
+      "PowerShell(php artisan migrate:status 2>&1)",
+      "Bash(php artisan *)",
+      "Bash(mkdir -p \"c:\\\\laragon\\\\www\\\\plateform-amg\\\\resources\\\\js\\\\pages\\\\Stock\\\\Movement\" 2>&1; echo \"done\")"
+    ],
+    "additionalDirectories": [
+      "c:\\laragon\\www\\plateform-amg\\resources\\js\\pages\\Stock"
     ]
   }
 }

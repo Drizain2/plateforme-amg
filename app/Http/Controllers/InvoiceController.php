@@ -32,12 +32,12 @@ class InvoiceController extends Controller
         $invoices = Invoice::with(['customer', 'ticket'])
             ->when(
                 $filters['search'] ?? null,
-                fn ($q, $s) => $q->where('number', 'like', "%$s%")
-                    ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%$s%"))
+                fn($q, $s) => $q->where('number', 'like', "%$s%")
+                    ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%$s%"))
             )
-            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
-            ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '>=', $v))
-            ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '<=', $v))
+            ->when($filters['status'] ?? null, fn($q, $v) => $q->where('status', $v))
+            ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '>=', $v))
+            ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '<=', $v))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -45,7 +45,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Index', [
             'invoices' => InvoiceResource::collection($invoices),
             'filters' => $filters,
-            'statuses' => array_map(fn ($s) => [
+            'statuses' => array_map(fn($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ], InvoiceStatus::cases()),
@@ -68,7 +68,7 @@ class InvoiceController extends Controller
                 ->with('customer:id,name', 'device:id,brand,model')
                 ->select('id', 'reference', 'customer_id', 'device_id', 'estimated_price')
                 ->get()
-                ->map(fn ($t) => [
+                ->map(fn($t) => [
                     'id' => $t->id,
                     'reference' => $t->reference,
                     'customer' => $t->customer->name,
@@ -111,9 +111,9 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): Response
     {
         return Inertia::render('Invoices/Show', [
-            'invoice' => new InvoiceResource(
+            'invoice' => (new InvoiceResource(
                 $invoice->load(['customer', 'ticket', 'lines'])
-            ),
+            ))->resolve(),
         ]);
     }
 

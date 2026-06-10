@@ -60,7 +60,7 @@ class PartController extends Controller
     public function edit(Part $part): InertiaResponse
     {
         return Inertia::render('Stock/Parts/Edit', [
-            'part' => new PartResource($part->load(['category', 'supplier', 'stockDepots.depot'])),
+            'part' => (new PartResource($part->load(['category', 'supplier', 'stockDepots.depot'])))->resolve(),
             'categories' => Categorie::select('id', 'name')->where('is_active', true)->get(),
             'suppliers' => Supplier::select('id', 'name')->where('is_active', true)->get(),
         ]);

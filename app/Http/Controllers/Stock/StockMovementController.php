@@ -69,7 +69,7 @@ class StockMovementController extends Controller
             ->get();
 
         return Inertia::render('Stock/Alerts', [
-            'alerts' => StockDepotResource::collection($alerts),
+            'alerts' => StockDepotResource::collection($alerts)->resolve(),
         ]);
     }
 }

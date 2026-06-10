@@ -19,8 +19,13 @@ const { success, error } = useToast()
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {
-  if (flash.success) success(flash.success)
-  if (flash.error)   error(flash.error)
+  if (flash.success) {
+success(flash.success)
+}
+
+  if (flash.error)   {
+error(flash.error)
+}
 }, { immediate: true })
 
 const fmt = (v: number) =>
@@ -30,7 +35,10 @@ const fmt = (v: number) =>
 const transitionForm = useForm({ status: '' })
 
 function submitTransition(status: string) {
-  if (!confirm('Confirmer ce changement de statut ?')) return
+  if (!confirm('Confirmer ce changement de statut ?')) {
+return
+}
+
   transitionForm.status = status
   transitionForm.post(InvoiceController.transition.url(props.invoice.id), {
     preserveScroll: true,
@@ -54,7 +62,9 @@ const lineTypeOptions = [
 function submitLine() {
   lineForm.post(InvoiceController.storeLine.url(props.invoice.id), {
     preserveScroll: true,
-    onSuccess: () => { showLineModal.value = false; lineForm.reset() },
+    onSuccess: () => {
+ showLineModal.value = false; lineForm.reset() 
+},
   })
 }
 
@@ -62,7 +72,10 @@ function submitLine() {
 const deletingLineId = ref<number | null>(null)
 
 function deleteLine(lineId: number) {
-  if (!confirm('Supprimer cette ligne ?')) return
+  if (!confirm('Supprimer cette ligne ?')) {
+return
+}
+
   deletingLineId.value = lineId
 
   useForm({}).delete(InvoiceController.destroyLine.url({ invoice: props.invoice.id, line: lineId }), {
