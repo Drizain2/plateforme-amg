@@ -70,14 +70,14 @@ export interface StockMovement {
     user?: { id: number; name: string };
     created_at: string;
 }
-export interface Customer {
-    id: number;
-    name: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-    notes?: string;
-}
+// export interface Customer {
+//     id: number;
+//     name: string;
+//     email?: string;
+//     phone?: string;
+//     address?: string;
+//     notes?: string;
+// }
 
 export interface Device {
     id: number;
@@ -148,6 +148,7 @@ export interface Ticket {
     depot?: { id: number; name: string };
     events?: TicketEvent[];
     parts?: TicketPart[];
+    tracking_token: string
 }
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
 

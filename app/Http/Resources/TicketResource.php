@@ -78,6 +78,7 @@ class TicketResource extends JsonResource
                     'part' => ['id' => $p->part->id, 'name' => $p->part->name],
                 ])
             ),
+            'tracking_token' => $this->tracking_token,
         ];
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\TrackController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
@@ -11,7 +12,6 @@ use App\Http\Controllers\Stock\PartController;
 use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
 use App\Http\Controllers\Ticket\TicketController;
-use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
@@ -35,8 +35,8 @@ Route::post('/logout', [LoginController::class, 'logout'])
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
+    Route::get('customers/search', [CustomerController::class, 'search'])->name('customers.search');
+    Route::resource('customers', CustomerController::class)->except('create', 'edit');
 
     Route::prefix('stock')->name('stock.')->group(function () {
         Route::resource('depots', DepotController::class)->except('show');
