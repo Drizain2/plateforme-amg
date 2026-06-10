@@ -8,6 +8,7 @@ use App\Http\Controllers\Stock\PartController;
 use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
 use App\Http\Controllers\Ticket\TicketController;
+use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,8 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
     Route::prefix('stock')->name('stock.')->group(function () {
         Route::resource('depots', DepotController::class)->except('show');

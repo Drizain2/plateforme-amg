@@ -30,9 +30,9 @@ class TicketController extends Controller
 
     public function index()
     {
-        $filters = request()->only(['search', 'status', 'priority', 'depot_id', 'technician_id']);
+        $filters = request()->only(['search', 'status', 'priority', 'depot_id', 'technicien_id']);
 
-        $tickets = Ticket::with(['customer', 'device', 'technician', 'depot'])
+        $tickets = Ticket::with(['customer', 'device', 'technicien', 'depot'])
             ->filter($filters)
             ->latest()
             ->paginate(20)
@@ -42,7 +42,7 @@ class TicketController extends Controller
             'tickets'     => TicketResource::collection($tickets),
             'filters'     => $filters,
             'depots'      => Depot::select('id', 'name')->get(),
-            'technicians' => User::role('technician')->select('id', 'name')->get(),
+            'technicians' => User::role('technicien')->select('id', 'name')->get(),
             'statuses'    => array_map(fn($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
@@ -58,7 +58,7 @@ class TicketController extends Controller
     {
         return Inertia::render('Tickets/Create', [
             'depots'      => Depot::select('id', 'name')->where('is_active', true)->get(),
-            'technicians' => User::role('technician')->select('id', 'name')->get(),
+            'technicians' => User::role('technicien')->select('id', 'name')->get(),
             'priorities'  => array_map(fn($p) => [
                 'value' => $p->value,
                 'label' => $p->label(),
@@ -120,7 +120,7 @@ class TicketController extends Controller
 
         return Inertia::render('Tickets/Show', [
             'ticket'      => new TicketResource($ticket),
-            'technicians' => User::role('technician')->select('id', 'name')->get(),
+            'technicians' => User::role('technicien')->select('id', 'name')->get(),
             'depotParts'  => StockDepot::where('depot_id', $ticket->depot_id)
                 ->where('is_active', true)
                 ->where('quantity', '>', 0)
