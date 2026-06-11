@@ -5,6 +5,7 @@ use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShopUserController;
 use App\Http\Controllers\Stock\CategorieController;
 use App\Http\Controllers\Stock\DepotController;
@@ -91,5 +92,12 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::delete('/{user}', [ShopUserController::class, 'destroy'])->name('destroy');
         Route::post('/{user}/toggle-active', [ShopUserController::class, 'toggleActive'])->name('toggle-active');
         Route::post('/{user}/reset-password', [ShopUserController::class, 'resetPassword'])->name('reset-password');
+    });
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'edit'])->name('edit');
+        Route::post('/shop', [SettingsController::class, 'updateShop'])->name('shop');
+        Route::put('/profile', [SettingsController::class, 'updateProfile'])->name('profile');
+        Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
     });
 });

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('logo_url')->nullable();
             $table->string('address')->nullable();
+            $table->decimal('tax_rate', 5, 2)->default(0.00);
             $table->enum('plan', ['starter', 'pro', 'enterprise'])->default('starter');
             $table->timestamp('trial_ends_at')->nullable();
             $table->boolean('is_active')->default(true);
