@@ -11,7 +11,7 @@ import Select from '@/Components/UI/Select.vue'
 import UserCard from '@/Components/Users/UserCard.vue'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import type { ShopUser } from '@/types'
+import type { ShopUser, UserRole } from '@/types'
 
 const props = defineProps<{
     users: ShopUser[]
@@ -41,7 +41,7 @@ const showCreateModal = ref(false)
 const createForm = useForm({
     name: '',
     email: '',
-    role: 'technicien' as 'admin' | 'technicien',
+    role: 'technicien' as UserRole,
     depot_ids: [] as number[],
 })
 
@@ -63,7 +63,7 @@ const editingUser = ref<ShopUser | null>(null)
 const editForm = useForm({
     name: '',
     email: '',
-    role: 'technicien' as 'admin' | 'technicien',
+    role: 'technicien' as UserRole,
     is_active: true,
     depot_ids: [] as number[],
 })
@@ -145,7 +145,9 @@ function confirmDelete(user: ShopUser) {
 // -----------------------------------------------
 const roleOptions = [
     { value: 'admin', label: 'Administrateur' },
+    { value: 'gestionnaire', label: 'Gestionnaire' },
     { value: 'technicien', label: 'Technicien' },
+    { value: 'caissiere', label: 'Caissière' },
 ]
 
 // const depotOptions = computed(() =>

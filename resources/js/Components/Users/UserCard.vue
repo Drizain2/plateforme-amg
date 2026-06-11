@@ -1,5 +1,7 @@
 <!-- resources/js/Components/Users/UserCard.vue -->
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3';
+import UserPermissionController from '@/actions/App/Http/Controllers/UserPermissionController';
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import type { ShopUser } from '@/types'
@@ -72,6 +74,11 @@ const initials = (name: string) =>
                 class="text-gray-500">
                 Reset MDP
             </Button>
+            <Link :href="UserPermissionController.index.url({ user: user.id })">
+                <Button variant="ghost" size="sm" class="text-indigo-600">
+                    Permissions
+                </Button>
+            </Link>
             <Button variant="ghost" size="sm" :loading="toggling" @click="emit('toggle', user)" :class="user.is_active
                 ? 'text-yellow-600 hover:bg-yellow-50'
                 : 'text-green-600 hover:bg-green-50'">

@@ -21,7 +21,7 @@ class UpdateShopUserRequest extends FormRequest
                 'email',
                 Rule::unique('users')->ignore($this->route('user')),
             ],
-            'role' => ['sometimes', Rule::in(['admin', 'technicien'])],
+            'role' => ['sometimes', Rule::in(['admin', 'technicien', 'gestionnaire','caissier',])],
             'is_active' => ['sometimes', 'boolean'],
             'depot_ids' => ['nullable', 'array'],
             'depot_ids.*' => ['exists:depots,id'],

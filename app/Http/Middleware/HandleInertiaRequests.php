@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,13 +36,16 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        $permService = app(PermissionService::class);
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user()?->load('roles'),
                 'shop' => $request->user()?->shop,
-                'unread_count' => fn () => $request->user()?->unreadNotifications()->count() ?? 0,
+                'unread_count' => fn() => $request->user()?->unreadNotifications()->count() ?? 0,
+                "permissions" => $user ? $permService->effectivePermissions($user) : [],
             ],
             'flash' => [
                 'success' => session('success'),

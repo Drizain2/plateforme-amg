@@ -14,6 +14,7 @@ use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
 use App\Http\Controllers\Ticket\TicketController;
 use App\Http\Controllers\TrackController;
+use App\Http\Controllers\UserPermissionController;
 use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
@@ -99,5 +100,11 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/shop', [SettingsController::class, 'updateShop'])->name('shop');
         Route::put('/profile', [SettingsController::class, 'updateProfile'])->name('profile');
         Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
+    });
+
+    Route::prefix('users/{user}/permissions')->name('users.permissions.')->group(function () {
+        Route::get('/', [UserPermissionController::class, 'index'])->name('index');
+        Route::post('/', [UserPermissionController::class, 'update'])->name('update');
+        Route::delete('/', [UserPermissionController::class, 'resetAll'])->name('reset');
     });
 });
