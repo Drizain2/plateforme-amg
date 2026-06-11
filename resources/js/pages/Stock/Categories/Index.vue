@@ -20,8 +20,13 @@ const { success, error } = useToast()
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {
-  if (flash.success) { success(flash.success) }
-  if (flash.error) { error(flash.error) }
+  if (flash.success) {
+ success(flash.success) 
+}
+
+  if (flash.error) {
+ error(flash.error) 
+}
 }, { immediate: true })
 
 // Création
@@ -31,7 +36,9 @@ const createForm = useForm({ name: '', is_active: true })
 function submitCreate() {
   createForm.post(CategorieController.store.url(), {
     preserveScroll: true,
-    onSuccess: () => { showCreateModal.value = false; createForm.reset() },
+    onSuccess: () => {
+ showCreateModal.value = false; createForm.reset() 
+},
   })
 }
 
@@ -46,10 +53,15 @@ function openEdit(cat: Pick<Category, 'id' | 'name' | 'is_active'>) {
 }
 
 function submitEdit() {
-  if (!editingCategory.value) { return }
+  if (!editingCategory.value) {
+ return 
+}
+
   editForm.put(CategorieController.update.url(editingCategory.value.id), {
     preserveScroll: true,
-    onSuccess: () => { editingCategory.value = null },
+    onSuccess: () => {
+ editingCategory.value = null 
+},
   })
 }
 
@@ -57,11 +69,16 @@ function submitEdit() {
 const deletingId = ref<number | null>(null)
 
 function confirmDelete(cat: Pick<Category, 'id' | 'name'>) {
-  if (!confirm(`Supprimer "${cat.name}" ?`)) { return }
+  if (!confirm(`Supprimer "${cat.name}" ?`)) {
+ return 
+}
+
   deletingId.value = cat.id
   router.delete(CategorieController.destroy.url(cat.id), {
     preserveScroll: true,
-    onFinish: () => { deletingId.value = null },
+    onFinish: () => {
+ deletingId.value = null 
+},
   })
 }
 </script>

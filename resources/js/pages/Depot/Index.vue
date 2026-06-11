@@ -81,8 +81,8 @@ function submitDepot() {
 const deletingId = ref<number | null>(null)
 
 function confirmDelete(depot: typeof props.depots.data[0]) {
-  const msg = (depot.parts_count ?? 0) > 0
-    ? `Ce dépôt contient ${depot.parts_count ?? 0} pièce(s). Il sera désactivé. Continuer ?`
+  const msg = (depot.stocks_count ?? 0) > 0
+    ? `Ce dépôt contient ${depot.stocks_count ?? 0} pièce(s). Il sera désactivé. Continuer ?`
     : `Supprimer le dépôt "${depot.name}" ?`
 
   if (!confirm(msg)){
@@ -213,7 +213,7 @@ const availableUsers = computed(() => {
           <!-- Stats -->
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-gray-50 rounded-lg px-3 py-2 text-center">
-              <p class="text-lg font-bold text-indigo-600">{{ depot.parts_count ?? 0 }}</p>
+              <p class="text-lg font-bold text-indigo-600">{{ depot.stocks_count ?? 0 }}</p>
               <p class="text-xs text-gray-500">Pièces</p>
             </div>
             <div class="bg-gray-50 rounded-lg px-3 py-2 text-center">
@@ -249,7 +249,7 @@ const availableUsers = computed(() => {
               @click="confirmDelete(depot)"
               class="text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
             >
-              {{ (depot.parts_count ?? 0) > 0 ? 'Désactiver' : 'Supprimer' }}
+              {{ (depot.stocks_count ?? 0) > 0 ? 'Désactiver' : 'Supprimer' }}
             </Button>
           </div>
         </div>

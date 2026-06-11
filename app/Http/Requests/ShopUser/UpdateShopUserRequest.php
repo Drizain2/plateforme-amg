@@ -17,10 +17,11 @@ class UpdateShopUserRequest extends FormRequest
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => [
-                'sometimes', 'email',
+                'sometimes',
+                'email',
                 Rule::unique('users')->ignore($this->route('user')),
             ],
-            'role' => ['sometimes', Rule::in(['admin', 'technician'])],
+            'role' => ['sometimes', Rule::in(['admin', 'technicien'])],
             'is_active' => ['sometimes', 'boolean'],
             'depot_ids' => ['nullable', 'array'],
             'depot_ids.*' => ['exists:depots,id'],

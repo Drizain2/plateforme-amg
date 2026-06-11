@@ -15,7 +15,7 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Ticket } from '@/types'
 
 const props = defineProps<{
-    ticket: { data: Ticket }
+    ticket: Ticket
     technicians: { id: number; name: string }[]
     depotParts: { id: number; name: string; quantity: number; unit_price: number }[]
 }>()
@@ -24,7 +24,7 @@ const { success, error } = useToast()
 // const { isAdmin } = usePermission()
 const page = usePage()
 
-const ticketData = computed(() => props.ticket.data)
+const ticketData = computed(() => props.ticket)
 
 watch(() => page.props.flash, (flash) => {
     if (flash.success) {

@@ -27,8 +27,13 @@ const { applyFilter } = useFilters(StockMovementController.index.url())
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {
-  if (flash.success) { success(flash.success) }
-  if (flash.error) { error(flash.error) }
+  if (flash.success) {
+ success(flash.success) 
+}
+
+  if (flash.error) {
+ error(flash.error) 
+}
 }, { immediate: true })
 
 const depotId = ref(props.filters.depot_id ?? '')
@@ -46,7 +51,10 @@ watch([depotId, type, from, to], () => {
 })
 
 function goToPage(url: string | null) {
-  if (!url) { return }
+  if (!url) {
+ return 
+}
+
   router.visit(url, { preserveScroll: true, preserveState: true })
 }
 
@@ -66,6 +74,7 @@ function typeBadgeVariant(type: string): BadgeVariant {
     transfer_in:  'info',
     transfer_out: 'info',
   }
+
   return map[type] ?? 'default'
 }
 

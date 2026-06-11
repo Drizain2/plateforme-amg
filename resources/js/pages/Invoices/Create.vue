@@ -33,11 +33,21 @@ const ticketOptions = computed(() => [
 ])
 
 watch(() => form.ticket_id, (ticketId) => {
-  if (!ticketId) { return }
+  if (!ticketId) {
+ return 
+}
+
   const ticket = props.tickets.find(t => t.id === Number(ticketId))
-  if (!ticket) { return }
+
+  if (!ticket) {
+ return 
+}
+
   const customer = props.customers.find(c => c.name === ticket.customer)
-  if (customer) { form.customer_id = customer.id }
+
+  if (customer) {
+ form.customer_id = customer.id 
+}
 })
 
 function addLine(type: 'service' | 'part') {

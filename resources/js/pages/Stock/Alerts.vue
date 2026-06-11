@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
-import StockMovementController from '@/actions/App/Http/Controllers/Stock/StockMovementController'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
+import StockMovementController from '@/actions/App/Http/Controllers/Stock/StockMovementController'
 import Badge from '@/Components/UI/Badge.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 

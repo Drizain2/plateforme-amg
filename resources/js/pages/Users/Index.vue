@@ -8,10 +8,10 @@ import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
+import UserCard from '@/Components/Users/UserCard.vue'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { ShopUser } from '@/types'
-import UserCard from '@/Components/Users/UserCard.vue'
 
 const props = defineProps<{
     users: ShopUser[]

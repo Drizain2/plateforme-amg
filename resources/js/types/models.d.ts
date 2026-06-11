@@ -14,7 +14,7 @@ export interface Depot {
     address?: string;
     phone?: string;
     is_active: boolean;
-    parts_count?: number;
+    stocks_count?: number;
     users?: {
         id: number;
         name: string;
