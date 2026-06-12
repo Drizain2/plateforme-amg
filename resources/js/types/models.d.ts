@@ -57,19 +57,19 @@ export interface Part {
     is_active: boolean;
 }
 
-export interface StockMovement {
-    id: number;
-    type: 'in' | 'out' | 'adjustment' | 'transfer_in' | 'transfer_out';
-    type_label: string;
-    quantity: number;
-    ticket_id?: number;
-    note?: string;
-    stock?: { id: number; part: Pick<Part, 'id' | 'name' | 'sku'> | null };
-    depot?: Pick<Depot, 'id' | 'name'>;
-    transfer_depot?: Pick<Depot, 'id' | 'name'>;
-    user?: { id: number; name: string };
-    created_at: string;
-}
+// export interface StockMovement {
+//     id: number;
+//     type: 'in' | 'out' | 'adjustment' | 'transfer_in' | 'transfer_out';
+//     type_label: string;
+//     quantity: number;
+//     ticket_id?: number;
+//     note?: string;
+//     stock?: { id: number; part: Pick<Part, 'id' | 'name' | 'sku'> | null };
+//     depot?: Pick<Depot, 'id' | 'name'>;
+//     transfer_depot?: Pick<Depot, 'id' | 'name'>;
+//     user?: { id: number; name: string };
+//     created_at: string;
+// }
 // export interface Customer {
 //     id: number;
 //     name: string;

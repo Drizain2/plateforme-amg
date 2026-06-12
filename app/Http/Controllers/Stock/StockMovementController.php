@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Stock;
 
+use App\Enums\StockMovementType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stock\StoreMovementRequest;
 use App\Http\Requests\Stock\TransferStockRequest;
@@ -22,7 +23,7 @@ class StockMovementController extends Controller
     {
         $filters = $request->only(['depot_id', 'type', 'from', 'part_id', 'to']);
 
-        $movements = StockMovement::with(['stock.part:id,name,sku', 'depot:id,name', 'user:id,name', 'transferDepot:id,name'])
+        $movements = StockMovement::with(['stock.part:id,name,sku', 'depot:id,name', 'user:id,name', 'transferDepot:id,name', 'ticket:id,reference'])
             ->when($filters['depot_id'] ?? null, fn ($q) => $q->where('depot_id', $filters['depot_id']))
             ->when($filters['part_id'] ?? null, fn ($q) => $q->whereHas('stock', fn ($q) => $q->where('part_id', $filters['part_id'])))
             ->when($filters['type'] ?? null, fn ($q) => $q->where('type', $filters['type']))
@@ -32,10 +33,34 @@ class StockMovementController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        // Résumé période
+        $summary = [
+            'total_in' => StockMovement::whereIn('type', ['in', 'transfert'])
+                ->when($filters['depot_id'] ?? null, fn ($q, $v) => $q->where('depot_id', $v))
+                ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
+                ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
+                ->sum('quantity'),
+            'total_out' => StockMovement::whereIn('type', ['out', 'transfer_out'])
+                ->when($filters['depot_id'] ?? null, fn ($q, $v) => $q->where('depot_id', $v))
+                ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
+                ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
+                ->sum('quantity'),
+            'total_adjustments' => StockMovement::where('type', 'adjustment')
+                ->when($filters['depot_id'] ?? null, fn ($q, $v) => $q->where('depot_id', $v))
+                ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
+                ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
+                ->count(),
+        ];
+
         return Inertia::render('Stock/Movement/Index', [
             'movements' => StockMovementResource::collection($movements),
             'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
             'filters' => $filters,
+            'summary' => $summary,
+            'types' => array_map(fn ($t) => [
+                'value' => $t->value,
+                'label' => $t->label(),
+            ], StockMovementType::cases()),
         ]);
     }
 

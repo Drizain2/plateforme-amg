@@ -46,7 +46,8 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('depots/{depot}/users', [DepotController::class, 'attachUser'])->name('depots.attach-user');
         Route::delete('depots/{depot}/users/{user}', [DepotController::class, 'detachUser'])->name('depots.detach-user');
 
-        Route::resource('parts', PartController::class);
+        Route::resource('parts', PartController::class)->except('show');
+        Route::get('parts/search', [PartController::class, 'search'])->name('parts.search');
         Route::resource('categories', CategorieController::class)->except(['show', 'create', 'edit']);
         Route::resource('suppliers', SupplierController::class);
 
@@ -107,4 +108,5 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/', [UserPermissionController::class, 'update'])->name('update');
         Route::delete('/', [UserPermissionController::class, 'resetAll'])->name('reset');
     });
+
 });
