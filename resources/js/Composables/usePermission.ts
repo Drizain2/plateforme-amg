@@ -17,7 +17,7 @@ export function usePermission() {
     const canAll = (...perms: Permission[]): boolean => perms.every((p) => can(p));
 
     const hasRole = (role: string): boolean =>
-        page.props.auth.user.roles.some((r) => r === role);
+        page.props.auth.user.roles.some((r) => r.name === role);
     const isAdmin = computed(() => hasRole('admin') || hasRole('super_admin'));
     const isManager = computed(() => hasRole('manager'));
     const isTechnician = computed(() => hasRole('technician'));

@@ -7,13 +7,18 @@ export type User = {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
-    roles: UserRole[];
+    roles: Role[];
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
 };
 
-export type UserRole = 'admin' | 'gestionnaire' | 'technicien' | 'caissiere';
+export type UserRoleName = 'admin' | 'gestionnaire' | 'technicien' | 'caissiere';
+
+export type Role = {
+    id: string | number;
+    name: string;
+};
 
 export type Permission =
     | 'stock.view'
@@ -54,7 +59,7 @@ export interface ShopUser {
     id: number;
     name: string;
     email: string;
-    role: UserRole;
+    role: UserRoleName;
     is_active: boolean;
     depot_ids: number[];
     depots: { id: number; name: string }[];
