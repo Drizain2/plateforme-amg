@@ -1,10 +1,22 @@
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { createPinia } from 'pinia';
 import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
 import { vPermission } from '@/directives/permission';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+if (import.meta.env.DEV) {
+    router.on('httpException', (event) => {
+        const response = (event as CustomEvent).detail?.response;
+
+        if (response?.data && typeof response.data === 'string') {
+            document.open();
+            document.write(response.data);
+            document.close();
+        }
+    });
+}
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),

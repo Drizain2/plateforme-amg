@@ -1,12 +1,37 @@
 <script setup lang="ts">
-import { Toaster } from 'vue-sonner'
+import { usePage } from '@inertiajs/vue3'
+import { watch } from 'vue'
+import { toast, Toaster } from 'vue-sonner'
 import Header from '@/Components/UI/Header.vue'
 import Sidebar from '@/Components/UI/Sidebar.vue'
-
 
 defineProps<{
   title: string
 }>()
+
+const page = usePage()
+
+watch(
+  () => page.props.flash as Record<string, string>,
+  (flash) => {
+    if (flash?.success) {
+      toast.success(flash.success)
+    }
+
+    if (flash?.error) {
+      toast.error(flash.error)
+    }
+
+    if (flash?.warning) {
+      toast.warning(flash.warning)
+    }
+
+    if (flash?.info) {
+      toast.info(flash.info)
+    }
+  },
+  { deep: true },
+)
 </script>
 
 <template>

@@ -48,7 +48,7 @@ class Ticket extends Model
 
     protected static function booted(): void
     {
-        static::creating(function ($m) {
+        static::creating(function (self $m) {
             $m->tracking_token = Str::uuid();
             $m->reference = static::generateReference();
         });
@@ -128,6 +128,6 @@ class Ticket extends Model
             ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
             ->when($filters['priority'] ?? null, fn ($q, $v) => $q->where('priority', $v))
             ->when($filters['depot_id'] ?? null, fn ($q, $v) => $q->where('depot_id', $v))
-            ->when($filters['technician_id'] ?? null, fn ($q, $v) => $q->where('technician_id', $v));
+            ->when($filters['technician_id'] ?? null, fn ($q, $v) => $q->where('technicien_id', $v));
     }
 }

@@ -2,11 +2,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { track } from '@/routes'
+import Button from '@/Components/UI/Button.vue'
 import type { TrackingTicket, TrackingStep } from '@/types'
 
 const props = defineProps<{ ticket: TrackingTicket }>()
-// Pas de layout — la page est son propre layout
-defineOptions({ layout: null })
 const fmt = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 

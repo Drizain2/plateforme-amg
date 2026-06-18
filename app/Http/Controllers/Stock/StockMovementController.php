@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Stock;
 
 use App\Enums\StockMovementType;
+use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stock\StoreMovementRequest;
 use App\Http\Requests\Stock\TransferStockRequest;
@@ -84,11 +85,15 @@ class StockMovementController extends Controller
 
         $stock = StockDepot::findOrFail($request->stock_id);
 
-        match ($request->type) {
-            'in' => $this->stockService->restock($stock, $request->quantity, $request->user(), $request->note ?? 'réapprovisionnement'),
-            'out' => $this->stockService->consume($stock, $request->quantity, $request->ticket_id, $request->user()),
-            'adjustment' => $this->stockService->adjustment($stock, $request->quantity, $request->note ?? '', $request->user()),
-        };
+        try {
+            match ($request->type) {
+                'in' => $this->stockService->restock($stock, $request->quantity, $request->user(), $request->note ?? 'réapprovisionnement'),
+                'out' => $this->stockService->consume($stock, $request->quantity, $request->ticket_id, $request->user()),
+                'adjustment' => $this->stockService->adjustment($stock, $request->quantity, $request->note ?? '', $request->user()),
+            };
+        } catch (InsufficientStockException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', 'Mouvement enregistré.');
     }
@@ -98,7 +103,11 @@ class StockMovementController extends Controller
         $source = StockDepot::findOrFail($request->stock_id);
         $targetDepot = Depot::findOrFail($request->to_depot_id);
 
-        $this->stockService->transfer($source, $targetDepot, $request->quantity, $request->user());
+        try {
+            $this->stockService->transfer($source, $targetDepot, $request->quantity, $request->user());
+        } catch (InsufficientStockException|\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', 'Transfert effectué avec succès.');
     }

@@ -185,6 +185,9 @@ export interface Invoice {
 export interface AppNotification {
   id: string
   data: {
+    assigned_by: any;
+    customer: any;
+    number: any;
     type?: string
     part_name?: string
     quantity?: number

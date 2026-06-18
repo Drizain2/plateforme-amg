@@ -100,7 +100,7 @@ class TicketController extends Controller
                 'depot_id' => $request->depot_id,
                 'customer_id' => $customer->id,
                 'device_id' => $device->id,
-                'technician_id' => $request->technician_id,
+                'technicien_id' => $request->technician_id,
                 'priority' => $request->priority,
                 'description' => $request->description,
                 'estimated_return_date' => $request->estimated_return_date,
@@ -142,19 +142,39 @@ class TicketController extends Controller
 
     public function update(UpdateTicketRequest $request, Ticket $ticket): RedirectResponse
     {
-        $ticket->update($request->validated());
+        $validated = $request->validated();
+        $newTechId = $validated['technician_id'] ?? null;
+
+        // Détecter un changement de technicien pour déclencher la notification
+        if ($newTechId && $newTechId !== $ticket->technicien_id) {
+            $technician = User::findOrFail($newTechId);
+            $this->ticketService->assignTechnician($ticket, $technician, $request->user());
+            unset($validated['technician_id']);
+        } elseif (array_key_exists('technician_id', $validated)) {
+            // Renommer la clé pour correspondre à la colonne du modèle
+            $validated['technicien_id'] = $validated['technician_id'];
+            unset($validated['technician_id']);
+        }
+
+        if (! empty($validated)) {
+            $ticket->update($validated);
+        }
 
         return back()->with('success', 'Ticket mis à jour.');
     }
 
     public function transition(TransitionTicketRequest $request, Ticket $ticket): RedirectResponse
     {
-        $this->ticketService->transition(
-            $ticket,
-            TicketStatus::from($request->status),
-            $request->user(),
-            $request->note,
-        );
+        try {
+            $this->ticketService->transition(
+                $ticket,
+                TicketStatus::from($request->status),
+                $request->user(),
+                $request->note,
+            );
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success', 'Statut mis à jour.');
     }

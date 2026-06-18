@@ -1,12 +1,14 @@
 <?php
 
+use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
-use App\Http\Middleware\CheckPermission;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,4 +29,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // Pages d'erreur Inertia pour 403 / 404 / 500 / 503 (prod uniquement)
+        // $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+        //     if (
+        //         ! config('app.debug') &&
+        //         in_array($response->getStatusCode(), [403, 404, 500, 503], true) &&
+        //         ! $request->is('api/*')
+        //     ) {
+        //         return Inertia::render('Errors/Error', ['status' => $response->getStatusCode()])
+        //             ->toResponse($request)
+        //             ->setStatusCode($response->getStatusCode());
+        //     }
+        // });
     })->create();

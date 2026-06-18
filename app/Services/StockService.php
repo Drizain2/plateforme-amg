@@ -9,6 +9,7 @@ use App\Models\StockMovement;
 use App\Models\User;
 use App\Notifications\LowStockAlert;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class StockService
 {
@@ -48,11 +49,11 @@ class StockService
 
             // Vérifier seuil après transaction
             if ($stock->fresh()->is_critical) {
-                $admin = User::where('shop_id', $stock->shop_id)
-                    ->role('admin')
-                    ->first();
+                $admins = User::where('shop_id', $stock->shop_id)
+                    ->role(['admin', 'super_admin'])
+                    ->get();
 
-                $admin?->notify(new LowStockAlert($stock->load('depot')));
+                Notification::send($admins, new LowStockAlert($stock->load('part', 'depot')));
             }
         });
     }

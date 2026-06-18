@@ -36,7 +36,7 @@ class TicketStatusChanged extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $status = $this->ticket->status->label();
-        $url = url('/track/'.$this->ticket->tracking_token);
+        $url = route('track', $this->ticket->tracking_token);
 
         return (new MailMessage)
             ->subject("Votre réparation — {$this->ticket->reference} : {$status}")

@@ -16,7 +16,7 @@ class TrackController extends Controller
             ->where('tracking_token', $token)
             ->with([
                 'device:id,brand,model,type',
-                'shop:id,name,phone',
+                'shop:id,name,email,phone',
                 'events' => fn ($q) => $q
                     ->whereIn('type', [
                         TicketEventType::StatusChanged->value,

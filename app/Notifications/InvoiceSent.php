@@ -27,7 +27,7 @@ class InvoiceSent extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -59,7 +59,10 @@ class InvoiceSent extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'type' => 'invoice_sent',
+            'invoice_id' => $this->invoice->id,
+            'number' => $this->invoice->number,
+            'total_ttc' => $this->invoice->total_ttc,
         ];
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Ticket;
 use App\Models\TicketEvent;
 use App\Models\TicketPart;
 use App\Models\User;
+use App\Notifications\TicketAssigned;
 use App\Notifications\TicketStatusChanged;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +29,12 @@ class TicketService
                 'note' => 'Ticket créé',
                 'metadata' => ['to' => TicketStatus::Received->value],
             ]);
+
+            // notifié le technicient
+            $ticket->load('technicien');
+            if ($ticket->technicien) {
+                $ticket->technicien->notify(new TicketAssigned($ticket->load('customer'), $by));
+            }
 
             return $ticket;
         });
@@ -129,5 +136,7 @@ class TicketService
                 'metadata' => ['technician_id' => $technicien->id],
             ]);
         });
+
+        $technicien->notify(new TicketAssigned($ticket->load('customer'), $by));
     }
 }
