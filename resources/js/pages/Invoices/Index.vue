@@ -49,7 +49,7 @@ watch([search, status, from, to], () => {
 })
 
 const fmt = (v: number) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v)
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
 function goToPage(url: string | null) {
   if (!url) {

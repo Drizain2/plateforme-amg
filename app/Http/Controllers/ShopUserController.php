@@ -16,6 +16,12 @@ use Inertia\Response;
 
 class ShopUserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('perm:users.view')->only(['index']);
+        $this->middleware('perm:users.manage')->only(['store', 'update', 'destroy', 'toggleActive', 'resetPassword']);
+    }
+
     public function index(): Response
     {
         $users = User::where('shop_id', app('current_shop')->id)

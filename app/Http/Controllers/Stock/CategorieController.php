@@ -12,6 +12,14 @@ use Inertia\Response;
 
 class CategorieController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('perm:stock.view')->only(['index']);
+        $this->middleware('perm:stock.create')->only(['store']);
+        $this->middleware('perm:stock.edit')->only(['update']);
+        $this->middleware('perm:stock.delete')->only(['destroy']);
+    }
+
     public function index(): Response
     {
         return Inertia::render('Stock/Categories/Index', [

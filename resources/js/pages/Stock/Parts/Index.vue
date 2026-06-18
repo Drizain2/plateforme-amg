@@ -13,24 +13,20 @@ import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
-import { usePermission } from '@/Composables/usePermission'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import type { PaginatedResource, Part, Depot, Category } from '@/types'
+import type { PaginatedResource, Part, Category } from '@/types'
 
 const props = defineProps<{
   parts: PaginatedResource<Part>
-  depots: Pick<Depot, 'id' | 'name'>[]
   categories: Pick<Category, 'id' | 'name'>[]
   filters: {
     search?: string
     category_id?: string
-    depot_id?: string
     critical?: string
   }
 }>()
 
-const { isAdmin } = usePermission()
 const { success, error } = useToast()
 const { applyFilter } = useFilters(PartController.index.url())
 const page = usePage()
@@ -49,14 +45,12 @@ watch(() => page.props.flash, (flash) => {
 // Filtres locaux
 const search     = ref(props.filters.search ?? '')
 const categoryId = ref(props.filters.category_id ?? '')
-const depotId    = ref(props.filters.depot_id ?? '')
 const critical   = ref(props.filters.critical === '1')
 
-watch([search, categoryId, depotId, critical], () => {
+watch([search, categoryId, critical], () => {
   applyFilter({
     search:      search.value || undefined,
     category_id: categoryId.value || undefined,
-    depot_id:    depotId.value || undefined,
     critical:    critical.value ? '1' : undefined,
   })
 })
@@ -115,7 +109,6 @@ function goToPage(url: string | null) {
 }
 
 // Options select
-const depotOptions    = computed(() => props.depots.map(d => ({ value: d.id, label: d.name })))
 const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id, label: c.name })))
 </script>
 
@@ -131,7 +124,7 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
             {{ parts.meta.total }} pièce{{ parts.meta.total > 1 ? 's' : '' }} au total
           </p>
         </div>
-        <Button v-if="isAdmin" @click="openCreate">
+        <Button v-permission="'stock.create'" @click="openCreate">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
@@ -141,7 +134,7 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
 
       <!-- Filtres -->
       <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <Input
             v-model="search"
             placeholder="Rechercher nom, SKU..."
@@ -150,11 +143,6 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
             v-model="categoryId"
             :options="categoryOptions"
             placeholder="Toutes catégories"
-          />
-          <Select
-            v-model="depotId"
-            :options="depotOptions"
-            placeholder="Tous les dépôts"
           />
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input
@@ -219,7 +207,7 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
                   <span v-else class="text-gray-400">Aucun stock</span>
                 </td>
                 <td class="px-4 py-3 text-gray-700">
-                  {{ new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(part.unit_price) }}
+                  {{ new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(part.unit_price) }}
                 </td>
                 <td class="px-4 py-3 text-gray-500 text-xs">
                   {{ part.supplier?.name ?? '—' }}
@@ -229,11 +217,11 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
                     <Button variant="ghost" size="sm" @click="openMovements(part)">
                       Mouvements
                     </Button>
-                    <Button v-if="isAdmin" variant="ghost" size="sm" @click="openEdit(part)">
+                    <Button v-permission="'stock.edit'" variant="ghost" size="sm" @click="openEdit(part)">
                       Modifier
                     </Button>
                     <Button
-                      v-if="isAdmin"
+                      v-permission="'stock.delete'"
                       variant="ghost"
                       size="sm"
                       :loading="deletingId === part.id"

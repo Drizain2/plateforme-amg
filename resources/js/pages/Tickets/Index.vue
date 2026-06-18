@@ -16,7 +16,6 @@ import type { BadgeVariant, PaginatedResource, Ticket } from '@/types'
 const props = defineProps<{
     tickets: PaginatedResource<Ticket>
     filters: Record<string, string>
-    depots: { id: number; name: string }[]
     technicians: { id: number; name: string }[]
     statuses: { value: string; label: string }[]
     priorities: { value: string; label: string }[]
@@ -39,15 +38,13 @@ watch(() => page.props.flash, (flash) => {
 const search = ref(props.filters.search ?? '')
 const status = ref(props.filters.status ?? '')
 const priority = ref(props.filters.priority ?? '')
-const depotId = ref(props.filters.depot_id ?? '')
 const technicianId = ref(props.filters.technician_id ?? '')
 
-watch([search, status, priority, depotId, technicianId], () => {
+watch([search, status, priority, technicianId], () => {
     applyFilter({
         search: search.value || undefined,
         status: status.value || undefined,
         priority: priority.value || undefined,
-        depot_id: depotId.value || undefined,
         technician_id: technicianId.value || undefined,
     })
 })
@@ -60,7 +57,6 @@ function goToPage(url: string | null) {
     router.visit(url, { preserveScroll: true, preserveState: true })
 }
 
-const depotOptions = computed(() => props.depots.map(d => ({ value: d.id, label: d.name })))
 const technicianOptions = computed(() => props.technicians.map(t => ({ value: t.id, label: t.name })))
 const statusOptions = computed(() => props.statuses.map(s => ({ value: s.value, label: s.label })))
 const priorityOptions = computed(() => props.priorities.map(p => ({ value: p.value, label: p.label })))
@@ -78,7 +74,7 @@ const priorityOptions = computed(() => props.priorities.map(p => ({ value: p.val
                         {{ tickets.meta.total }} ticket{{ tickets.meta.total > 1 ? 's' : '' }}
                     </p>
                 </div>
-                <Link :href="TicketController.create.url()">
+                <Link v-permission="'tickets.create'" :href="TicketController.create.url()">
                     <Button>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -90,11 +86,10 @@ const priorityOptions = computed(() => props.priorities.map(p => ({ value: p.val
 
             <!-- Filtres -->
             <div class="bg-white rounded-xl border border-gray-200 p-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <Input v-model="search" placeholder="Réf, client, appareil..." />
                     <Select v-model="status" :options="statusOptions" placeholder="Tous statuts" />
                     <Select v-model="priority" :options="priorityOptions" placeholder="Toutes priorités" />
-                    <Select v-model="depotId" :options="depotOptions" placeholder="Tous dépôts" />
                     <Select v-model="technicianId" :options="technicianOptions" placeholder="Tous techniciens" />
                 </div>
             </div>

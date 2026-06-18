@@ -20,7 +20,7 @@ const props = defineProps<{
 }>()
 
 const formatCurrency = (v: number) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v)
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
 const lineLabels = computed(() => props.charts.tickets_by_day.map(d => d.label))
 const lineValues = computed(() => props.charts.tickets_by_day.map(d => d.total))

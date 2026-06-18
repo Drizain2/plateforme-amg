@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Tickets/Create.vue -->
 <script setup lang="ts">
-import { useForm, router } from '@inertiajs/vue3'
+import { useForm, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import CustomerController from '@/actions/App/Http/Controllers/Customer/CustomerController'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
@@ -14,6 +14,10 @@ const props = defineProps<{
   technicians: { id: number; name: string }[]
   priorities: { value: string; label: string }[]
 }>()
+
+const page = usePage()
+const activeDepot = computed(() => page.props.auth.depotActive)
+const activeDepotId = page.props.auth.depotActive ? String(page.props.auth.depotActive.id) : ''
 
 const form = useForm({
   // Client
@@ -30,7 +34,7 @@ const form = useForm({
   device_color: '',
   condition_in: '',
   // Ticket
-  depot_id:              '',
+  depot_id:              activeDepotId,
   technician_id:         '',
   priority:              'normal',
   description:           '',
@@ -192,7 +196,14 @@ function submit() {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Dépôt *</label>
-              <Select v-model="form.depot_id" :options="depotOptions" :error="form.errors.depot_id" />
+              <div v-if="activeDepot" class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+                <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
+                </svg>
+                {{ activeDepot.name }}
+              </div>
+              <Select v-else v-model="form.depot_id" :options="depotOptions" :error="form.errors.depot_id" />
+              <p v-if="form.errors.depot_id" class="text-xs text-red-500 mt-1">{{ form.errors.depot_id }}</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Technicien</label>

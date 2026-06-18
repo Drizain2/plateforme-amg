@@ -13,6 +13,7 @@ use App\Models\InvoiceLine;
 use App\Models\Ticket;
 use App\Notifications\InvoiceSent;
 use App\Services\InvoiceService;
+use App\Services\PermissionService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,13 @@ use Inertia\Response;
 
 class InvoiceController extends Controller
 {
-    public function __construct(private InvoiceService $invoiceService) {}
+    public function __construct(private InvoiceService $invoiceService)
+    {
+        $this->middleware('perm:invoices.view')->only(['index', 'show', 'pdf', 'publicPdf']);
+        $this->middleware('perm:invoices.create')->only(['create', 'store', 'fromTicket']);
+        $this->middleware('perm:invoices.edit')->only(['update', 'storeLine', 'destroyLine']);
+        // transition : vérifié inline selon le statut cible
+    }
 
     public function index(): Response
     {
@@ -32,12 +39,12 @@ class InvoiceController extends Controller
         $invoices = Invoice::with(['customer', 'ticket'])
             ->when(
                 $filters['search'] ?? null,
-                fn($q, $s) => $q->where('number', 'like', "%$s%")
-                    ->orWhereHas('customer', fn($q) => $q->where('name', 'like', "%$s%"))
+                fn ($q, $s) => $q->where('number', 'like', "%$s%")
+                    ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%$s%"))
             )
-            ->when($filters['status'] ?? null, fn($q, $v) => $q->where('status', $v))
-            ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '>=', $v))
-            ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('issued_at', '<=', $v))
+            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
+            ->when($filters['from'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '>=', $v))
+            ->when($filters['to'] ?? null, fn ($q, $v) => $q->whereDate('issued_at', '<=', $v))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -45,7 +52,7 @@ class InvoiceController extends Controller
         return Inertia::render('Invoices/Index', [
             'invoices' => InvoiceResource::collection($invoices),
             'filters' => $filters,
-            'statuses' => array_map(fn($s) => [
+            'statuses' => array_map(fn ($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ], InvoiceStatus::cases()),
@@ -68,7 +75,7 @@ class InvoiceController extends Controller
                 ->with('customer:id,name', 'device:id,brand,model')
                 ->select('id', 'reference', 'customer_id', 'device_id', 'estimated_price')
                 ->get()
-                ->map(fn($t) => [
+                ->map(fn ($t) => [
                     'id' => $t->id,
                     'reference' => $t->reference,
                     'customer' => $t->customer->name,
@@ -136,6 +143,10 @@ class InvoiceController extends Controller
         ]);
 
         $newStatus = InvoiceStatus::from($request->status);
+
+        $permission = $newStatus === InvoiceStatus::Paid ? 'invoices.mark_paid' : 'invoices.edit';
+        abort_unless(app(PermissionService::class)->has($request->user(), $permission), 403, "Permission requise : {$permission}");
+
         $this->invoiceService->transition($invoice, $newStatus);
 
         // Notifier le client si envoi

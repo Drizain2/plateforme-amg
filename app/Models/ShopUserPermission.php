@@ -13,6 +13,7 @@ class ShopUserPermission extends Model
         'permission',
         'granted',
     ];
+
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class);
@@ -24,15 +25,17 @@ class ShopUserPermission extends Model
     }
 
     /**
-     * Vérifier si l'utilisateur a une permission spécifique dans ce shop
+     * Vérifier si l'utilisateur a un override de permission (grant ou revoke).
+     * Retourne null si aucun override, true/false si override trouvé.
      */
-    public function hasPermission(int $shopId, int $userId, string $permission): bool
+    public static function getOverride(int $userId, int $shopId, string $permission): ?bool
     {
-        return self::where([
-            'shop_id' => $shopId,
+        $record = self::where([
             'user_id' => $userId,
+            'shop_id' => $shopId,
             'permission' => $permission,
-            'granted' => true,
-        ])->exists();
+        ])->first();
+
+        return $record ? (bool) $record->granted : null;
     }
 }

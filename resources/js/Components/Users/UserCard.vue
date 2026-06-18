@@ -66,7 +66,7 @@ const initials = (name: string) =>
         </div>
 
         <!-- Actions — masquées si c'est l'utilisateur courant -->
-        <div v-if="!isCurrentUser" class="flex items-center gap-1 shrink-0">
+        <div v-if="!isCurrentUser" v-permission="'users.manage'" class="flex items-center gap-1 shrink-0">
             <Button variant="ghost" size="sm" @click="emit('edit', user)">
                 Modifier
             </Button>

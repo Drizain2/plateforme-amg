@@ -14,23 +14,29 @@ use Inertia\Inertia;
 
 class DepotController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('perm:depots.view')->only(['index']);
+        $this->middleware('perm:depots.manage')->only(['store', 'update', 'destroy', 'attachUser', 'detachUser']);
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $depots = Depot::withCount("stocks")
-            ->with("users:id,name")
+        $depots = Depot::withCount('stocks')
+            ->with('users:id,name')
             ->get();
 
         $shopUsers = User::where('shop_id', app('current_shop')->id)
-        ->role('technicien')
-        ->select('id', 'name')
-        ->get();
-        
-        return Inertia::render("Depot/Index", [
-            "depots" => DepotResource::collection($depots),
-            "shopUsers" => $shopUsers,
+            ->role('technicien')
+            ->select('id', 'name')
+            ->get();
+
+        return Inertia::render('Depot/Index', [
+            'depots' => DepotResource::collection($depots),
+            'shopUsers' => $shopUsers,
         ]);
     }
 
@@ -49,7 +55,8 @@ class DepotController extends Controller
     {
         $depot = Depot::create($request->validated());
         $depot->users()->attach($request->users);
-        return redirect()->route("stock.depots.index")->with("success", "Dépôt {$depot->name} enregistré");
+
+        return redirect()->route('stock.depots.index')->with('success', "Dépôt {$depot->name} enregistré");
     }
 
     /**
@@ -84,23 +91,26 @@ class DepotController extends Controller
     public function destroy(Depot $depot)
     {
         // Soft disable plutôt que suppression si des pièces existent
-        if($depot->stocks()->exists()){
+        if ($depot->stocks()->exists()) {
             $depot->update(['is_active' => false]);
 
             return back()->with('success', 'Dépôt désactivé.');
         }
 
         $depot->delete();
-        return back()->with("success","Dépôt supprimé.");
+
+        return back()->with('success', 'Dépôt supprimé.');
     }
 
-    public function attachUser(Depot $depot,Request $request){
+    public function attachUser(Depot $depot, Request $request)
+    {
         $request->validate([
-            "user_id"=>["required", "exists:users,id"]
+            'user_id' => ['required', 'exists:users,id'],
         ]);
-        
+
         $depot->users()->syncWithoutDetaching([$request->user_id]);
-        return back()->with("success","Utilisateurs ajoutés.");
+
+        return back()->with('success', 'Utilisateurs ajoutés.');
     }
 
     public function detachUser(Depot $depot, User $user): RedirectResponse

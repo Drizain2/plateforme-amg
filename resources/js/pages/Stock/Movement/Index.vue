@@ -29,6 +29,10 @@ const { applyFilter } = useFilters(StockMovementController.index.url())
 const { can } = usePermission()
 const page = usePage()
 
+const activeDepot = computed(() => page.props.auth.depotActive)
+const isGlobalView = computed(() => page.props.auth.isGlobalView)
+const activeDepotId = page.props.auth.depotActive ? String(page.props.auth.depotActive.id) : ''
+
 watch(() => page.props.flash, (flash) => {
   if (flash.success) {
     success(flash.success)
@@ -42,14 +46,12 @@ watch(() => page.props.flash, (flash) => {
 // -----------------------------------------------
 // Filtres
 // -----------------------------------------------
-const depotId = ref(props.filters.depot_id ?? '')
 const type = ref(props.filters.type ?? '')
 const from = ref(props.filters.from ?? '')
 const to = ref(props.filters.to ?? '')
 
-watch([depotId, type, from, to], () => {
+watch([type, from, to], () => {
   applyFilter({
-    depot_id: depotId.value || undefined,
     type: type.value || undefined,
     from: from.value || undefined,
     to: to.value || undefined,
@@ -57,17 +59,16 @@ watch([depotId, type, from, to], () => {
 })
 
 function resetFilters() {
-  depotId.value = ''
   type.value = ''
   from.value = ''
   to.value = ''
 }
 
-const depotOptions = computed(() =>
-  props.depots.map(d => ({ value: d.id, label: d.name }))
-)
 const typeOptions = computed(() =>
   props.types.map(t => ({ value: t.value, label: t.label }))
+)
+const depotOptions = computed(() =>
+  props.depots.map(d => ({ value: d.id, label: d.name }))
 )
 
 // -----------------------------------------------
@@ -77,7 +78,7 @@ const showModal = ref(false)
 
 const movementForm = useForm({
   part_id: '',
-  depot_id: '',
+  depot_id: activeDepotId,
   type: 'in' as 'in' | 'out' | 'adjustment',
   quantity: 1,
   note: '',
@@ -142,7 +143,7 @@ const showTransferModal = ref(false)
 
 const transferForm = useForm({
   part_id: '',
-  from_depot_id: '',
+  from_depot_id: activeDepotId,
   to_depot_id: '',
   quantity: 1,
   note: '',
@@ -219,7 +220,7 @@ function goToPage(url: string | null) {
 }
 
 const hasActiveFilters = computed(() =>
-  !!(depotId.value || type.value || from.value || to.value)
+  !!(type.value || from.value || to.value)
 )
 </script>
 
@@ -280,8 +281,7 @@ const hasActiveFilters = computed(() =>
 
       <!-- Filtres -->
       <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <Select v-model="depotId" :options="depotOptions" placeholder="Tous les dépôts" />
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Select v-model="type" :options="typeOptions" placeholder="Tous les types" />
           <Input v-model="from" type="date" />
           <Input v-model="to" type="date" />
@@ -421,8 +421,14 @@ const hasActiveFilters = computed(() =>
 
         <!-- Dépôt -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Dépôt *</label>
-          <Select v-model="movementForm.depot_id" :options="depotOptions" :error="movementForm.errors.depot_id" />
+          <label class="block text-sm font-medium text-gray-700 mb-1">Dépôt</label>
+          <div v-if="activeDepot" class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+            <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
+            </svg>
+            {{ activeDepot.name }}
+          </div>
+          <Select v-else v-model="movementForm.depot_id" :options="depotOptions" :error="movementForm.errors.depot_id" />
         </div>
 
         <!-- Type -->
@@ -459,8 +465,14 @@ const hasActiveFilters = computed(() =>
 
         <!-- Dépôt source -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Dépôt source *</label>
-          <Select v-model="transferForm.from_depot_id" :options="depotOptions" placeholder="Choisir le dépôt source"
+          <label class="block text-sm font-medium text-gray-700 mb-1">Dépôt source</label>
+          <div v-if="activeDepot" class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+            <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
+            </svg>
+            {{ activeDepot.name }}
+          </div>
+          <Select v-else v-model="transferForm.from_depot_id" :options="depotOptions" placeholder="Choisir le dépôt source"
             :error="transferForm.errors.from_depot_id" />
         </div>
 

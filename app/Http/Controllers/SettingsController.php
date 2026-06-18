@@ -14,22 +14,27 @@ use Inertia\Response;
 
 class SettingsController extends Controller
 {
-    public function edit():Response
+    public function __construct()
     {
-        $shop = app("current_shop");
+        $this->middleware('perm:settings.manage');
+    }
 
-        return Inertia::render('Settings/Index',[
+    public function edit(): Response
+    {
+        $shop = app('current_shop');
+
+        return Inertia::render('Settings/Index', [
             'shop' => [
-                'name'     => $shop->name,
-                'email'    => $shop->email,
-                'phone'    => $shop->phone,
-                'address'  => $shop->address,
+                'name' => $shop->name,
+                'email' => $shop->email,
+                'phone' => $shop->phone,
+                'address' => $shop->address,
                 'logo_url' => $shop->logo_url,
-                'plan'     => $shop->plan,
+                'plan' => $shop->plan,
                 'tax_rate' => $shop->tax_rate ?? 20.00,
             ],
             'profile' => [
-                'name'  => auth()->user()->name,
+                'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
             ],
         ]);
@@ -48,7 +53,7 @@ class SettingsController extends Controller
                 );
             }
 
-            $path          = $request->file('logo')->store('logos', 'public');
+            $path = $request->file('logo')->store('logos', 'public');
             $data['logo_url'] = Storage::url($path);
         }
 
@@ -60,7 +65,7 @@ class SettingsController extends Controller
     public function updateProfile(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'  => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required', 'email',
                 Rule::unique('users')->ignore(auth()->id()),

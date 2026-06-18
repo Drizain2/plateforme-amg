@@ -92,8 +92,8 @@
       <td>{{ $line->label }}</td>
       <td>{{ $line->type === 'service' ? 'Main d\'œuvre' : 'Pièce' }}</td>
       <td class="text-right">{{ $line->quantity }}</td>
-      <td class="text-right">{{ number_format($line->unit_price, 2, ',', ' ') }} €</td>
-      <td class="text-right">{{ number_format($line->total, 2, ',', ' ') }} €</td>
+      <td class="text-right">{{ number_format($line->unit_price, 0, ',', ' ') }} FCFA</td>
+      <td class="text-right">{{ number_format($line->total, 0, ',', ' ') }} FCFA</td>
     </tr>
     @endforeach
   </tbody>
@@ -102,15 +102,15 @@
 <table class="totals">
   <tr>
     <td>Total HT</td>
-    <td class="text-right">{{ number_format($invoice->total_ht, 2, ',', ' ') }} €</td>
+    <td class="text-right">{{ number_format($invoice->total_ht, 0, ',', ' ') }} FCFA</td>
   </tr>
   <tr>
     <td>TVA ({{ $invoice->tax_rate }}%)</td>
-    <td class="text-right">{{ number_format($invoice->tax_amount, 2, ',', ' ') }} €</td>
+    <td class="text-right">{{ number_format($invoice->tax_amount, 0, ',', ' ') }} FCFA</td>
   </tr>
   <tr class="total-ttc">
     <td><strong>Total TTC</strong></td>
-    <td class="text-right"><strong>{{ number_format($invoice->total_ttc, 2, ',', ' ') }} €</strong></td>
+    <td class="text-right"><strong>{{ number_format($invoice->total_ttc, 0, ',', ' ') }} FCFA</strong></td>
   </tr>
 </table>
 

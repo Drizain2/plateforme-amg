@@ -164,7 +164,7 @@ const totalParts = computed(() =>
                             <p class="text-sm text-gray-700">{{ ticketData.diagnosis }}</p>
                             <p v-if="ticketData.estimated_price" class="text-sm font-medium text-indigo-600 mt-1">
                                 Devis estimé : {{ new Intl.NumberFormat('fr-FR', {
-                                    style: 'currency', currency: 'EUR'
+                                    style: 'currency', currency: 'XOF'
                                 }).format(ticketData.estimated_price) }}
                             </p>
                         </div>

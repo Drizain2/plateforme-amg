@@ -13,28 +13,32 @@ use Spatie\Permission\Models\Permission;
 
 class UserPermissionController extends Controller
 {
-    public function __construct(private PermissionService $permissionService) {}
+    public function __construct(private PermissionService $permissionService)
+    {
+        $this->middleware('perm:users.manage');
+    }
 
-    public function index(User $user){
+    public function index(User $user)
+    {
         $this->authorizeAdmin($user);
 
-        $allPermissions   = Permission::orderBy('name')->pluck('name');
-        $effectivePerms   = $this->permissionService->effectivePermissions($user);
-        $overrides        = ShopUserPermission::where('user_id', $user->id)
+        $allPermissions = Permission::orderBy('name')->pluck('name');
+        $effectivePerms = $this->permissionService->effectivePermissions($user);
+        $overrides = ShopUserPermission::where('user_id', $user->id)
             ->where('shop_id', app('current_shop')->id)
             ->get()
             ->keyBy('permission');
 
         return Inertia::render('Users/Permissions', [
-            'targetUser'       => [
-                'id'   => $user->id,
+            'targetUser' => [
+                'id' => $user->id,
                 'name' => $user->name,
                 'role' => $user->roles->first()?->name,
             ],
-            'allPermissions'   => $allPermissions,
-            'effectivePerms'   => $effectivePerms,
-            'rolePerms'        => $user->getPermissionsViaRoles()->pluck('name'),
-            'overrides'        => $overrides->map(fn($o) => [
+            'allPermissions' => $allPermissions,
+            'effectivePerms' => $effectivePerms,
+            'rolePerms' => $user->getPermissionsViaRoles()->pluck('name'),
+            'overrides' => $overrides->map(fn ($o) => [
                 'granted' => $o->granted,
             ]),
         ]);
@@ -46,13 +50,13 @@ class UserPermissionController extends Controller
 
         $request->validate([
             'permission' => ['required', 'string', 'exists:permissions,name'],
-            'action'     => ['required', Rule::in(['grant', 'revoke', 'reset'])],
+            'action' => ['required', Rule::in(['grant', 'revoke', 'reset'])],
         ]);
 
-        match($request->action) {
-            'grant'  => $this->permissionService->setOverride($user, $request->permission, true),
+        match ($request->action) {
+            'grant' => $this->permissionService->setOverride($user, $request->permission, true),
             'revoke' => $this->permissionService->setOverride($user, $request->permission, false),
-            'reset'  => $this->permissionService->removeOverride($user, $request->permission),
+            'reset' => $this->permissionService->removeOverride($user, $request->permission),
         };
 
         return back()->with('success', 'Permission mise à jour.');
@@ -68,7 +72,11 @@ class UserPermissionController extends Controller
 
     private function authorizeAdmin(User $user): void
     {
-        if ($user->shop_id !== app('current_shop')->id) abort(403);
-        if (!auth()->user()->hasRole('admin'))          abort(403);
+        if ($user->shop_id !== app('current_shop')->id) {
+            abort(403);
+        }
+        if (! auth()->user()->hasRole('admin')) {
+            abort(403);
+        }
     }
 }

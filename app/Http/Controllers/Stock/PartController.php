@@ -7,7 +7,6 @@ use App\Http\Requests\Stock\StorePartRequest;
 use App\Http\Requests\Stock\UpdatePartRequest;
 use App\Http\Resources\PartResource;
 use App\Models\Categorie;
-use App\Models\Depot;
 use App\Models\Part;
 use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
@@ -17,9 +16,17 @@ use Inertia\Response as InertiaResponse;
 
 class PartController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('perm:stock.view')->only(['index', 'create', 'edit', 'search']);
+        $this->middleware('perm:stock.create')->only(['store']);
+        $this->middleware('perm:stock.edit')->only(['update']);
+        $this->middleware('perm:stock.delete')->only(['destroy']);
+    }
+
     public function index(Request $request): InertiaResponse
     {
-        $filters = $request->only(['search', 'category_id', 'depot_id', 'critical']);
+        $filters = $request->only(['search', 'category_id', 'critical']);
 
         $parts = Part::query()
             ->with(['category:id,name', 'supplier:id,name', 'stockDepots:id,part_id,depot_id,quantity,alert_quantity'])
@@ -29,7 +36,6 @@ class PartController extends Controller
                     ->orWhere('sku', 'like', "%{$filters['search']}%")
             ))
             ->when($filters['category_id'] ?? null, fn ($q) => $q->where('category_id', $filters['category_id']))
-            ->when($filters['depot_id'] ?? null, fn ($q) => $q->whereHas('stockDepots', fn ($q) => $q->where('depot_id', $filters['depot_id'])))
             ->when($filters['critical'] ?? null, fn ($q) => $q->whereHas('stockDepots', fn ($q) => $q->whereColumn('quantity', '<=', 'alert_quantity')))
             ->latest()
             ->paginate(20)
@@ -38,7 +44,6 @@ class PartController extends Controller
         return Inertia::render('Stock/Parts/Index', [
             'parts' => PartResource::collection($parts),
             'filters' => $filters,
-            'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
             'categories' => Categorie::select('id', 'name')->where('is_active', true)->get(),
             'suppliers' => Supplier::select('id', 'name')->where('is_active', true)->get(),
         ]);

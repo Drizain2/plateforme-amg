@@ -16,6 +16,14 @@ use Inertia\Response;
 
 class CustomerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('perm:customers.view')->only(['index', 'show', 'search']);
+        $this->middleware('perm:customers.create')->only(['store']);
+        $this->middleware('perm:customers.edit')->only(['update']);
+        $this->middleware('perm:customers.delete')->only(['destroy']);
+    }
+
     public function index(): Response
     {
         $filters = request()->only(['search']);

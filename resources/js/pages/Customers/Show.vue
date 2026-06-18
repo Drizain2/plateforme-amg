@@ -28,7 +28,7 @@ watch(() => page.props.flash, (flash) => {
 }
 }, { immediate: true })
 
-const fmt = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' })
+const fmt = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' })
 
 // Édition
 const showEditModal = ref(false)

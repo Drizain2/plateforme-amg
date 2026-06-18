@@ -64,8 +64,8 @@ const totalHT = computed(() =>
 const taxAmount = computed(() => totalHT.value * (form.tax_rate / 100))
 const totalTTC = computed(() => totalHT.value + taxAmount.value)
 
-const fmtEur = (v: number) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v)
+const fmtXof = (v: number) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
 function submit() {
   form.post(InvoiceController.store.url(), { preserveScroll: true })
@@ -170,7 +170,7 @@ function submit() {
                 <Input v-model.number="line.unit_price" type="number" step="0.01" min="0" />
               </div>
               <div class="col-span-1 text-sm text-gray-700 font-medium">
-                {{ fmtEur(line.quantity * line.unit_price) }}
+                {{ fmtXof(line.quantity * line.unit_price) }}
               </div>
               <div class="col-span-1 text-right">
                 <button type="button" @click="removeLine(i)"
@@ -183,15 +183,15 @@ function submit() {
           <div v-if="form.lines.length > 0" class="border-t border-gray-100 pt-4 space-y-1 text-sm">
             <div class="flex justify-between text-gray-600">
               <span>Sous-total HT</span>
-              <span>{{ fmtEur(totalHT) }}</span>
+              <span>{{ fmtXof(totalHT) }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
               <span>TVA ({{ form.tax_rate }}%)</span>
-              <span>{{ fmtEur(taxAmount) }}</span>
+              <span>{{ fmtXof(taxAmount) }}</span>
             </div>
             <div class="flex justify-between font-semibold text-gray-900 text-base pt-1 border-t border-gray-100">
               <span>Total TTC</span>
-              <span>{{ fmtEur(totalTTC) }}</span>
+              <span>{{ fmtXof(totalTTC) }}</span>
             </div>
           </div>
         </div>

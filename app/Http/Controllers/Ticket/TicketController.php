@@ -25,11 +25,17 @@ use Inertia\Response;
 
 class TicketController extends Controller
 {
-    public function __construct(private TicketService $ticketService) {}
+    public function __construct(private TicketService $ticketService)
+    {
+        $this->middleware('perm:tickets.view')->only(['index', 'show']);
+        $this->middleware('perm:tickets.create')->only(['create', 'store']);
+        $this->middleware('perm:tickets.edit')->only(['update', 'addNote', 'consumePart']);
+        $this->middleware('perm:tickets.transition')->only(['transition']);
+    }
 
     public function index()
     {
-        $filters = request()->only(['search', 'status', 'priority', 'depot_id', 'technician_id']);
+        $filters = request()->only(['search', 'status', 'priority', 'technician_id']);
 
         $tickets = Ticket::with(['customer', 'device', 'technicien', 'depot'])
             ->filter($filters)
@@ -40,7 +46,6 @@ class TicketController extends Controller
         return Inertia::render('Tickets/Index', [
             'tickets' => TicketResource::collection($tickets),
             'filters' => $filters,
-            'depots' => Depot::select('id', 'name')->get(),
             'technicians' => User::role('technicien')->select('id', 'name')->get(),
             'statuses' => array_map(fn ($s) => [
                 'value' => $s->value,

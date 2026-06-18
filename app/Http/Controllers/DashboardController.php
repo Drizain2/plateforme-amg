@@ -13,6 +13,11 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('perm:dashboard.view');
+    }
+
     public function index(): Response
     {
         $now = now();
@@ -81,7 +86,7 @@ class DashboardController extends Controller
         $byStatus = Ticket::selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->get()
-            ->map(fn ($r) => [
+            ->map(fn($r) => [
                 'status' => $r->status->label(),
                 'total' => $r->total,
             ]);
@@ -91,7 +96,7 @@ class DashboardController extends Controller
             ->with('depot:id,name')
             ->groupBy('depot_id')
             ->get()
-            ->map(fn ($r) => [
+            ->map(fn($r) => [
                 'depot' => $r->depot?->name ?? 'Inconnu',
                 'total' => $r->total,
             ]);
@@ -110,7 +115,7 @@ class DashboardController extends Controller
                 ->latest()
                 ->limit(6)
                 ->get()
-                ->map(fn ($t) => [
+                ->map(fn($t) => [
                     'id' => $t->id,
                     'reference' => $t->reference,
                     'status_label' => $t->status->label(),
@@ -127,7 +132,7 @@ class DashboardController extends Controller
                 ->latest()
                 ->limit(5)
                 ->get()
-                ->map(fn (StockDepot $stock) => [
+                ->map(fn(StockDepot $stock) => [
                     'id' => $stock->id,
                     'part_name' => $stock->part->name,
                     'depot_name' => $stock->depot->name,
@@ -150,7 +155,7 @@ class DashboardController extends Controller
                 ->with('customer:id,name')
                 ->limit(5)
                 ->get()
-                ->map(fn ($t) => [
+                ->map(fn($t) => [
                     'id' => $t->id,
                     'reference' => $t->reference,
                     'customer_name' => $t->customer->name,

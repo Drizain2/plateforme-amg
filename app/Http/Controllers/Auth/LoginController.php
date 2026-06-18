@@ -12,21 +12,28 @@ class LoginController extends Controller
 {
     public function create()
     {
-        return Inertia::render("Auth/Login");
+        return Inertia::render('Auth/Login');
     }
 
     public function store(LoginRequest $request)
     {
         $request->authenticate();
         $request->session()->regenerate();
+
         return redirect()->intended(route('dashboard'));
     }
 
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        if ($user) {
+            $user->update(['depot_active_id' => null]);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login');
     }
 }

@@ -8,7 +8,7 @@ const props = defineProps<{ ticket: TrackingTicket }>()
 // Pas de layout — la page est son propre layout
 defineOptions({ layout: null })
 const fmt = (v: number) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v)
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
 const statusColors: Record<string, string> = {
   success: 'bg-green-100 text-green-700 border-green-200',

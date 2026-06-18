@@ -11,13 +11,19 @@ use App\Http\Resources\StockMovementResource;
 use App\Models\Depot;
 use App\Models\StockDepot;
 use App\Models\StockMovement;
+use App\Services\PermissionService;
 use App\Services\StockService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class StockMovementController extends Controller
 {
-    public function __construct(private StockService $stockService) {}
+    public function __construct(private StockService $stockService)
+    {
+        $this->middleware('perm:stock.view')->only(['index', 'alerts']);
+        $this->middleware('perm:stock.transfer')->only(['transfer']);
+        // store : permission vérifiée inline selon le type de mouvement
+    }
 
     public function index(Request $request)
     {
@@ -66,6 +72,16 @@ class StockMovementController extends Controller
 
     public function store(StoreMovementRequest $request)
     {
+        $permissionMap = [
+            'in' => 'stock.restock',
+            'out' => 'stock.restock',
+            'adjustment' => 'stock.adjust',
+        ];
+
+        $required = $permissionMap[$request->type] ?? 'stock.restock';
+
+        abort_unless(app(PermissionService::class)->has($request->user(), $required), 403, "Permission requise : {$required}");
+
         $stock = StockDepot::findOrFail($request->stock_id);
 
         match ($request->type) {

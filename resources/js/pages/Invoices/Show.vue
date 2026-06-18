@@ -29,7 +29,7 @@ error(flash.error)
 }, { immediate: true })
 
 const fmt = (v: number) =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(v)
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
 // Transition statut
 const transitionForm = useForm({ status: '' })
