@@ -11,26 +11,27 @@ defineProps<{
 
 const page = usePage()
 
+const flash = () => page.props.flash as Record<string, string>
+
 watch(
-  () => page.props.flash as Record<string, string>,
-  (flash) => {
-    if (flash?.success) {
-      toast.success(flash.success)
+  () => [flash()?.success, flash()?.error, flash()?.warning, flash()?.info],
+  ([success, error, warning, info], [prevSuccess, prevError, prevWarning, prevInfo]) => {
+    if (success && success !== prevSuccess) {
+      toast.success(success)
     }
 
-    if (flash?.error) {
-      toast.error(flash.error)
+    if (error && error !== prevError) {
+      toast.error(error)
     }
 
-    if (flash?.warning) {
-      toast.warning(flash.warning)
+    if (warning && warning !== prevWarning) {
+      toast.warning(warning)
     }
 
-    if (flash?.info) {
-      toast.info(flash.info)
+    if (info && info !== prevInfo) {
+      toast.info(info)
     }
   },
-  { deep: true },
 )
 </script>
 

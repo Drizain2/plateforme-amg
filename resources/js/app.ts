@@ -1,4 +1,5 @@
 import { createInertiaApp, router } from '@inertiajs/vue3';
+import 'vue-sonner/style.css';
 import { createPinia } from 'pinia';
 import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
