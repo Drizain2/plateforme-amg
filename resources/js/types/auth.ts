@@ -1,4 +1,4 @@
-import type { AppNotification, Shop } from './models';
+import type { AppNotification, Depot, Shop } from './models';
 
 export type User = {
     id: number;
@@ -13,7 +13,7 @@ export type User = {
     [key: string]: unknown;
 };
 
-export type UserRoleName = 'admin' | 'gestionnaire' | 'technicien' | 'caissiere';
+export type UserRoleName = 'super_admin' | 'admin' | 'gestionnaire' | 'technicien' | 'caissiere';
 
 export type Role = {
     id: string | number;
@@ -70,6 +70,9 @@ export interface ShopUser {
 export type Auth = {
     user: User;
     shop: Shop;
+    depotActive: Depot | null;
+    depots: Pick<Depot, 'id' | 'name' | 'is_active'>[];
+    isGlobalView: boolean;
     unread_count: AppNotification;
     permissions: Permission[];
 };

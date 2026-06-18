@@ -46,11 +46,16 @@ class User extends Authenticatable
 
     public function hasDepotAccess(Depot $depot): bool
     {
-        if ($this->hasRole('admin')) {
+        if ($this->hasRole(['admin', 'super_admin'])) {
             return true;
         }
 
         return $this->depots->contains($depot);
+    }
+
+    public function isAdminOrSuperAdmin(): bool
+    {
+        return $this->hasRole(['admin', 'super_admin']);
     }
 
     public function tickets(): HasMany

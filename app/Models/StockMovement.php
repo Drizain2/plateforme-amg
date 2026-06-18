@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasDepotScope;
 use App\Models\Concerns\HasShopScope;
 use Database\Factories\StockMovementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class StockMovement extends Model
 {
     /** @use HasFactory<StockMovementFactory> */
-    use HasFactory, HasShopScope;
+    use HasDepotScope, HasFactory, HasShopScope;
 
     protected $fillable = [
         'shop_id', 'depot_id', 'stock_id', 'user_id', 'ticket_id',

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('shop_id')->after('id')->nullable()->constrained('shops')->nullOnDelete();
             $table->boolean('is_active')->default(true)->after('password');
-            $table->foreignId("depot_active_id")->constrained("depots")->nullable();
+            $table->foreignId("depot_active_id")->nullable()->constrained("depots")->nullOnDelete();
         });
     }
 

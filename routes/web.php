@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepotSwitchController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SettingsController;
@@ -36,6 +37,13 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
+    // Sélection de dépôt (non-admins avec plusieurs dépôts)
+    Route::get('/depot/select', [DepotSwitchController::class, 'select'])->name('depot.select');
+    Route::post('/depot/select', [DepotSwitchController::class, 'save'])->name('depot.save');
+
+    // Changement de dépôt actif (admin / super_admin uniquement)
+    Route::post('/depot/switch', [DepotSwitchController::class, 'switch'])->name('depot.switch');
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('customers/search', [CustomerController::class, 'search'])->name('customers.search');

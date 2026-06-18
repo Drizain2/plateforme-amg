@@ -38,19 +38,53 @@ class HandleInertiaRequests extends Middleware
     {
         $user = $request->user();
         $permService = app(PermissionService::class);
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user()?->load('roles'),
-                'shop' => $request->user()?->shop,
-                'unread_count' => fn() => $request->user()?->unreadNotifications()->count() ?? 0,
-                "permissions" => $user ? $permService->effectivePermissions($user) : [],
+                'user' => $user?->load('roles'),
+                'shop' => $user?->shop,
+                'depotActive' => fn() => $user?->depotActive,
+                'depots' => fn() => $this->availableDepots($user),
+                'isGlobalView' => fn() => $user && $user->isAdminOrSuperAdmin() && ! $user->depot_active_id,
+                'unread_count' => fn() => $user?->unreadNotifications()->count() ?? 0,
+                'permissions' => $user ? $permService->effectivePermissions($user) : [],
             ],
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
             ],
         ];
+    }
+
+    /**
+     * @return array<int, array{id: int, name: string, is_active: bool}>
+     */
+    private function availableDepots($user): array
+    {
+        if (! $user) {
+            return [];
+        }
+
+        if ($user->isAdminOrSuperAdmin()) {
+            return $user->shop->depots()
+                ->where('depots.is_active', true)
+                ->get([
+                    'depots.id',
+                    'depots.name',
+                    'depots.is_active'
+                ])
+                ->toArray();
+        }
+
+        return $user->depots()
+            ->where('depots.is_active', true)
+            ->get([
+                'depots.id',
+                'depots.name',
+                'depots.is_active'
+            ])
+            ->toArray();
     }
 }
