@@ -62,7 +62,7 @@ const initials = (name: string) =>
         <!-- Stats -->
         <div class="text-center shrink-0 hidden sm:block">
             <p class="text-lg font-bold text-indigo-600">{{ user.tickets_count }}</p>
-            <p class="text-xs text-gray-400">ticket{{ user.tickets_count > 1 ? 's' : '' }}</p>
+            <p class="text-xs text-gray-400">{{ user.tickets_count_label }}</p>
         </div>
 
         <!-- Actions — masquées si c'est l'utilisateur courant -->

@@ -64,6 +64,7 @@ export interface ShopUser {
     depot_ids: number[];
     depots: { id: number; name: string }[];
     tickets_count: number;
+    tickets_count_label: string;
     created_at: string;
 }
 export type Auth = {

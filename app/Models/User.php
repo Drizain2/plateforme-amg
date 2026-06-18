@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['shop_id', 'name', 'email', 'password', 'is_active'])]
+#[Fillable(['shop_id', 'name', 'email', 'password', 'is_active', 'depot_active_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -52,8 +53,23 @@ class User extends Authenticatable
         return $this->depots->contains($depot);
     }
 
-    public function tickets()
+    public function tickets(): HasMany
     {
-        return $this->belongsToMany(Ticket::class, 'users_ticket');
+        return $this->hasMany(Ticket::class, 'created_by');
+    }
+
+    public function assignedTickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'technicien_id');
+    }
+
+    public function depotActive(): BelongsTo
+    {
+        return $this->belongsTo(Depot::class, 'depot_active_id');
+    }
+
+    public function requireDepotActive(): bool
+    {
+        return $this->depot_active_id !== null;
     }
 }

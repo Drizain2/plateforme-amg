@@ -10,7 +10,7 @@ trait HasShopScope
     {
         static::addGlobalScope('shop', function (Builder $query) {
             if (app()->has('current_shop')) {
-                $query->where('shop_id', app('current_shop')->id);
+                $query->where($query->getModel()->getTable().'.shop_id', app('current_shop')->id);
             }
         });
 

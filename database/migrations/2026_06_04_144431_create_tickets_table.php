@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,9 +20,10 @@ return new class extends Migration
             $table->foreignId('depot_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('device_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('technician_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('status')->default('received');
-            $table->string('priority')->default('normal');
+            $table->foreignId('technicien_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('status')->default(TicketStatus::Received->value);
+            $table->string('priority')->default(TicketPriority::Normal->value);
             $table->text('description');              // symptômes décrits par le client
             $table->text('diagnosis')->nullable();    // diagnostic technicien
             $table->decimal('estimated_price', 10, 2)->nullable();

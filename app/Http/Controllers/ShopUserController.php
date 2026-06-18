@@ -20,7 +20,7 @@ class ShopUserController extends Controller
     {
         $users = User::where('shop_id', app('current_shop')->id)
             ->with(['roles', 'depots:id,name'])
-            ->withCount('tickets')
+            ->withCount(['tickets', 'assignedTickets'])
             ->orderBy('name')
             ->get();
 

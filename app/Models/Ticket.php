@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
@@ -26,7 +25,7 @@ class Ticket extends Model
         'depot_id',
         'customer_id',
         'device_id',
-        'technician_id',
+        'technicien_id',
         'status',
         'priority',
         'description',
@@ -35,6 +34,7 @@ class Ticket extends Model
         'tracking_token',
         'estimated_return_date',
         'closed_at',
+        'created_by',
     ];
 
     protected $casts = [
@@ -42,6 +42,7 @@ class Ticket extends Model
         'closed_at' => 'datetime',
         'status' => TicketStatus::class,
         'priority' => TicketPriority::class,
+        'created_by' => 'integer',
     ];
 
     protected static function booted(): void
@@ -85,12 +86,12 @@ class Ticket extends Model
 
     public function technicien(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'technician_id');
+        return $this->belongsTo(User::class, 'technicien_id');
     }
 
-    public function users(): BelongsToMany
+    public function createdBy(): BelongsTo
     {
-        return $this->belongsToMany(User::class, 'users_ticket');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function events(): HasMany

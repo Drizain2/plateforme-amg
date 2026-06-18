@@ -33,7 +33,7 @@ class TicketService
         });
     }
 
-    public function transition(Ticket $ticket, TicketStatus $newStatus, User $by, string $note = ''): void
+    public function transition(Ticket $ticket, TicketStatus $newStatus, User $by, ?string $note): void
     {
         if (! $ticket->status->canTransitionTo($newStatus)) {
             throw new \InvalidArgumentException(
@@ -53,7 +53,7 @@ class TicketService
                 'ticket_id' => $ticket->id,
                 'user_id' => $by->id,
                 'type' => TicketEventType::StatusChanged->value,
-                'note' => $note ?: 'Transition vers ' . $newStatus->label(),
+                'note' => $note ?: 'Transition vers '.$newStatus->label(),
                 'metadata' => [
                     'from' => $oldStatus->value,
                     'to' => $newStatus->value,

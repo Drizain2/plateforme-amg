@@ -14,6 +14,8 @@ class ShopUserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $isTechnicien = $this->roles->first()?->name === 'technicien';
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -25,7 +27,10 @@ class ShopUserResource extends JsonResource
                 'id' => $d->id,
                 'name' => $d->name,
             ]),
-            'tickets_count' => $this->whenCounted('tickets'),
+            'tickets_count' => $isTechnicien
+                ? $this->whenCounted('assignedTickets')
+                : $this->whenCounted('tickets'),
+            'tickets_count_label' => $isTechnicien ? 'assigné(s)' : 'créé(s)',
             'created_at' => $this->created_at->format('d/m/Y'),
         ];
     }
