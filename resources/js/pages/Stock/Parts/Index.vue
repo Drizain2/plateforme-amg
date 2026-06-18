@@ -13,6 +13,7 @@ import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
+import { usePermission } from '@/Composables/usePermission'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { PaginatedResource, Part, Category } from '@/types'
@@ -28,6 +29,7 @@ const props = defineProps<{
 }>()
 
 const { success, error } = useToast()
+const { can } = usePermission()
 const { applyFilter } = useFilters(PartController.index.url())
 const page = usePage()
 
@@ -124,7 +126,7 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
             {{ parts.meta.total }} pièce{{ parts.meta.total > 1 ? 's' : '' }} au total
           </p>
         </div>
-        <Button v-permission="'stock.create'" @click="openCreate">
+        <Button v-show="can('stock.create')" @click="openCreate">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
@@ -217,11 +219,11 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
                     <Button variant="ghost" size="sm" @click="openMovements(part)">
                       Mouvements
                     </Button>
-                    <Button v-permission="'stock.edit'" variant="ghost" size="sm" @click="openEdit(part)">
+                    <Button v-show="can('stock.edit')" variant="ghost" size="sm" @click="openEdit(part)">
                       Modifier
                     </Button>
                     <Button
-                      v-permission="'stock.delete'"
+                      v-show="can('stock.delete')"
                       variant="ghost"
                       size="sm"
                       :loading="deletingId === part.id"

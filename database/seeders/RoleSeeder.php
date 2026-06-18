@@ -108,6 +108,7 @@ class RoleSeeder extends Seeder
             'depots.manage',
 
             'users.view',
+            'users.manage',
 
             'dashboard.view',
             'dashboard.analytics',

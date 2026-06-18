@@ -8,6 +8,7 @@ import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
+import { usePermission } from '@/Composables/usePermission'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { BadgeVariant, PaginatedResource, Ticket } from '@/types'
@@ -23,6 +24,7 @@ const props = defineProps<{
 
 const { success, error } = useToast()
 const { applyFilter } = useFilters('tickets.index')
+const { can } = usePermission()
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {
@@ -74,7 +76,7 @@ const priorityOptions = computed(() => props.priorities.map(p => ({ value: p.val
                         {{ tickets.meta.total }} ticket{{ tickets.meta.total > 1 ? 's' : '' }}
                     </p>
                 </div>
-                <Link v-permission="'tickets.create'" :href="TicketController.create.url()">
+                <Link v-show="can('tickets.create')" :href="TicketController.create.url()">
                     <Button>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

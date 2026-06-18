@@ -7,6 +7,7 @@ import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
+import { usePermission } from '@/Composables/usePermission'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Depot, PaginatedResource } from '@/types'
@@ -16,6 +17,7 @@ const props = defineProps<{
   shopUsers: { id: number; name: string }[]
 }>()
 const { success, error } = useToast()
+const { can } = usePermission()
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {
@@ -179,7 +181,7 @@ const availableUsers = computed(() => {
             {{ depots.data.length }} dépôt{{ depots.data.length > 1 ? 's' : '' }}
           </p>
         </div>
-        <Button v-permission="'depots.manage'" @click="openCreate">
+        <Button v-show="can('depots.manage')" @click="openCreate">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
@@ -232,7 +234,7 @@ const availableUsers = computed(() => {
           <p v-else class="text-xs text-gray-400 italic">Aucun technicien assigné</p>
 
           <!-- Actions -->
-          <div v-permission="'depots.manage'" class="flex items-center gap-2 pt-1 border-t border-gray-100">
+          <div v-show="can('depots.manage')" class="flex items-center gap-2 pt-1 border-t border-gray-100">
             <Button variant="ghost" size="sm" @click="openUsers(depot)">
               Gérer techniciens
             </Button>
@@ -257,7 +259,7 @@ const availableUsers = computed(() => {
           class="col-span-full bg-white rounded-xl border border-dashed border-gray-300 p-12 text-center"
         >
           <p class="text-gray-400 text-sm">Aucun dépôt configuré.</p>
-          <Button v-permission="'depots.manage'" variant="secondary" size="sm" class="mt-3" @click="openCreate">
+          <Button v-show="can('depots.manage')" variant="secondary" size="sm" class="mt-3" @click="openCreate">
             Créer le premier dépôt
           </Button>
         </div>

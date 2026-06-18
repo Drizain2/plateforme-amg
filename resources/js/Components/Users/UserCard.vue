@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import UserPermissionController from '@/actions/App/Http/Controllers/UserPermissionController';
+import { usePermission } from '@/Composables/usePermission';
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import type { ShopUser } from '@/types'
@@ -28,6 +29,8 @@ function roleLabel(role: string) {
 function roleVariant(role: string) {
     return role === 'admin' ? 'warning' : 'info'
 }
+
+const { can } = usePermission()
 
 const initials = (name: string) =>
     name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
@@ -66,7 +69,7 @@ const initials = (name: string) =>
         </div>
 
         <!-- Actions — masquées si c'est l'utilisateur courant -->
-        <div v-if="!isCurrentUser" v-permission="'users.manage'" class="flex items-center gap-1 shrink-0">
+        <div v-if="!isCurrentUser && can('users.manage')" class="flex items-center gap-1 shrink-0">
             <Button variant="ghost" size="sm" @click="emit('edit', user)">
                 Modifier
             </Button>
