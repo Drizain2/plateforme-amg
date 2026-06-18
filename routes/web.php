@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepotSwitchController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShopUserController;
 use App\Http\Controllers\Stock\CategorieController;
@@ -45,6 +46,7 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
     Route::post('/depot/switch', [DepotSwitchController::class, 'switch'])->name('depot.switch');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/reports/cash', [ReportController::class, 'cash'])->name('reports.cash');
 
     Route::get('customers/search', [CustomerController::class, 'search'])->name('customers.search');
     Route::resource('customers', CustomerController::class)->except('create', 'edit');

@@ -106,7 +106,7 @@ async function searchParts() {
 
 function selectPart(p: typeof foundParts.value[0]) {
   movementForm.part_id = String(p.id)
-  movementForm.depot_id = String(p.depot_id)
+  movementForm.depot_id = p.depot_id ? String(p.depot_id) : activeDepotId
   partSearch.value = `${p.name}${p.sku ? ` (${p.sku})` : ''}`
   foundParts.value = []
 }

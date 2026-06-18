@@ -18,6 +18,7 @@ use App\Models\StockDepot;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\TicketService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -46,7 +47,7 @@ class TicketController extends Controller
         return Inertia::render('Tickets/Index', [
             'tickets' => TicketResource::collection($tickets),
             'filters' => $filters,
-            'technicians' => User::role('technicien')->select('id', 'name')->get(),
+            'technicians' => $this->techniciansForDepot(),
             'statuses' => array_map(fn ($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
@@ -62,7 +63,7 @@ class TicketController extends Controller
     {
         return Inertia::render('Tickets/Create', [
             'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
-            'technicians' => User::role('technicien')->select('id', 'name')->get(),
+            'technicians' => $this->techniciansForDepot(),
             'priorities' => array_map(fn ($p) => [
                 'value' => $p->value,
                 'label' => $p->label(),
@@ -124,7 +125,7 @@ class TicketController extends Controller
 
         return Inertia::render('Tickets/Show', [
             'ticket' => (new TicketResource($ticket))->resolve(),
-            'technicians' => User::role('technicien')->select('id', 'name')->get(),
+            'technicians' => $this->techniciansForDepot($ticket->depot_id),
             'depotParts' => StockDepot::where('depot_id', $ticket->depot_id)
                 ->where('quantity', '>', 0)
                 ->with('part:id,name,sell_price')
@@ -171,5 +172,16 @@ class TicketController extends Controller
         $this->ticketService->consumePart($ticket, $part, $request->quantity, $request->user());
 
         return back()->with('success', 'Pièce consommée.');
+    }
+
+    /** @return Collection<int, User> */
+    private function techniciansForDepot(?int $depotId = null): Collection
+    {
+        $depotId ??= app()->has('current_depot') ? app('current_depot')->id : null;
+
+        return User::role('technicien')
+            ->when($depotId, fn ($q) => $q->whereHas('depots', fn ($q) => $q->where('depots.id', $depotId)))
+            ->select('id', 'name')
+            ->get();
     }
 }

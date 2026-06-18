@@ -15,14 +15,16 @@ class StoreMovementRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        // Résoudre stock_id à partir de part_id + depot_id
-        if ($this->part_id && $this->depot_id) {
+        $depotId = ($this->depot_id && $this->depot_id !== 'null') ? (int) $this->depot_id : null;
+        $depotId ??= app()->has('current_depot') ? app('current_depot')->id : null;
+
+        if ($this->part_id && $depotId) {
             $stock = StockDepot::firstOrCreate(
-                ['part_id' => $this->part_id, 'depot_id' => $this->depot_id],
+                ['part_id' => (int) $this->part_id, 'depot_id' => $depotId],
                 ['quantity' => 0, 'alert_quantity' => 0]
             );
 
-            $this->merge(['stock_id' => $stock->id]);
+            $this->merge(['stock_id' => $stock->id, 'depot_id' => $depotId]);
         }
     }
 

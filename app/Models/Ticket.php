@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Models\Concerns\HasDepotScope;
 use App\Models\Concerns\HasShopScope;
 use Database\Factories\TicketFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +18,7 @@ use Illuminate\Support\Str;
 class Ticket extends Model
 {
     /** @use HasFactory<TicketFactory> */
-    use HasFactory, HasShopScope;
+    use HasDepotScope, HasFactory, HasShopScope;
 
     protected $fillable = [
         'reference',
