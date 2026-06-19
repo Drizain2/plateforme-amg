@@ -4,13 +4,13 @@ import { useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import CustomerController from '@/actions/App/Http/Controllers/Customer/CustomerController'
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
-import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
+import PartStockPicker from '@/Components/Stock/PartStockPicker.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import { usePermission } from '@/Composables/usePermission'
+import type { StockSearchResult } from '@/types'
 
 interface FoundCustomer { id: number; name: string; email?: string; phone?: string }
-interface StockSearchResult { id: number; name: string; sku: string | null; quantity: number; depot_id: number | null; sell_price: number }
 interface CartLine {
   part_id: number | null
   type: 'service' | 'part'
@@ -50,7 +50,6 @@ async function searchCustomers() {
 }
 
 function selectCustomer(c: FoundCustomer) {
-  console.log("customer selected", c)
   selectedCustomer.value = c
   foundCustomers.value   = []
   customerSearch.value   = ''
@@ -97,17 +96,6 @@ const totalTTC  = computed(() => totalHT.value + taxAmount.value)
 const fmtXof = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
-// Stock disponible (colonne droite)
-const search  = ref('')
-const results = ref<StockSearchResult[]>([])
-
-async function runSearch() {
-  const res = await fetch(PartController.search.url({ query: { q: search.value, depot_id: depotActive.value?.id } }), {
-    headers: { Accept: 'application/json' },
-  })
-  results.value = await res.json()
-}
-
 // Soumission
 const form = useForm({
   customer_id: '' as number | '',
@@ -151,8 +139,6 @@ function submit() {
   })
 }
 
-const formErrors = computed(() => Object.values(form.errors))
-
 function resetState() {
   selectedCustomer.value = null
   customerSearch.value   = ''
@@ -162,8 +148,6 @@ function resetState() {
   newCustomerEmail.value = ''
   lines.value            = []
   taxRate.value          = 20
-  search.value           = ''
-  results.value          = []
   submitError.value      = null
   form.reset()
   form.clearErrors()
@@ -172,7 +156,6 @@ function resetState() {
 watch(() => props.show, (shown) => {
   if (shown) {
     resetState()
-    runSearch()
   }
 })
 </script>
@@ -200,9 +183,6 @@ watch(() => props.show, (shown) => {
             <div class="flex flex-col overflow-y-auto p-6 space-y-5">
               <div v-if="submitError" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                 {{ submitError }}
-              </div>
-              <div v-if="formErrors.length" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 space-y-1">
-                <p v-for="(msg, i) in formErrors" :key="i">{{ msg }}</p>
               </div>
 
               <div>
@@ -306,31 +286,7 @@ watch(() => props.show, (shown) => {
             <!-- Droite : stock disponible -->
             <div class="flex flex-col overflow-y-auto p-6 space-y-3">
               <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Stock disponible — {{ depotActive?.name ?? '—' }}</p>
-              <Input v-model="search" placeholder="Rechercher nom, SKU..." @input="runSearch" />
-
-              <div v-if="results.length === 0" class="text-center text-sm text-gray-400 py-8">
-                Aucune pièce en stock
-              </div>
-
-              <div v-else class="space-y-1.5">
-                <button
-                  v-for="r in results"
-                  :key="`${r.id}-${r.depot_id}`"
-                  type="button"
-                  class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-gray-100 hover:border-indigo-300 hover:bg-indigo-50 transition text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                  :disabled="r.quantity === 0"
-                  @click="addPart(r)"
-                >
-                  <div class="min-w-0">
-                    <p class="text-sm font-medium text-gray-900 truncate">{{ r.name }}</p>
-                    <p class="text-xs text-gray-400 font-mono">{{ r.sku ?? '—' }}</p>
-                  </div>
-                  <div class="text-right shrink-0">
-                    <p class="text-xs text-gray-500">{{ r.quantity }} en stock</p>
-                    <p class="text-sm font-medium text-indigo-600">{{ fmtXof(r.sell_price) }}</p>
-                  </div>
-                </button>
-              </div>
+              <PartStockPicker :depot-id="depotActive?.id" @select="addPart" />
             </div>
 
           </div>

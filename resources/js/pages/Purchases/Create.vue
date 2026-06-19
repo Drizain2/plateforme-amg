@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { router, useForm, usePage } from '@inertiajs/vue3'
-import { computed, ref, watch } from 'vue'
-import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
+import { computed, ref } from 'vue'
+import PurchaseController from '@/actions/App/Http/Controllers/PurchaseController'
 import PartStockPicker from '@/Components/Stock/PartStockPicker.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
@@ -9,81 +9,45 @@ import Select from '@/Components/UI/Select.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { StockSearchResult } from '@/types'
 
-interface SimpleCustomer { id: number; name: string; email?: string }
-interface SimpleTicket { id: number; reference: string; customer: string; device: string }
+interface SimpleSupplier { id: number; name: string }
 
 const props = defineProps<{
-  customers: SimpleCustomer[]
-  tickets: SimpleTicket[]
+  suppliers: SimpleSupplier[]
 }>()
 
 interface Line {
-  type: 'service' | 'part'
   label: string
   quantity: number
   unit_price: number
-  part_id: number | null
-  max_quantity?: number
+  part_id: number
 }
 
 const page = usePage()
 const depotActive = computed(() => page.props.auth.depotActive)
 
 const form = useForm({
-  customer_id: '' as number | '',
-  ticket_id: '' as number | '',
-  tax_rate: 20,
-  due_at: '',
+  supplier_id: '' as number | '',
+  tax_rate: 0,
   notes: '',
   lines: [] as Line[],
 })
 
-const customerOptions = computed(() => props.customers.map(c => ({ value: c.id, label: c.name })))
-const ticketOptions = computed(() => [
-  { value: '', label: 'Aucun ticket associé' },
-  ...props.tickets.map(t => ({ value: t.id, label: `${t.reference} — ${t.customer} — ${t.device}` })),
-])
-
-watch(() => form.ticket_id, (ticketId) => {
-  if (!ticketId) {
- return
-}
-
-  const ticket = props.tickets.find(t => t.id === Number(ticketId))
-
-  if (!ticket) {
- return
-}
-
-  const customer = props.customers.find(c => c.name === ticket.customer)
-
-  if (customer) {
- form.customer_id = customer.id
-}
-})
-
-function addServiceLine() {
-  form.lines.push({ type: 'service', label: '', quantity: 1, unit_price: 0, part_id: null })
-}
+const supplierOptions = computed(() => props.suppliers.map(s => ({ value: s.id, label: s.name })))
 
 function addPartFromStock(result: StockSearchResult) {
   const existing = form.lines.find(l => l.part_id === result.id)
 
   if (existing) {
-    if (existing.quantity < (existing.max_quantity ?? result.quantity)) {
-      existing.quantity++
-    }
+    existing.quantity++
 
     return
   }
 
   form.lines.push({
-    type: 'part',
+    part_id: result.id,
     label: result.name,
     quantity: 1,
-    unit_price: result.sell_price,
-    part_id: result.id,
-    max_quantity: result.quantity,
+    unit_price: result.unit_price,
   })
 }
 
@@ -105,7 +69,7 @@ const submitError = ref<string | null>(null)
 function submit() {
   submitError.value = null
 
-  form.post(InvoiceController.store.url(), {
+  form.post(PurchaseController.store.url(), {
     preserveScroll: true,
     preserveState: true,
     onSuccess: () => {
@@ -118,24 +82,28 @@ function submit() {
 </script>
 
 <template>
-  <AppLayout title="Nouvelle facture">
+  <AppLayout title="Nouvel achat">
     <div class="max-w-6xl space-y-6">
 
       <!-- Header -->
       <div class="flex items-center gap-3">
-        <Button variant="ghost" size="sm" @click="router.visit(InvoiceController.index.url())">
+        <Button variant="ghost" size="sm" @click="router.visit(PurchaseController.index.url())">
           ← Retour
         </Button>
-        <h1 class="text-xl font-semibold text-gray-900">Nouvelle facture</h1>
+        <h1 class="text-xl font-semibold text-gray-900">Nouvel achat</h1>
       </div>
 
       <div v-if="submitError" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
         {{ submitError }}
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div v-if="!depotActive" class="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700">
+        Sélectionnez un dépôt actif (en haut) pour créer un achat — le stock sera reçu dans ce dépôt.
+      </div>
 
-        <!-- Gauche : facture -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+        <!-- Gauche : achat -->
         <form @submit.prevent="submit" class="space-y-6">
 
           <!-- Infos générales -->
@@ -143,30 +111,18 @@ function submit() {
             <h2 class="text-sm font-semibold text-gray-700">Informations générales</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Client *</label>
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fournisseur *</label>
                 <Select
-                  v-model="form.customer_id"
-                  :options="customerOptions"
-                  placeholder="Sélectionner un client"
-                  :error="form.errors.customer_id"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Ticket associé</label>
-                <Select
-                  v-model="form.ticket_id"
-                  :options="ticketOptions"
-                  :error="form.errors.ticket_id"
+                  v-model="form.supplier_id"
+                  :options="supplierOptions"
+                  placeholder="Sélectionner un fournisseur"
+                  :error="form.errors.supplier_id"
                 />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">TVA (%)</label>
                 <Input v-model="form.tax_rate" type="number" step="0.01" :error="form.errors.tax_rate" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Date d'échéance</label>
-                <Input v-model="form.due_at" type="date" :error="form.errors.due_at" />
               </div>
               <div class="sm:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
@@ -178,20 +134,16 @@ function submit() {
 
           <!-- Lignes -->
           <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <div class="flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-gray-700">Lignes de facturation</h2>
-              <Button variant="secondary" size="sm" type="button" @click="addServiceLine">+ Prestation</Button>
-            </div>
+            <h2 class="text-sm font-semibold text-gray-700">Pièces commandées</h2>
 
             <div v-if="form.lines.length === 0" class="text-center text-sm text-gray-400 py-6">
-              Ajoutez une prestation ou cliquez sur une pièce en stock à droite.
+              Cliquez sur une pièce du catalogue à droite pour l'ajouter.
             </div>
 
             <div v-else class="space-y-2">
               <!-- En-tête colonnes -->
               <div class="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase tracking-wide px-1">
-                <div class="col-span-1">Type</div>
-                <div class="col-span-5">Désignation</div>
+                <div class="col-span-6">Désignation</div>
                 <div class="col-span-2">Qté</div>
                 <div class="col-span-2">Prix unit.</div>
                 <div class="col-span-1">Total</div>
@@ -203,18 +155,9 @@ function submit() {
                 :key="i"
                 class="grid grid-cols-12 gap-2 items-center"
               >
-                <div class="col-span-1">
-                  <span class="text-xs px-1.5 py-0.5 rounded font-medium"
-                    :class="line.type === 'service' ? 'bg-indigo-50 text-indigo-700' : 'bg-orange-50 text-orange-700'">
-                    {{ line.type === 'service' ? 'Prest.' : 'Pièce' }}
-                  </span>
-                </div>
-                <div class="col-span-5">
-                  <Input v-if="line.type === 'service'" v-model="line.label" placeholder="Désignation" />
-                  <p v-else class="text-sm font-medium text-gray-900 px-1 truncate">{{ line.label }}</p>
-                </div>
+                <p class="col-span-6 text-sm font-medium text-gray-900 px-1 truncate">{{ line.label }}</p>
                 <div class="col-span-2">
-                  <Input v-model.number="line.quantity" type="number" min="1" :max="line.max_quantity" />
+                  <Input v-model.number="line.quantity" type="number" min="1" />
                 </div>
                 <div class="col-span-2">
                   <Input v-model.number="line.unit_price" type="number" step="0.01" min="0" />
@@ -248,23 +191,20 @@ function submit() {
 
           <!-- Actions -->
           <div class="flex justify-end gap-3">
-            <Button variant="secondary" type="button" @click="router.visit(InvoiceController.index.url())">
+            <Button variant="secondary" type="button" @click="router.visit(PurchaseController.index.url())">
               Annuler
             </Button>
             <Button type="submit" :loading="form.processing" :disabled="form.lines.length === 0">
-              Créer la facture
+              Créer l'achat
             </Button>
           </div>
 
         </form>
 
-        <!-- Droite : pièces en stock -->
+        <!-- Droite : catalogue -->
         <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4 lg:sticky lg:top-6">
-          <h2 class="text-sm font-semibold text-gray-700">Pièces en stock</h2>
-          <p v-if="!depotActive" class="text-sm text-amber-600">
-            Sélectionnez un dépôt actif (en haut) pour ajouter des pièces depuis le stock.
-          </p>
-          <PartStockPicker v-else :depot-id="depotActive.id" @select="addPartFromStock" />
+          <h2 class="text-sm font-semibold text-gray-700">Catalogue pièces</h2>
+          <PartStockPicker :depot-id="depotActive.id" mode="purchase" @select="addPartFromStock" />
         </div>
 
       </div>

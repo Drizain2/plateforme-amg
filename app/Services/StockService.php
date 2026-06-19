@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Notification;
 
 class StockService
 {
-    public function restock(StockDepot $stock, int $quantity, User $by, string $note = 'réapprovisionnement', ?int $invoiceId = null, ?float $newUnitPrice = null): void
+    public function restock(StockDepot $stock, int $quantity, User $by, string $note = 'réapprovisionnement', ?int $invoiceId = null, ?float $newUnitPrice = null, ?int $purchaseId = null): void
     {
-        DB::transaction(function () use ($stock, $quantity, $by, $note, $invoiceId, $newUnitPrice) {
+        DB::transaction(function () use ($stock, $quantity, $by, $note, $invoiceId, $newUnitPrice, $purchaseId) {
             $stock->increment('quantity', $quantity);
 
             if ($newUnitPrice !== null) {
@@ -27,6 +27,7 @@ class StockService
                 'stock_id' => $stock->id,
                 'user_id' => $by->id,
                 'invoice_id' => $invoiceId,
+                'purchase_id' => $purchaseId,
                 'type' => 'in',
                 'quantity' => $quantity,
                 'note' => $note,

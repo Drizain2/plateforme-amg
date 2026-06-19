@@ -5,6 +5,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
 import StockMovementController from '@/actions/App/Http/Controllers/Stock/StockMovementController'
+import StatCard from '@/Components/Dashboard/StatCard.vue'
 import LowStockBadge from '@/Components/Stock/LowStockBadge.vue'
 import PartForm from '@/Components/Stock/PartForm.vue'
 import StockInvoicePanel from '@/Components/Stock/StockInvoicePanel.vue'
@@ -27,6 +28,12 @@ const props = defineProps<{
     search?: string
     category_id?: string
     critical?: string
+  }
+  stats: {
+    purchase_value: number
+    sale_value: number
+    profit: number
+    low_stock_count: number
   }
 }>()
 
@@ -153,6 +160,9 @@ function goToPage(url: string | null) {
 
 // Options select
 const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id, label: c.name })))
+
+const fmtXof = (v: number) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 </script>
 
 <template>
@@ -188,6 +198,32 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
             Ajouter une pièce
           </Button>
         </div>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Valeur d'achat"
+          :value="fmtXof(stats.purchase_value)"
+          sub="stock affiché, prix d'achat"
+        />
+        <StatCard
+          label="Valeur de vente"
+          :value="fmtXof(stats.sale_value)"
+          sub="stock affiché, prix de vente"
+        />
+        <StatCard
+          label="Bénéfice potentiel"
+          :value="fmtXof(stats.profit)"
+          sub="si tout le stock est vendu"
+          variant="success"
+        />
+        <StatCard
+          label="Sous le seuil d'alerte"
+          :value="stats.low_stock_count"
+          sub="lignes de stock à ravitailler"
+          :variant="stats.low_stock_count > 0 ? 'danger' : 'default'"
+        />
       </div>
 
       <!-- Filtres -->

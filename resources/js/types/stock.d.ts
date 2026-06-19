@@ -1,4 +1,14 @@
 // resources/js/Types/models.d.ts — ajout
+export interface StockSearchResult {
+    id: number;
+    name: string;
+    sku: string | null;
+    quantity: number;
+    depot_id: number | null;
+    sell_price: number;
+    unit_price: number;
+}
+
 export type StockMovementType =
     | 'in'
     | 'out'

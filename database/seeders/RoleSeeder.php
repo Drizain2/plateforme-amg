@@ -47,6 +47,12 @@ class RoleSeeder extends Seeder
             'invoices.delete',
             'invoices.mark_paid',
 
+            // Achats fournisseurs
+            'purchases.view',
+            'purchases.create',
+            'purchases.receive',  // marquer reçue — déclenche l'entrée en stock
+            'purchases.mark_paid',
+
             // Dépôts
             'depots.view',
             'depots.manage',      // créer/modifier/supprimer dépôts
@@ -70,10 +76,10 @@ class RoleSeeder extends Seeder
         // Ensuite, création des rôles et assignation des permissions
 
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
-        $admin      = Role::firstOrCreate(['name' => 'admin']);
+        $admin = Role::firstOrCreate(['name' => 'admin']);
         $technicien = Role::firstOrCreate(['name' => 'technicien']);
-        $manager    = Role::firstOrCreate(['name' => 'manager']);
-        $caissiere  = Role::firstOrCreate(['name' => 'caissiere']);
+        $manager = Role::firstOrCreate(['name' => 'manager']);
+        $caissiere = Role::firstOrCreate(['name' => 'caissiere']);
 
         $superAdmin->syncPermissions(Permission::all());
 
@@ -103,6 +109,11 @@ class RoleSeeder extends Seeder
             'invoices.edit',
             'invoices.delete',
             'invoices.mark_paid',
+
+            'purchases.view',
+            'purchases.create',
+            'purchases.receive',
+            'purchases.mark_paid',
 
             'depots.view',
             'depots.manage',
@@ -151,6 +162,11 @@ class RoleSeeder extends Seeder
 
             'invoices.view',
             'invoices.create',
+
+            'purchases.view',
+            'purchases.create',
+            'purchases.receive',
+            'purchases.mark_paid',
 
             'depots.view',
 

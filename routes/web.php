@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepotSwitchController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShopUserController;
@@ -89,6 +90,14 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/{invoice}/lines', [InvoiceController::class, 'storeLine'])->name('lines.store');
         Route::delete('/{invoice}/lines/{line}', [InvoiceController::class, 'destroyLine'])->name('lines.destroy');
         Route::get('/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('pdf');
+    });
+
+    Route::prefix('purchases')->name('purchases.')->group(function () {
+        Route::get('/', [PurchaseController::class, 'index'])->name('index');
+        Route::get('/create', [PurchaseController::class, 'create'])->name('create');
+        Route::post('/', [PurchaseController::class, 'store'])->name('store');
+        Route::get('/{purchase}', [PurchaseController::class, 'show'])->name('show');
+        Route::post('/{purchase}/transition', [PurchaseController::class, 'transition'])->name('transition');
     });
 
     Route::prefix('notifications')->name('notifications.')->group(function () {

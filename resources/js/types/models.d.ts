@@ -182,6 +182,36 @@ export interface Invoice {
     lines?: InvoiceLine[];
 }
 
+export type PurchaseStatus = 'draft' | 'received' | 'paid' | 'cancelled';
+
+export interface PurchaseLine {
+    id: number;
+    label: string;
+    quantity: number;
+    unit_price: number;
+    total: number;
+}
+
+export interface Purchase {
+    id: number;
+    number: string;
+    status: PurchaseStatus;
+    status_label: string;
+    status_color: BadgeVariant;
+    total_ht: number;
+    tax_rate: number;
+    tax_amount: number;
+    total_ttc: number;
+    notes?: string;
+    ordered_at?: string;
+    received_at?: string;
+    paid_at?: string;
+    next_statuses: { value: PurchaseStatus; label: string }[];
+    supplier?: Pick<Supplier, 'id' | 'name' | 'email' | 'phone'>;
+    depot?: Pick<Depot, 'id' | 'name'>;
+    lines?: PurchaseLine[];
+}
+
 export interface AppNotification {
   id: string
   data: {
