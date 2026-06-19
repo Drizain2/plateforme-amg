@@ -87,7 +87,7 @@ class StockMovementController extends Controller
 
         try {
             match ($request->type) {
-                'in' => $this->stockService->restock($stock, $request->quantity, $request->user(), $request->note ?? 'réapprovisionnement'),
+                'in' => $this->stockService->restock($stock, $request->quantity, $request->user(), $request->note ?? 'réapprovisionnement', null, $request->unit_price),
                 'out' => $this->stockService->consume($stock, $request->quantity, $request->ticket_id, $request->user()),
                 'adjustment' => $this->stockService->adjustment($stock, $request->quantity, $request->note ?? '', $request->user()),
             };

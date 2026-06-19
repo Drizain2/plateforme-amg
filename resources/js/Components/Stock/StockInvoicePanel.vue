@@ -50,6 +50,7 @@ async function searchCustomers() {
 }
 
 function selectCustomer(c: FoundCustomer) {
+  console.log("customer selected", c)
   selectedCustomer.value = c
   foundCustomers.value   = []
   customerSearch.value   = ''
@@ -117,11 +118,14 @@ const form = useForm({
   lines: [] as { type: string; label: string; quantity: number; unit_price: number; part_id: number | null }[],
 })
 
+const submitError = ref<string | null>(null)
+
 function submit() {
+  submitError.value    = null
   form.customer_id     = selectedCustomer.value?.id ?? ''
-  form.customer_name   = selectedCustomer.value ? '' : newCustomerName.value
-  form.customer_phone  = selectedCustomer.value ? '' : newCustomerPhone.value
-  form.customer_email  = selectedCustomer.value ? '' : newCustomerEmail.value
+  form.customer_name   = selectedCustomer.value?.name || newCustomerName.value
+  form.customer_phone  = selectedCustomer.value?.phone || newCustomerPhone.value
+  form.customer_email  = selectedCustomer.value?.email || newCustomerEmail.value
   form.tax_rate        = taxRate.value
   form.lines           = lines.value.map(l => ({
     type: l.type,
@@ -132,9 +136,22 @@ function submit() {
   }))
 
   form.post(InvoiceController.store.url(), {
-    onSuccess: () => emit('close'),
+    preserveScroll: true,
+    preserveState: true,
+    onSuccess: () => {
+      // Une facture créée avec succès redirige vers sa page de détail ;
+      // si on est encore sur le stock, c'est qu'une erreur métier (ex.
+      // stock insuffisant) a renvoyé ici avec un message flash.
+      if (page.props.flash.error) {
+        submitError.value = page.props.flash.error
+      } else {
+        emit('close')
+      }
+    },
   })
 }
+
+const formErrors = computed(() => Object.values(form.errors))
 
 function resetState() {
   selectedCustomer.value = null
@@ -147,6 +164,7 @@ function resetState() {
   taxRate.value          = 20
   search.value           = ''
   results.value          = []
+  submitError.value      = null
   form.reset()
   form.clearErrors()
 }
@@ -180,6 +198,13 @@ watch(() => props.show, (shown) => {
 
             <!-- Gauche : facture en cours -->
             <div class="flex flex-col overflow-y-auto p-6 space-y-5">
+              <div v-if="submitError" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {{ submitError }}
+              </div>
+              <div v-if="formErrors.length" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 space-y-1">
+                <p v-for="(msg, i) in formErrors" :key="i">{{ msg }}</p>
+              </div>
+
               <div>
                 <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Client</p>
 

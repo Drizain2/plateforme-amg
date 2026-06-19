@@ -47,6 +47,7 @@ class StoreMovementRequest extends FormRequest
             'quantity' => ['required', 'integer', 'min:1'],
             'type' => ['required', 'string', Rule::in(['in', 'out', 'adjustment'])],
             'note' => ['nullable', 'string'],
+            'unit_price' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 

@@ -3,7 +3,22 @@
     "allow": [
       "PowerShell(php artisan migrate:status 2>&1)",
       "Bash(php artisan *)",
-      "Bash(mkdir -p \"c:\\\\laragon\\\\www\\\\plateform-amg\\\\resources\\\\js\\\\pages\\\\Stock\\\\Movement\" 2>&1; echo \"done\")"
+      "Bash(mkdir -p \"c:\\\\laragon\\\\www\\\\plateform-amg\\\\resources\\\\js\\\\pages\\\\Stock\\\\Movement\" 2>&1; echo \"done\")",
+      "Bash(xargs grep -l \"facture\\\\|invoice\\\\|Facture\\\\|Invoice\")",
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "Bash(cd /tmp)",
+      "Bash(awk '/id=\"app\"/{print NR}' parts_full.html)",
+      "mcp__laravel-boost__database-query",
+      "Bash(curl -s -c cookies.txt -b cookies.txt http://plateform-amg.test/stock/parts -o after_insuff.html)",
+      "Bash(grep -o '\"flash\":{\"success\":[^}]*,\"error\":\"[^\"]*\"' after_insuff.html)",
+      "Bash(curl -s -b cookies.txt \"http://plateform-amg.test/stock/parts/search?q=&depot_id=1\" -H \"Accept: application/json\")",
+      "Bash(curl -s -b cookies.txt \"http://plateform-amg.test/stock/parts/search?q=Galaxy&depot_id=1\" -H \"Accept: application/json\")",
+      "Bash(tasklist)",
+      "Bash(netstat -ano)",
+      "Bash(php -l app/Http/Requests/Stock/StoreMovementRequest.php)",
+      "Bash(php -l app/Services/StockService.php)",
+      "Bash(php -l app/Http/Controllers/Stock/StockMovementController.php)",
+      "Bash(npx eslint *)"
     ],
     "additionalDirectories": [
       "c:\\laragon\\www\\plateform-amg\\resources\\js\\pages\\Stock"

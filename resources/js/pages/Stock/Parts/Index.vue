@@ -92,21 +92,23 @@ function openMovements(part: Part) {
 const showRestockModal = ref(false)
 const restockTarget     = ref<{ partName: string; depotName: string | null } | null>(null)
 const restockForm = useForm({
-  part_id:  '' as number | '',
-  depot_id: '' as number | '',
-  stock_id: '' as number | '',
-  quantity: 1,
-  note:     '',
+  part_id:    '' as number | '',
+  depot_id:   '' as number | '',
+  stock_id:   '' as number | '',
+  quantity:   1,
+  unit_price: 0,
+  note:       '',
 })
 
 function openRestock(part: Part, sd: StockDepot) {
-  restockTarget.value   = { partName: part.name, depotName: sd.depot_name }
-  restockForm.part_id   = part.id
-  restockForm.depot_id  = sd.depot_id
-  restockForm.stock_id  = sd.id
-  restockForm.quantity  = 1
-  restockForm.note      = ''
-  showRestockModal.value = true
+  restockTarget.value     = { partName: part.name, depotName: sd.depot_name }
+  restockForm.part_id     = part.id
+  restockForm.depot_id    = sd.depot_id
+  restockForm.stock_id    = sd.id
+  restockForm.quantity    = 1
+  restockForm.unit_price  = part.unit_price
+  restockForm.note        = ''
+  showRestockModal.value  = true
 }
 
 function submitRestock() {
@@ -163,6 +165,9 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
           <h1 class="text-xl font-semibold text-gray-900">Pièces détachées</h1>
           <p class="text-sm text-gray-500 mt-0.5">
             {{ parts.meta.total }} pièce{{ parts.meta.total > 1 ? 's' : '' }} au total
+          </p>
+          <p v-if="!depotActive" class="text-xs text-amber-600 mt-1">
+            Sélectionnez un dépôt actif (en haut) pour ravitailler ou facturer depuis le stock.
           </p>
         </div>
         <div class="flex items-center gap-2">
@@ -368,6 +373,11 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Quantité reçue *</label>
           <Input v-model.number="restockForm.quantity" type="number" min="1" :error="restockForm.errors.quantity" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Prix d'achat unitaire</label>
+          <Input v-model.number="restockForm.unit_price" type="number" step="0.01" min="0" :error="restockForm.errors.unit_price" />
+          <p class="text-xs text-gray-400 mt-1">À ajuster si le prix fournisseur a changé.</p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
