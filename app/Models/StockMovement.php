@@ -15,7 +15,7 @@ class StockMovement extends Model
     use HasDepotScope, HasFactory, HasShopScope;
 
     protected $fillable = [
-        'shop_id', 'depot_id', 'stock_id', 'user_id', 'ticket_id',
+        'shop_id', 'depot_id', 'stock_id', 'user_id', 'ticket_id', 'invoice_id',
         'type', 'quantity', 'transfer_depot_id', 'note',
     ];
 
@@ -42,6 +42,11 @@ class StockMovement extends Model
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(Ticket::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function getTypeLabelAttribute(): string

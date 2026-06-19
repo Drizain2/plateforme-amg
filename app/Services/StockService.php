@@ -13,15 +13,16 @@ use Illuminate\Support\Facades\Notification;
 
 class StockService
 {
-    public function restock(StockDepot $stock, int $quantity, User $by, string $note = 'réapprovisionnement'): void
+    public function restock(StockDepot $stock, int $quantity, User $by, string $note = 'réapprovisionnement', ?int $invoiceId = null): void
     {
-        DB::transaction(function () use ($stock, $quantity, $by, $note) {
+        DB::transaction(function () use ($stock, $quantity, $by, $note, $invoiceId) {
             $stock->increment('quantity', $quantity);
 
             StockMovement::create([
                 'depot_id' => $stock->depot_id,
                 'stock_id' => $stock->id,
                 'user_id' => $by->id,
+                'invoice_id' => $invoiceId,
                 'type' => 'in',
                 'quantity' => $quantity,
                 'note' => $note,
@@ -29,13 +30,13 @@ class StockService
         });
     }
 
-    public function consume(StockDepot $stock, int $quantity, ?int $ticketId, User $by): void
+    public function consume(StockDepot $stock, int $quantity, ?int $ticketId, User $by, ?int $invoiceId = null): void
     {
         if ($stock->quantity < $quantity) {
             throw new InsufficientStockException("Stock insuffisant (disponible : {$stock->quantity}, demandé : {$quantity}).");
         }
 
-        DB::transaction(function () use ($stock, $quantity, $ticketId, $by) {
+        DB::transaction(function () use ($stock, $quantity, $ticketId, $by, $invoiceId) {
             $stock->decrement('quantity', $quantity);
 
             StockMovement::create([
@@ -43,6 +44,7 @@ class StockService
                 'stock_id' => $stock->id,
                 'user_id' => $by->id,
                 'ticket_id' => $ticketId,
+                'invoice_id' => $invoiceId,
                 'type' => 'out',
                 'quantity' => $quantity,
             ]);

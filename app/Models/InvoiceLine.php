@@ -11,7 +11,7 @@ class InvoiceLine extends Model
     use HasShopScope;
 
     protected $fillable = [
-        'shop_id', 'invoice_id', 'type', 'label', 'quantity', 'unit_price', 'total',
+        'shop_id', 'invoice_id', 'part_id', 'type', 'label', 'quantity', 'unit_price', 'total',
     ];
 
     protected static function booted(): void
@@ -24,5 +24,10 @@ class InvoiceLine extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function part(): BelongsTo
+    {
+        return $this->belongsTo(Part::class);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\TicketStatus;
+use App\Exceptions\InsufficientStockException;
 use App\Http\Requests\Invoice\StoreInvoiceRequest;
 use App\Http\Requests\Invoice\UpdateInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
@@ -17,7 +18,6 @@ use App\Services\PermissionService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -86,29 +86,11 @@ class InvoiceController extends Controller
 
     public function store(StoreInvoiceRequest $request): RedirectResponse
     {
-        $invoice = DB::transaction(function () use ($request) {
-            $invoice = Invoice::create([
-                'customer_id' => $request->customer_id,
-                'ticket_id' => $request->ticket_id,
-                'status' => InvoiceStatus::Draft,
-                'tax_rate' => $request->tax_rate,
-                'notes' => $request->notes,
-                'issued_at' => now(),
-                'due_at' => $request->due_at,
-            ]);
-
-            foreach ($request->lines as $line) {
-                InvoiceLine::create([
-                    'invoice_id' => $invoice->id,
-                    'type' => $line['type'],
-                    'label' => $line['label'],
-                    'quantity' => $line['quantity'],
-                    'unit_price' => $line['unit_price'],
-                ]);
-            }
-
-            return $invoice;
-        });
+        try {
+            $invoice = $this->invoiceService->create($request->validated(), $request->user());
+        } catch (InsufficientStockException $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
 
         return redirect()
             ->route('invoices.show', $invoice->id)
@@ -147,7 +129,7 @@ class InvoiceController extends Controller
         $permission = $newStatus === InvoiceStatus::Paid ? 'invoices.mark_paid' : 'invoices.edit';
         abort_unless(app(PermissionService::class)->has($request->user(), $permission), 403, "Permission requise : {$permission}");
 
-        $this->invoiceService->transition($invoice, $newStatus);
+        $this->invoiceService->transition($invoice, $newStatus, $request->user());
 
         // Notifier le client si envoi
         if ($newStatus === InvoiceStatus::Sent) {

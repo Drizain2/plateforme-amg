@@ -37,6 +37,7 @@ class PartController extends Controller
             ))
             ->when($filters['category_id'] ?? null, fn ($q) => $q->where('category_id', $filters['category_id']))
             ->when($filters['critical'] ?? null, fn ($q) => $q->whereHas('stockDepots', fn ($q) => $q->whereColumn('quantity', '<=', 'alert_quantity')))
+            ->whereHas('stockDepots')
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -98,27 +99,31 @@ class PartController extends Controller
 
     public function search(): JsonResponse
     {
-        $parts = Part::with(['stockDepots' => function ($q) {
-            $q->when(request('depot_id'), fn ($q) => $q->where('depot_id', request('depot_id')));
+        $depotId = request('depot_id');
+
+        $parts = Part::with(['stockDepots' => function ($q) use ($depotId) {
+            $q->when($depotId, fn ($q) => $q->where('depot_id', $depotId)->where('quantity', '>', 0));
         }])
             ->where(fn ($q) => $q
                 ->where('name', 'like', '%'.request('q').'%')
                 ->orWhere('sku', 'like', '%'.request('q').'%'))
             ->where('is_active', true)
-            ->when(request('depot_id'), fn ($q) => $q->whereHas('stockDepots', fn ($q) => $q->where('depot_id', request('depot_id'))))
+            ->when($depotId, fn ($q) => $q->whereHas('stockDepots', fn ($q) => $q->where('depot_id', $depotId)->where('quantity', '>', 0)))
             ->limit(8)
-            ->get(['id', 'name', 'sku', 'unit_price']);
+            ->get(['id', 'name', 'sku', 'unit_price', 'sell_price']);
 
         // Aplatir par dépôt : une entrée par (pièce × dépôt) pour que le frontend
-        // reçoive bien depot_id et quantity.
-        $results = $parts->flatMap(function (Part $part) {
+        // reçoive bien depot_id et quantity. Quand un dépôt est demandé, on ne
+        // garde que les pièces effectivement en stock dans ce dépôt.
+        $results = $parts->flatMap(function (Part $part) use ($depotId) {
             if ($part->stockDepots->isEmpty()) {
-                return [[
+                return $depotId ? [] : [[
                     'id' => $part->id,
                     'name' => $part->name,
                     'sku' => $part->sku,
                     'quantity' => 0,
                     'depot_id' => null,
+                    'sell_price' => $part->sell_price,
                 ]];
             }
 
@@ -128,6 +133,7 @@ class PartController extends Controller
                 'sku' => $part->sku,
                 'quantity' => $sd->quantity,
                 'depot_id' => $sd->depot_id,
+                'sell_price' => $part->sell_price,
             ]);
         });
 
