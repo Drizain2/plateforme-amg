@@ -1,11 +1,12 @@
 <!-- resources/js/Pages/Settings/Index.vue -->
 <script setup lang="ts">
 import { useForm, usePage } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import SettingsController from '@/actions/App/Http/Controllers/SettingsController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
+import { usePermission } from '@/Composables/usePermission'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { ShopSettings, ProfileSettings } from '@/types'
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const { success, error } = useToast()
+const { can } = usePermission()
 const page = usePage()
 
 watch(() => page.props.flash, (flash) => {
@@ -29,15 +31,20 @@ watch(() => page.props.flash, (flash) => {
 }, { immediate: true })
 
 // -----------------------------------------------
-// Onglets
+// Onglets — l'atelier et l'abonnement ne concernent que les comptes
+// disposant de settings.manage ; le profil et le mot de passe restent
+// accessibles à tout utilisateur authentifié.
 // -----------------------------------------------
-const tabs = [
-    { id: 'shop', label: 'Atelier' },
-    { id: 'profile', label: 'Mon profil' },
-    { id: 'password', label: 'Mot de passe' },
-    { id: 'plan', label: 'Abonnement' },
+const canManageShop = computed(() => can('settings.manage'))
+
+const allTabs = [
+    { id: 'shop', label: 'Atelier', adminOnly: true },
+    { id: 'profile', label: 'Mon profil', adminOnly: false },
+    { id: 'password', label: 'Mot de passe', adminOnly: false },
+    { id: 'plan', label: 'Abonnement', adminOnly: true },
 ]
-const activeTab = ref('shop')
+const tabs = computed(() => allTabs.filter(t => !t.adminOnly || canManageShop.value))
+const activeTab = ref(canManageShop.value ? 'shop' : 'profile')
 
 // -----------------------------------------------
 // Formulaire atelier

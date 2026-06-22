@@ -50,6 +50,12 @@ const groups: SidebarGroup[] = [
         permission: 'dashboard.view',
         icon: ICONS.dashboard
       },
+      {
+        label: 'Mon profil',
+        href: SettingsController.edit.url(),
+        path: '/settings',
+        icon: ICONS.settings
+      },
     ],
   },
   {
@@ -149,7 +155,6 @@ const groups: SidebarGroup[] = [
     label: 'Administration',
     items: [
       { label: 'Utilisateurs', href: ShopUserController.index.url(), path: '/users', permission: 'users.view', icon: ICONS.users },
-      { label: 'Paramètres', href: SettingsController.edit.url(), path: '/settings', permission: 'settings.manage', icon: ICONS.settings },
     ],
   },
 ]

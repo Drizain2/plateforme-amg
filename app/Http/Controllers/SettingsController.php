@@ -16,7 +16,10 @@ class SettingsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('perm:settings.manage');
+        // Le profil personnel (nom, email, mot de passe) est accessible à
+        // tout utilisateur authentifié. Seuls les paramètres de l'atelier
+        // (boutique, abonnement) requièrent la permission settings.manage.
+        $this->middleware('perm:settings.manage')->only(['updateShop']);
     }
 
     public function edit(): Response
