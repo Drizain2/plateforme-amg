@@ -82,7 +82,7 @@ class PartController extends Controller
             ->when($filters['category_id'] ?? null, fn ($q) => $q->where('parts.category_id', $filters['category_id']))
             ->when($filters['critical'] ?? null, fn ($q) => $q->whereColumn('stock_depots.quantity', '<=', 'stock_depots.alert_quantity'));
 
-        $purchaseValue = (float) (clone $base)->sum(DB::raw('stock_depots.quantity * parts.unit_price'));
+        $purchaseValue = (float) (clone $base)->sum(DB::raw('stock_depots.quantity * stock_depots.avg_cost_price'));
         $saleValue = (float) (clone $base)->sum(DB::raw('stock_depots.quantity * parts.sell_price'));
         $lowStockCount = (clone $base)->whereColumn('stock_depots.quantity', '<=', 'stock_depots.alert_quantity')->count();
 
@@ -178,6 +178,7 @@ class PartController extends Controller
                     'depot_id' => $depotId,
                     'sell_price' => $part->sell_price,
                     'unit_price' => $part->unit_price,
+                    'avg_cost_price' => 0,
                 ]];
             }
 
@@ -189,6 +190,7 @@ class PartController extends Controller
                 'depot_id' => $sd->depot_id,
                 'sell_price' => $part->sell_price,
                 'unit_price' => $part->unit_price,
+                'avg_cost_price' => $sd->avg_cost_price,
             ]);
         });
 

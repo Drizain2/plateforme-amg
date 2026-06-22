@@ -25,6 +25,7 @@ class RoleSeeder extends Seeder
             'stock.restock',      // entrée de stock — interdit caissière
             'stock.transfer',     // transfert entre dépôts
             'stock.adjust',       // ajustement inventaire
+            'stock.count',        // démarrer/valider un inventaire physique
 
             // Tickets
             'tickets.view',
@@ -91,6 +92,7 @@ class RoleSeeder extends Seeder
             'stock.restock',
             'stock.transfer',
             'stock.adjust',
+            'stock.count',
 
             'tickets.view',
             'tickets.create',

@@ -17,6 +17,7 @@ class StockMovementResource extends JsonResource
             'type' => $this->type,
             'type_label' => $this->type_label,
             'quantity' => $this->quantity,
+            'unit_cost' => $this->unit_cost,
             'ticket_id' => $this->ticket_id,
             'note' => $this->note,
             'stock' => $this->whenLoaded('stock', fn () => [

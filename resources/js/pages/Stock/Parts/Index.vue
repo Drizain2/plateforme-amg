@@ -205,7 +205,7 @@ const fmtXof = (v: number) =>
         <StatCard
           label="Valeur d'achat"
           :value="fmtXof(stats.purchase_value)"
-          sub="stock affiché, prix d'achat"
+          sub="stock affiché, coût moyen pondéré"
         />
         <StatCard
           label="Valeur de vente"
@@ -259,7 +259,7 @@ const fmtXof = (v: number) =>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">SKU</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Catégorie</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Stock par dépôt</th>
-                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Prix unit.</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Dernier prix d'achat</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Fournisseur</th>
                 <th class="px-4 py-3" />
               </tr>
@@ -294,7 +294,10 @@ const fmtXof = (v: number) =>
                       :key="sd.id"
                       class="flex items-center justify-between gap-3"
                     >
-                      <span class="text-xs text-gray-500">{{ sd.depot_name ?? '—' }}</span>
+                      <span class="text-xs text-gray-500">
+                        {{ sd.depot_name ?? '—' }}
+                        <span class="text-gray-400">· CMP {{ fmtXof(sd.avg_cost_price) }}</span>
+                      </span>
                       <div class="flex items-center gap-1.5">
                         <LowStockBadge :quantity="sd.quantity" :alert-quantity="sd.alert_quantity" />
                         <button

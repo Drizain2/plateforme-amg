@@ -20,6 +20,9 @@ async function runSearch() {
 
 const priceOf = (r: StockSearchResult) => props.mode === 'purchase' ? r.unit_price : r.sell_price
 
+const isLossMaking = (r: StockSearchResult) =>
+  props.mode !== 'purchase' && r.avg_cost_price > 0 && r.sell_price < r.avg_cost_price
+
 const fmtXof = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
@@ -54,7 +57,14 @@ defineExpose({ reload: runSearch })
         </div>
         <div class="text-right shrink-0">
           <p class="text-xs text-gray-500">{{ r.quantity }} en stock</p>
-          <p class="text-sm font-medium text-indigo-600">{{ fmtXof(priceOf(r)) }}</p>
+          <p
+            class="text-sm font-medium"
+            :class="isLossMaking(r) ? 'text-red-600' : 'text-indigo-600'"
+            :title="isLossMaking(r) ? `Coût moyen : ${fmtXof(r.avg_cost_price)}` : undefined"
+          >
+            {{ fmtXof(priceOf(r)) }}
+            <span v-if="isLossMaking(r)">⚠</span>
+          </p>
         </div>
       </button>
     </div>

@@ -28,6 +28,7 @@ export type Permission =
     | 'stock.restock'
     | 'stock.transfer'
     | 'stock.adjust'
+    | 'stock.count'
     | 'tickets.view'
     | 'tickets.create'
     | 'tickets.edit'

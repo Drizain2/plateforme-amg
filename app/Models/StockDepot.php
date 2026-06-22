@@ -22,6 +22,11 @@ class StockDepot extends Model
         'depot_id',
         'quantity',
         'alert_quantity',
+        'avg_cost_price',
+    ];
+
+    protected $casts = [
+        'avg_cost_price' => 'decimal:2',
     ];
 
     public function shop(): BelongsTo

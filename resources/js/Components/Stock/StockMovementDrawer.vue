@@ -38,6 +38,9 @@ watch(() => props.part, async (part) => {
   loading.value   = false
 })
 
+const fmtXof = (v: number) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
+
 const typeVariant = (type: StockMovement['type']) => ({
   in:           'success',
   out:          'danger',
@@ -101,6 +104,9 @@ const typeVariant = (type: StockMovement['type']) => ({
                   >
                     {{ ['in','transfer_in'].includes(m.type) ? '+' : '-' }}{{ m.quantity }}
                   </span>
+                  <p v-if="m.unit_cost != null" class="text-xs text-gray-400 mt-1">
+                    CMP {{ fmtXof(m.unit_cost) }}
+                  </p>
                   <p class="text-xs text-gray-400 mt-1">{{ m.created_at }}</p>
                 </div>
               </div>

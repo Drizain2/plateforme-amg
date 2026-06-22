@@ -222,6 +222,9 @@ function goToPage(url: string | null) {
 const hasActiveFilters = computed(() =>
   !!(type.value || from.value || to.value)
 )
+
+const fmtXof = (v: number) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 </script>
 
 <template>
@@ -304,6 +307,7 @@ const hasActiveFilters = computed(() =>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Pièce</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Dépôt</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Quantité</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Coût unit.</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Référence</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Opérateur</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Note</th>
@@ -311,7 +315,7 @@ const hasActiveFilters = computed(() =>
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr v-if="movements.data.length === 0">
-                <td colspan="8" class="px-4 py-12 text-center text-gray-400">
+                <td colspan="9" class="px-4 py-12 text-center text-gray-400">
                   Aucun mouvement trouvé
                 </td>
               </tr>
@@ -349,6 +353,11 @@ const hasActiveFilters = computed(() =>
                   <span class="font-bold text-sm" :class="movement.is_debit ? 'text-red-600' : 'text-green-600'">
                     {{ movement.is_debit ? '-' : '+' }}{{ movement.quantity }}
                   </span>
+                </td>
+
+                <!-- Coût unitaire (CMP au moment du mouvement) -->
+                <td class="px-4 py-3 text-right text-xs text-gray-500">
+                  {{ movement.unit_cost != null ? fmtXof(movement.unit_cost) : '—' }}
                 </td>
 
                 <!-- Ticket lié -->

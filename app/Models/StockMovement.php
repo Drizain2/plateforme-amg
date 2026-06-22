@@ -15,8 +15,12 @@ class StockMovement extends Model
     use HasDepotScope, HasFactory, HasShopScope;
 
     protected $fillable = [
-        'shop_id', 'depot_id', 'stock_id', 'user_id', 'ticket_id', 'invoice_id', 'purchase_id',
-        'type', 'quantity', 'transfer_depot_id', 'note',
+        'shop_id', 'depot_id', 'stock_id', 'user_id', 'ticket_id', 'invoice_id', 'invoice_line_id', 'purchase_id',
+        'type', 'quantity', 'unit_cost', 'transfer_depot_id', 'note',
+    ];
+
+    protected $casts = [
+        'unit_cost' => 'decimal:2',
     ];
 
     public function stock(): BelongsTo
@@ -47,6 +51,11 @@ class StockMovement extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function invoiceLine(): BelongsTo
+    {
+        return $this->belongsTo(InvoiceLine::class);
     }
 
     public function purchase(): BelongsTo

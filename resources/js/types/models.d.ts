@@ -42,6 +42,7 @@ export interface StockDepot {
     depot_name: string | null;
     quantity: number;
     alert_quantity: number;
+    avg_cost_price: number;
     is_critical: boolean;
 }
 export interface Part {
@@ -155,6 +156,7 @@ export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';
 export interface InvoiceLine {
     id: number;
     type: 'service' | 'part';
+    part_id: number | null;
     label: string;
     quantity: number;
     unit_price: number;
@@ -210,6 +212,33 @@ export interface Purchase {
     supplier?: Pick<Supplier, 'id' | 'name' | 'email' | 'phone'>;
     depot?: Pick<Depot, 'id' | 'name'>;
     lines?: PurchaseLine[];
+}
+
+export type StockCountStatus = 'draft' | 'validated';
+
+export interface StockCountLine {
+    id: number;
+    part: Pick<Part, 'id' | 'name' | 'sku'> | null;
+    expected_quantity: number;
+    counted_quantity: number | null;
+    difference: number | null;
+    unit_cost: number;
+    note?: string | null;
+}
+
+export interface StockCount {
+    id: number;
+    number: string;
+    status: StockCountStatus;
+    status_label: string;
+    status_color: BadgeVariant;
+    note?: string | null;
+    started_at?: string;
+    validated_at?: string;
+    lines_count?: number;
+    depot?: Pick<Depot, 'id' | 'name'>;
+    user?: { id: number; name: string };
+    lines?: StockCountLine[];
 }
 
 export interface AppNotification {

@@ -132,3 +132,100 @@ test('un utilisateur sans la permission customers.create ne peut pas créer un c
     $response->assertForbidden();
     expect(Invoice::count())->toBe(0);
 });
+
+test('ajouter une ligne pièce à une facture brouillon décrémente le stock et trace le mouvement', function () {
+    $this->actingAs($this->admin)->post(route('invoices.store'), invoiceStockPayload([
+        'customer_id' => $this->customer->id,
+        'lines' => [
+            ['type' => 'service', 'label' => 'Main d\'œuvre', 'quantity' => 1, 'unit_price' => 1000],
+        ],
+    ]));
+    $invoice = Invoice::latest('id')->first();
+
+    $response = $this->actingAs($this->admin)->post(route('invoices.lines.store', $invoice->id), [
+        'type' => 'part',
+        'part_id' => $this->part->id,
+        'label' => $this->part->name,
+        'quantity' => 2,
+        'unit_price' => 50,
+    ]);
+
+    $response->assertSessionHas('success');
+    expect($this->stock->refresh()->quantity)->toBe(8);
+
+    $line = $invoice->lines()->where('part_id', $this->part->id)->first();
+    $movement = StockMovement::where('invoice_line_id', $line->id)->where('type', 'out')->first();
+    expect($movement)->not->toBeNull();
+    expect($movement->quantity)->toBe(2);
+});
+
+test('ajouter une ligne pièce sans stock suffisant échoue sans créer la ligne', function () {
+    $this->actingAs($this->admin)->post(route('invoices.store'), invoiceStockPayload([
+        'customer_id' => $this->customer->id,
+        'lines' => [
+            ['type' => 'service', 'label' => 'Main d\'œuvre', 'quantity' => 1, 'unit_price' => 1000],
+        ],
+    ]));
+    $invoice = Invoice::latest('id')->first();
+
+    $response = $this->actingAs($this->admin)->post(route('invoices.lines.store', $invoice->id), [
+        'type' => 'part',
+        'part_id' => $this->part->id,
+        'label' => $this->part->name,
+        'quantity' => 50,
+        'unit_price' => 50,
+    ]);
+
+    $response->assertSessionHas('error');
+    expect($invoice->lines()->where('part_id', $this->part->id)->exists())->toBeFalse();
+    expect($this->stock->refresh()->quantity)->toBe(10);
+});
+
+test('vendre une pièce sous son coût moyen déclenche une alerte de marge', function () {
+    $this->stock->update(['avg_cost_price' => 80]);
+
+    $response = $this->actingAs($this->admin)->post(route('invoices.store'), invoiceStockPayload([
+        'customer_id' => $this->customer->id,
+        'lines' => [
+            ['type' => 'part', 'label' => $this->part->name, 'quantity' => 1, 'unit_price' => 50, 'part_id' => $this->part->id],
+        ],
+    ]));
+
+    $response->assertSessionHas('warning');
+});
+
+test('vendre une pièce au-dessus de son coût moyen ne déclenche aucune alerte', function () {
+    $this->stock->update(['avg_cost_price' => 20]);
+
+    $response = $this->actingAs($this->admin)->post(route('invoices.store'), invoiceStockPayload([
+        'customer_id' => $this->customer->id,
+        'lines' => [
+            ['type' => 'part', 'label' => $this->part->name, 'quantity' => 1, 'unit_price' => 50, 'part_id' => $this->part->id],
+        ],
+    ]));
+
+    $response->assertSessionDoesntHaveErrors();
+    expect(session('warning'))->toBeNull();
+});
+
+test('supprimer une ligne pièce d\'une facture brouillon restocke la quantité consommée', function () {
+    $this->actingAs($this->admin)->post(route('invoices.store'), invoiceStockPayload([
+        'customer_id' => $this->customer->id,
+        'lines' => [
+            ['type' => 'part', 'label' => $this->part->name, 'quantity' => 3, 'unit_price' => 50, 'part_id' => $this->part->id],
+        ],
+    ]));
+    $invoice = Invoice::latest('id')->first();
+    expect($this->stock->refresh()->quantity)->toBe(7);
+
+    $line = $invoice->lines()->where('part_id', $this->part->id)->first();
+
+    $response = $this->actingAs($this->admin)->delete(route('invoices.lines.destroy', [
+        'invoice' => $invoice->id,
+        'line' => $line->id,
+    ]));
+
+    $response->assertSessionHas('success');
+    expect($this->stock->refresh()->quantity)->toBe(10);
+    expect($invoice->lines()->whereKey($line->id)->exists())->toBeFalse();
+});

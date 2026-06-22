@@ -16,6 +16,7 @@ class StockDepotResource extends JsonResource
             'id' => $this->id,
             'quantity' => $this->quantity,
             'alert_quantity' => $this->alert_quantity,
+            'avg_cost_price' => $this->avg_cost_price,
             'is_critical' => $this->is_critical,
             'part' => $this->whenLoaded('part', fn () => [
                 'id' => $this->part->id,

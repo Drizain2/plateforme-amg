@@ -7,6 +7,7 @@ export interface StockSearchResult {
     depot_id: number | null;
     sell_price: number;
     unit_price: number;
+    avg_cost_price: number;
 }
 
 export type StockMovementType =
@@ -22,6 +23,7 @@ export interface StockMovement {
     type_label: string;
     is_debit: boolean;
     quantity: number;
+    unit_cost: number | null;
     note?: string;
     created_at: string;
     stock?: { id: number; part: Pick<Part, 'id' | 'name' | 'sku'> | null };

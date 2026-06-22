@@ -33,6 +33,7 @@ class PartResource extends JsonResource
                 'depot_name' => $sd->relationLoaded('depot') ? $sd->depot->name : null,
                 'quantity' => $sd->quantity,
                 'alert_quantity' => $sd->alert_quantity,
+                'avg_cost_price' => $sd->avg_cost_price,
                 'is_critical' => $sd->is_critical,
             ])),
             'is_active' => $this->is_active,

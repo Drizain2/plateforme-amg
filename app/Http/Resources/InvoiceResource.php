@@ -44,6 +44,7 @@ class InvoiceResource extends JsonResource
             'lines' => $this->whenLoaded('lines', fn () => $this->lines->map(fn ($l) => [
                 'id' => $l->id,
                 'type' => $l->type,
+                'part_id' => $l->part_id,
                 'label' => $l->label,
                 'quantity' => $l->quantity,
                 'unit_price' => $l->unit_price,

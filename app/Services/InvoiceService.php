@@ -15,10 +15,42 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceService
 {
+    /** @var array<int, string> */
+    private array $marginWarnings = [];
+
     public function __construct(
         private StockService $stockService,
         private PermissionService $permissionService,
     ) {}
+
+    /**
+     * Récupère puis vide les alertes de marge négative accumulées par le
+     * dernier appel à create()/addLine() (vente d'une pièce sous son CMP).
+     *
+     * @return array<int, string>
+     */
+    public function pullMarginWarnings(): array
+    {
+        $warnings = $this->marginWarnings;
+        $this->marginWarnings = [];
+
+        return $warnings;
+    }
+
+    private function checkMargin(string $label, float $unitPrice, StockDepot $stock): void
+    {
+        $cost = (float) $stock->avg_cost_price;
+
+        if ($unitPrice < $cost) {
+            $this->marginWarnings[] = sprintf(
+                '"%s" vendue à %.2f alors que son coût moyen est de %.2f (perte de %.2f/unité).',
+                $label,
+                $unitPrice,
+                $cost,
+                $cost - $unitPrice,
+            );
+        }
+    }
 
     public function createFromTicket(Ticket $ticket): Invoice
     {
@@ -80,17 +112,7 @@ class InvoiceService
             ]);
 
             foreach ($data['lines'] as $line) {
-                if (! empty($line['part_id'])) {
-                    $stock = StockDepot::where('part_id', $line['part_id'])->first();
-
-                    if (! $stock) {
-                        throw new InsufficientStockException('Aucun stock pour cette pièce dans ce dépôt.');
-                    }
-
-                    $this->stockService->consume($stock, $line['quantity'], null, $by, $invoice->id);
-                }
-
-                InvoiceLine::create([
+                $invoiceLine = InvoiceLine::create([
                     'invoice_id' => $invoice->id,
                     'part_id' => $line['part_id'] ?? null,
                     'type' => $line['type'],
@@ -98,6 +120,17 @@ class InvoiceService
                     'quantity' => $line['quantity'],
                     'unit_price' => $line['unit_price'],
                 ]);
+
+                if (! empty($line['part_id'])) {
+                    $stock = StockDepot::where('part_id', $line['part_id'])->first();
+
+                    if (! $stock) {
+                        throw new InsufficientStockException('Aucun stock pour cette pièce dans ce dépôt.');
+                    }
+
+                    $this->stockService->consume($stock, $line['quantity'], null, $by, $invoice->id, $invoiceLine->id);
+                    $this->checkMargin($line['label'], (float) $line['unit_price'], $stock);
+                }
             }
 
             return $invoice->fresh(['lines']);
@@ -155,32 +188,84 @@ class InvoiceService
                 $stock = StockDepot::withoutGlobalScopes()->find($movement->stock_id);
 
                 if ($stock) {
-                    $this->stockService->restock($stock, $movement->quantity, $by, "Annulation facture {$invoice->number}", $invoice->id);
+                    $this->stockService->restock(
+                        $stock,
+                        $movement->quantity,
+                        $by,
+                        "Annulation facture {$invoice->number}",
+                        $invoice->id,
+                        $movement->unit_cost !== null ? (float) $movement->unit_cost : null,
+                    );
                 }
             });
     }
 
-    public function addLine(Invoice $invoice, array $data): InvoiceLine
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function addLine(Invoice $invoice, array $data, User $by): InvoiceLine
     {
         if ($invoice->status !== InvoiceStatus::Draft) {
             throw new \InvalidArgumentException('Impossible de modifier une facture non brouillon.');
         }
 
-        return InvoiceLine::create([
-            'invoice_id' => $invoice->id,
-            'type' => $data['type'],
-            'label' => $data['label'],
-            'quantity' => $data['quantity'],
-            'unit_price' => $data['unit_price'],
-        ]);
+        return DB::transaction(function () use ($invoice, $data, $by) {
+            $line = InvoiceLine::create([
+                'invoice_id' => $invoice->id,
+                'part_id' => $data['part_id'] ?? null,
+                'type' => $data['type'],
+                'label' => $data['label'],
+                'quantity' => $data['quantity'],
+                'unit_price' => $data['unit_price'],
+            ]);
+
+            if (! empty($data['part_id'])) {
+                $stock = StockDepot::where('part_id', $data['part_id'])->first();
+
+                if (! $stock) {
+                    throw new InsufficientStockException('Aucun stock pour cette pièce dans ce dépôt.');
+                }
+
+                $this->stockService->consume($stock, $data['quantity'], null, $by, $invoice->id, $line->id);
+                $this->checkMargin($data['label'], (float) $data['unit_price'], $stock);
+            }
+
+            return $line;
+        });
     }
 
-    public function removeLine(InvoiceLine $line): void
+    /**
+     * Supprime une ligne de facture brouillon en remettant en stock la
+     * quantité éventuellement consommée pour cette ligne, au coût exact
+     * appliqué lors de la consommation.
+     */
+    public function removeLine(InvoiceLine $line, User $by): void
     {
         if ($line->invoice->status !== InvoiceStatus::Draft) {
             throw new \InvalidArgumentException('Impossible de modifier une facture non brouillon.');
         }
 
-        $line->delete();
+        DB::transaction(function () use ($line, $by) {
+            $movement = StockMovement::where('invoice_line_id', $line->id)
+                ->where('type', 'out')
+                ->first();
+
+            if ($movement) {
+                $stock = StockDepot::withoutGlobalScopes()->find($movement->stock_id);
+
+                if ($stock) {
+                    $this->stockService->restock(
+                        $stock,
+                        $movement->quantity,
+                        $by,
+                        "Suppression ligne facture {$line->invoice->number}",
+                        null,
+                        $movement->unit_cost !== null ? (float) $movement->unit_cost : null,
+                    );
+                }
+            }
+
+            $line->delete();
+        });
     }
 }

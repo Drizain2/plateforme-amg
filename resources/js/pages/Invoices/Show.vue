@@ -1,9 +1,10 @@
 <!-- resources/js/Pages/Invoices/Show.vue -->
 <script setup lang="ts">
 import { useForm, usePage } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
+import PartStockPicker from '@/Components/Stock/PartStockPicker.vue'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
@@ -11,12 +12,14 @@ import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import type { StockSearchResult } from '@/types'
 import type { Invoice, BadgeVariant } from '@/types/models'
 
 const props = defineProps<{ invoice: Invoice }>()
 
 const { success, error } = useToast()
 const page = usePage()
+const depotActive = computed(() => page.props.auth.depotActive)
 
 watch(() => page.props.flash, (flash) => {
   if (flash.success) {
@@ -47,8 +50,10 @@ return
 
 // Ajout ligne
 const showLineModal = ref(false)
+const maxQuantity = ref<number | null>(null)
 const lineForm = useForm({
   type:       'service' as 'service' | 'part',
+  part_id:    null as number | null,
   label:      '',
   quantity:   1,
   unit_price: 0,
@@ -59,13 +64,32 @@ const lineTypeOptions = [
   { value: 'part',    label: 'Pièce' },
 ]
 
+watch(() => lineForm.type, () => {
+  lineForm.part_id    = null
+  lineForm.label      = ''
+  lineForm.unit_price = 0
+  maxQuantity.value   = null
+})
+
+function selectPartForLine(result: StockSearchResult) {
+  lineForm.part_id    = result.id
+  lineForm.label      = result.name
+  lineForm.unit_price = result.sell_price
+  lineForm.quantity   = 1
+  maxQuantity.value   = result.quantity
+}
+
 function submitLine() {
   lineForm.post(InvoiceController.storeLine.url(props.invoice.id), {
     preserveScroll: true,
-    onSuccess: () => {
- showLineModal.value = false; lineForm.reset() 
-},
+    onSuccess: () => closeLineModal(),
   })
+}
+
+function closeLineModal() {
+  showLineModal.value = false
+  lineForm.reset()
+  maxQuantity.value = null
 }
 
 // Suppression ligne
@@ -234,20 +258,39 @@ return
     </div>
 
     <!-- Modal ajout ligne -->
-    <Modal :show="showLineModal" title="Ajouter une ligne" max-width="sm" @close="showLineModal = false">
+    <Modal :show="showLineModal" title="Ajouter une ligne" max-width="sm" @close="closeLineModal">
       <form @submit.prevent="submitLine" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
           <Select v-model="lineForm.type" :options="lineTypeOptions" :error="lineForm.errors.type" />
         </div>
-        <div>
+        <div v-if="lineForm.type === 'service'">
           <label class="block text-sm font-medium text-gray-700 mb-1">Désignation *</label>
           <Input v-model="lineForm.label" placeholder="Main d'œuvre iPhone 14..." :error="lineForm.errors.label" />
         </div>
+
+        <template v-else>
+          <div v-if="!lineForm.part_id">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Pièce *</label>
+            <p v-if="!depotActive" class="text-xs text-amber-600">
+              Sélectionnez un dépôt actif (en haut) pour choisir une pièce en stock.
+            </p>
+            <PartStockPicker v-else :depot-id="depotActive.id" @select="selectPartForLine" />
+            <p v-if="lineForm.errors.part_id" class="text-xs text-red-600 mt-1">{{ lineForm.errors.part_id }}</p>
+          </div>
+          <div v-else class="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 bg-gray-50">
+            <span class="text-sm font-medium text-gray-900">{{ lineForm.label }}</span>
+            <button type="button" class="text-xs text-indigo-600 hover:underline" @click="lineForm.part_id = null; maxQuantity = null">
+              Changer
+            </button>
+          </div>
+        </template>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Quantité *</label>
-            <Input v-model="lineForm.quantity" type="number" :error="lineForm.errors.quantity" />
+            <Input v-model="lineForm.quantity" type="number" min="1" :max="maxQuantity ?? undefined" :error="lineForm.errors.quantity" />
+            <p v-if="maxQuantity != null" class="text-xs text-gray-400 mt-1">{{ maxQuantity }} en stock</p>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Prix unitaire HT *</label>
@@ -255,8 +298,14 @@ return
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" @click="showLineModal = false">Annuler</Button>
-          <Button type="submit" :loading="lineForm.processing">Ajouter</Button>
+          <Button variant="secondary" @click="closeLineModal">Annuler</Button>
+          <Button
+            type="submit"
+            :loading="lineForm.processing"
+            :disabled="lineForm.type === 'part' && !lineForm.part_id"
+          >
+            Ajouter
+          </Button>
         </div>
       </form>
     </Modal>

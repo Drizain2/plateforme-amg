@@ -92,9 +92,15 @@ class InvoiceController extends Controller
             return back()->with('error', $e->getMessage())->withInput();
         }
 
-        return redirect()
+        $response = redirect()
             ->route('invoices.show', $invoice->id)
             ->with('success', "Facture {$invoice->number} créée.");
+
+        if ($warnings = $this->invoiceService->pullMarginWarnings()) {
+            $response->with('warning', implode(' ', $warnings));
+        }
+
+        return $response;
     }
 
     public function show(Invoice $invoice): Response
@@ -146,16 +152,27 @@ class InvoiceController extends Controller
             'label' => ['required', 'string', 'max:255'],
             'quantity' => ['required', 'integer', 'min:1'],
             'unit_price' => ['required', 'numeric', 'min:0'],
+            'part_id' => ['nullable', 'integer', 'exists:parts,id'],
         ]);
 
-        $this->invoiceService->addLine($invoice, $request->all());
+        try {
+            $this->invoiceService->addLine($invoice, $request->all(), $request->user());
+        } catch (InsufficientStockException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
-        return back()->with('success', 'Ligne ajoutée.');
+        $response = back()->with('success', 'Ligne ajoutée.');
+
+        if ($warnings = $this->invoiceService->pullMarginWarnings()) {
+            $response->with('warning', implode(' ', $warnings));
+        }
+
+        return $response;
     }
 
-    public function destroyLine(Invoice $invoice, InvoiceLine $line): RedirectResponse
+    public function destroyLine(Invoice $invoice, InvoiceLine $line, Request $request): RedirectResponse
     {
-        $this->invoiceService->removeLine($line);
+        $this->invoiceService->removeLine($line, $request->user());
 
         return back()->with('success', 'Ligne supprimée.');
     }

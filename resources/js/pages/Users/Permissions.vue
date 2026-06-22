@@ -104,6 +104,7 @@ function permLabel(perm: string): string {
         'stock.restock': 'Ravitailler le stock',
         'stock.transfer': 'Transférer entre dépôts',
         'stock.adjust': 'Ajuster l\'inventaire',
+        'stock.count': 'Faire un inventaire physique',
         'tickets.view': 'Voir les tickets',
         'tickets.create': 'Créer des tickets',
         'tickets.edit': 'Modifier les tickets',

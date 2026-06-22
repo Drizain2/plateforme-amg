@@ -14,6 +14,7 @@ use App\Http\Controllers\ShopUserController;
 use App\Http\Controllers\Stock\CategorieController;
 use App\Http\Controllers\Stock\DepotController;
 use App\Http\Controllers\Stock\PartController;
+use App\Http\Controllers\Stock\StockCountController;
 use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
 use App\Http\Controllers\Ticket\TicketController;
@@ -70,6 +71,14 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/movements', [StockMovementController::class, 'store'])->name('movements.store');
         Route::post('/movements/transfer', [StockMovementController::class, 'transfer'])->name('movements.transfer');
         Route::get('/alerts', [StockMovementController::class, 'alerts'])->name('alerts');
+
+        Route::prefix('counts')->name('counts.')->group(function () {
+            Route::get('/', [StockCountController::class, 'index'])->name('index');
+            Route::post('/', [StockCountController::class, 'store'])->name('store');
+            Route::get('/{stockCount}', [StockCountController::class, 'show'])->name('show');
+            Route::put('/{stockCount}', [StockCountController::class, 'update'])->name('update');
+            Route::post('/{stockCount}/validate', [StockCountController::class, 'validateCount'])->name('validate');
+        });
     });
 
     Route::prefix('tickets')->name('tickets.')->group(function () {
