@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Plan;
 use App\Models\Shop;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -18,27 +19,29 @@ class ShopFactory extends Factory
      */
     public function definition(): array
     {
-        $facker = \Faker\Factory::create("fr_FR");
+        $facker = \Faker\Factory::create('fr_FR');
         $name = $facker->company();
+
         return [
-            "name" => $name,
-            "slug" => Str::slug($name). '-'.fake()->unique()->numberBetween(100, 999),
-            "phone" => $facker->phoneNumber(),
-            "email" => $facker->companyEmail(),
-            "address" => $facker->address(),
-            'plan' => fake()->randomElement(['starter', 'pro', 'enterprise']),
+            'name' => $name,
+            'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(100, 999),
+            'phone' => $facker->phoneNumber(),
+            'email' => $facker->companyEmail(),
+            'address' => $facker->address(),
+            'plan_id' => Plan::inRandomOrder()->value('id') ?? Plan::factory(),
             'trial_ends_at' => fake()->optional(0.3)->dateTimeBetween('now', '+30 days'),
-            "is_active" => true,
+            'is_active' => true,
         ];
     }
+
     public function starter(): static
     {
-        return $this->state(['plan' => 'starter']);
+        return $this->state(['plan_id' => Plan::where('slug', 'starter')->value('id') ?? Plan::factory()]);
     }
 
     public function pro(): static
     {
-        return $this->state(['plan' => 'pro']);
+        return $this->state(['plan_id' => Plan::where('slug', 'pro')->value('id') ?? Plan::factory()]);
     }
 
     public function withTrial(): static

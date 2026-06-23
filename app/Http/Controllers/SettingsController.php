@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Settings\UpdatePasswordRequest;
 use App\Http\Requests\Settings\UpdateSettingsRequest;
+use App\Models\Plan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +25,7 @@ class SettingsController extends Controller
 
     public function edit(): Response
     {
-        $shop = app('current_shop');
+        $shop = app('current_shop')->load('plan');
 
         return Inertia::render('Settings/Index', [
             'shop' => [
@@ -36,6 +37,7 @@ class SettingsController extends Controller
                 'plan' => $shop->plan,
                 'tax_rate' => $shop->tax_rate ?? 20.00,
             ],
+            'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
             'profile' => [
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,

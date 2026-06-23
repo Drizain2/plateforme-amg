@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\Plan;
+use App\Models\Shop;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class RegisterController extends Controller
+{
+    public function create(): Response
+    {
+        return Inertia::render('Auth/Register', [
+            'plans' => Plan::where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'name', 'slug', 'description', 'price', 'features']),
+        ]);
+    }
+
+    public function store(RegisterRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $user = DB::transaction(function () use ($data) {
+            $shop = Shop::create([
+                'name' => $data['shop_name'],
+                'slug' => $this->uniqueSlug($data['shop_name']),
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'plan_id' => $data['plan_id'],
+                'trial_ends_at' => now()->addDays(14),
+                'is_active' => true,
+            ]);
+
+            $user = User::create([
+                'shop_id' => $shop->id,
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'is_active' => true,
+            ]);
+
+            $user->assignRole('admin');
+
+            return $user;
+        });
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard');
+    }
+
+    private function uniqueSlug(string $name): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $suffix = 1;
+
+        while (Shop::where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$suffix++;
+        }
+
+        return $slug;
+    }
+}

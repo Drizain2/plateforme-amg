@@ -1,9 +1,18 @@
+export interface Plan {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string | null;
+    price: number;
+    features: string[];
+}
+
 export interface Shop {
     id: number;
     name: string;
     slug: string;
     email: string;
-    plan: 'starter' | 'pro' | 'entreprise';
+    plan?: Plan;
     is_active: boolean;
 }
 

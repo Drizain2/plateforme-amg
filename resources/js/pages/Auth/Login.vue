@@ -2,7 +2,7 @@
 import { useForm } from '@inertiajs/vue3';
 import Button from '@/Components/UI/Button.vue';
 import Input from '@/Components/UI/Input.vue';
-import { login } from '@/routes';
+import { login, register } from '@/routes';
 
 
 const form = useForm({
@@ -75,6 +75,11 @@ function submit() {
         >
           Se connecter
         </Button>
+
+        <p class="text-center text-sm text-gray-500">
+          Pas encore inscrit ?
+          <a :href="register.url()" class="text-indigo-600 font-medium hover:underline">Créer un atelier</a>
+        </p>
       </form>
     </div>
   </div>

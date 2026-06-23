@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Plan;
 use App\Models\Shop;
 use Illuminate\Database\Seeder;
 
@@ -16,7 +17,7 @@ class ShopSeeder extends Seeder
             'name' => 'Atelier Demo',
             'slug' => 'atelier-demo',
             'email' => 'demo@atelier.fr',
-            'plan' => 'pro',
+            'plan_id' => Plan::where('slug', 'pro')->value('id'),
         ]);
         Shop::factory(10)->create();
     }

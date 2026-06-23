@@ -9,10 +9,11 @@ import Input from '@/Components/UI/Input.vue'
 import { usePermission } from '@/Composables/usePermission'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import type { ShopSettings, ProfileSettings } from '@/types'
+import type { ShopSettings, ProfileSettings, Plan } from '@/types'
 
 const props = defineProps<{
     shop: ShopSettings
+    plans: Plan[]
     profile: ProfileSettings
 }>()
 
@@ -110,11 +111,11 @@ function submitPassword() {
 // -----------------------------------------------
 // Plan
 // -----------------------------------------------
-const planDetails = {
-    starter: { label: 'Starter', color: 'default', features: ['1 dépôt', '3 utilisateurs', 'Tickets & Stock'] },
-    pro: { label: 'Pro', color: 'info', features: ['Dépôts illimités', '10 utilisateurs', 'Facturation', 'Notifications', 'Analytics'] },
-    enterprise: { label: 'Enterprise', color: 'success', features: ['Tout en illimité', 'Support prioritaire', 'API access'] },
-} as const
+const planColors: Record<string, 'default' | 'info' | 'success'> = {
+    starter: 'default',
+    pro: 'info',
+    enterprise: 'success',
+}
 </script>
 
 <template>
@@ -259,12 +260,12 @@ const planDetails = {
                     <div class="bg-white rounded-xl border border-gray-200 p-6">
                         <div class="flex items-center justify-between mb-4">
                             <p class="text-sm font-medium text-gray-700">Plan actuel</p>
-                            <Badge :variant="planDetails[shop.plan].color">
-                                {{ planDetails[shop.plan].label }}
+                            <Badge :variant="planColors[shop.plan.slug]">
+                                {{ shop.plan.name }}
                             </Badge>
                         </div>
                         <ul class="space-y-2">
-                            <li v-for="feature in planDetails[shop.plan].features" :key="feature"
+                            <li v-for="feature in shop.plan.features" :key="feature"
                                 class="flex items-center gap-2 text-sm text-gray-600">
                                 <svg class="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -278,15 +279,15 @@ const planDetails = {
 
                     <!-- Comparaison plans -->
                     <div class="grid grid-cols-3 gap-4">
-                        <div v-for="(plan, key) in planDetails" :key="key" :class="[
+                        <div v-for="plan in plans" :key="plan.id" :class="[
                             'bg-white rounded-xl border p-5 space-y-4 transition',
-                            shop.plan === key
+                            shop.plan.id === plan.id
                                 ? 'border-indigo-400 ring-2 ring-indigo-100'
                                 : 'border-gray-200'
                         ]">
                             <div class="flex items-center justify-between">
-                                <p class="font-semibold text-gray-900">{{ plan.label }}</p>
-                                <Badge v-if="shop.plan === key" variant="info">Actuel</Badge>
+                                <p class="font-semibold text-gray-900">{{ plan.name }}</p>
+                                <Badge v-if="shop.plan.id === plan.id" variant="info">Actuel</Badge>
                             </div>
                             <ul class="space-y-1.5">
                                 <li v-for="feature in plan.features" :key="feature"
@@ -299,9 +300,9 @@ const planDetails = {
                                     {{ feature }}
                                 </li>
                             </ul>
-                            <Button v-if="shop.plan !== key" variant="secondary" size="sm" class="w-full justify-center"
+                            <Button v-if="shop.plan.id !== plan.id" variant="secondary" size="sm" class="w-full justify-center"
                                 @click="() => { }">
-                                Passer à {{ plan.label }}
+                                Passer à {{ plan.name }}
                             </Button>
                             <p v-else class="text-xs text-center text-indigo-600 font-medium">Plan actif</p>
                         </div>
