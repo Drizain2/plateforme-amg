@@ -13,6 +13,9 @@ const props = defineProps<{
   plans: (Plan & { shops_count: number })[]
 }>()
 
+const fmt = (v: number) =>
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
+
 // -----------------------------------------------
 // Modal création / édition
 // -----------------------------------------------
@@ -141,7 +144,7 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
                 </td>
 
                 <td class="px-4 py-3 text-gray-700">
-                  {{ plan.price > 0 ? `${plan.price} €/mois` : 'Gratuit' }}
+                  {{ plan.price > 0 ? `${fmt(plan.price)}/mois` : 'Gratuit' }}
                 </td>
 
                 <td class="px-4 py-3 text-gray-500 text-xs">
@@ -212,8 +215,8 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
 
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Prix (€/mois) *</label>
-            <Input v-model="form.price" type="number" step="0.01" :error="form.errors.price" />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Prix (FCFA/mois) *</label>
+            <Input v-model="form.price" type="number" step="1" min="0" :error="form.errors.price" />
           </div>
 
           <div>

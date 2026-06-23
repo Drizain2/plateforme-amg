@@ -65,12 +65,12 @@ const supplierOptions = computed(() => (props.suppliers ?? []).map(s => ({ value
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Prix d'achat (€)</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Prix d'achat (FCFA)</label>
         <Input v-model="form.unit_price" type="number" step="0.01" :error="form.errors.unit_price" />
       </div>
 
       <div class="col-span-2">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Prix de vente (€)</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Prix de vente (FCFA)</label>
         <Input v-model="form.sell_price" type="number" step="0.01" :error="form.errors.sell_price" />
       </div>
     </div>

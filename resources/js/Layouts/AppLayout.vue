@@ -42,7 +42,7 @@ watch(
     <div class="flex-1 flex flex-col h-screen overflow-y-auto">
       <Header :title="title" class="sticky top-0 z-30" />
 
-      <main class="flex-1 px-8 py-6">
+      <main class="flex-1 p-8">
         <slot />
       </main>
     </div>

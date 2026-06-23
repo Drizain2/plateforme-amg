@@ -49,7 +49,7 @@ test('un opérateur plateforme peut créer une offre', function () {
         'name' => 'Premium',
         'slug' => 'premium',
         'description' => 'Offre premium',
-        'price' => 49.90,
+        'price' => 49900,
         'max_users' => 15,
         'max_depots' => null,
         'features' => ['Support prioritaire', 'API access'],

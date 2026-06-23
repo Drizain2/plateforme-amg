@@ -28,7 +28,7 @@ class UpdatePlanRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', Rule::unique('plans', 'slug')->ignore($this->route('plan'))],
             'description' => ['nullable', 'string'],
-            'price' => ['required', 'numeric', 'min:0'],
+            'price' => ['required', 'integer', 'min:0'],
             'max_users' => ['nullable', 'integer', 'min:1'],
             'max_depots' => ['nullable', 'integer', 'min:1'],
             'features' => ['nullable', 'array'],

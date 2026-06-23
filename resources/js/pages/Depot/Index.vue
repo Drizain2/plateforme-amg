@@ -15,6 +15,8 @@ import type { Depot, PaginatedResource } from '@/types'
 const props = defineProps<{
   depots:PaginatedResource<Depot>
   shopUsers: { id: number; name: string }[]
+  depotLimit: number | null
+  canAddDepot: boolean
 }>()
 const { success, error } = useToast()
 const { can } = usePermission()
@@ -179,14 +181,19 @@ const availableUsers = computed(() => {
           <h1 class="text-xl font-semibold text-gray-900">Dépôts</h1>
           <p class="text-sm text-gray-500 mt-0.5">
             {{ depots.data.length }} dépôt{{ depots.data.length > 1 ? 's' : '' }}
+            <span v-if="depotLimit !== null"> / {{ depotLimit }} max</span>
           </p>
         </div>
-        <Button v-show="can('depots.manage')" @click="openCreate">
+        <Button v-show="can('depots.manage')" :disabled="!canAddDepot" @click="openCreate">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
           Nouveau dépôt
         </Button>
+      </div>
+
+      <div v-if="can('depots.manage') && !canAddDepot" class="bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-xl px-4 py-3">
+        Limite de dépôts atteinte pour votre offre actuelle. Passez à une offre supérieure pour en ajouter.
       </div>
 
       <!-- Cards dépôts -->
@@ -259,7 +266,7 @@ const availableUsers = computed(() => {
           class="col-span-full bg-white rounded-xl border border-dashed border-gray-300 p-12 text-center"
         >
           <p class="text-gray-400 text-sm">Aucun dépôt configuré.</p>
-          <Button v-show="can('depots.manage')" variant="secondary" size="sm" class="mt-3" @click="openCreate">
+          <Button v-show="can('depots.manage')" :disabled="!canAddDepot" variant="secondary" size="sm" class="mt-3" @click="openCreate">
             Créer le premier dépôt
           </Button>
         </div>

@@ -24,7 +24,9 @@ class ShopUserController extends Controller
 
     public function index(): Response
     {
-        $users = User::where('shop_id', app('current_shop')->id)
+        $shop = app('current_shop');
+
+        $users = User::where('shop_id', $shop->id)
             ->with(['roles', 'depots:id,name'])
             ->withCount(['tickets', 'assignedTickets'])
             ->orderBy('name')
@@ -33,11 +35,19 @@ class ShopUserController extends Controller
         return Inertia::render('Users/Index', [
             'users' => ShopUserResource::collection($users)->resolve(),
             'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
+            'userLimit' => $shop->plan?->max_users,
+            'canAddUser' => $shop->canAddUser(),
         ]);
     }
 
     public function store(StoreShopUserRequest $request): RedirectResponse
     {
+        $shop = app('current_shop');
+
+        if (! $shop->canAddUser()) {
+            return back()->with('error', "Limite d'utilisateurs atteinte pour l'offre {$shop->plan?->name} ({$shop->plan?->max_users}). Passez à une offre supérieure pour en ajouter.");
+        }
+
         $user = DB::transaction(function () use ($request) {
             $user = User::create([
                 'shop_id' => app('current_shop')->id,

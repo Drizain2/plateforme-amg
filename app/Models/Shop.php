@@ -55,4 +55,18 @@ class Shop extends Model
     {
         return $this->trial_ends_at && $this->trial_ends_at->isFuture();
     }
+
+    public function canAddDepot(): bool
+    {
+        $max = $this->plan?->max_depots;
+
+        return $max === null || $this->depots()->count() < $max;
+    }
+
+    public function canAddUser(): bool
+    {
+        $max = $this->plan?->max_users;
+
+        return $max === null || $this->users()->count() < $max;
+    }
 }

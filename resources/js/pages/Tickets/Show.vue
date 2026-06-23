@@ -101,6 +101,9 @@ function eventIcon(type: string): string {
 const totalParts = computed(() =>
     (ticketData.value.parts ?? []).reduce((sum, p) => sum + p.total, 0)
 )
+
+const fmt = (v: number) =>
+    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 </script>
 
 <template>
@@ -163,9 +166,7 @@ const totalParts = computed(() =>
                             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Diagnostic</p>
                             <p class="text-sm text-gray-700">{{ ticketData.diagnosis }}</p>
                             <p v-if="ticketData.estimated_price" class="text-sm font-medium text-indigo-600 mt-1">
-                                Devis estimé : {{ new Intl.NumberFormat('fr-FR', {
-                                    style: 'currency', currency: 'XOF'
-                                }).format(ticketData.estimated_price) }}
+                                Devis estimé : {{ fmt(ticketData.estimated_price) }}
                             </p>
                         </div>
                     </div>
@@ -180,13 +181,13 @@ const totalParts = computed(() =>
                             <div v-for="p in ticketData.parts" :key="p.id" class="flex items-center justify-between py-2">
                                 <span class="text-sm text-gray-700">{{ p.part.name }}</span>
                                 <span class="text-sm text-gray-500">
-                                    {{ p.quantity }} × {{ p.unit_price }}€ =
-                                    <span class="font-medium text-gray-900">{{ p.total.toFixed(2) }}€</span>
+                                    {{ p.quantity }} × {{ fmt(p.unit_price) }} =
+                                    <span class="font-medium text-gray-900">{{ fmt(p.total) }}</span>
                                 </span>
                             </div>
                             <div class="flex justify-end pt-2">
                                 <span class="text-sm font-semibold text-gray-900">
-                                    Total pièces : {{ totalParts.toFixed(2) }}€
+                                    Total pièces : {{ fmt(totalParts) }}
                                 </span>
                             </div>
                         </div>

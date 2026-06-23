@@ -25,6 +25,9 @@ function submit() {
         onFinish: () => form.reset('password', 'password_confirmation'),
     })
 }
+
+const fmt = (v: number) =>
+    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 </script>
 
 <template>
@@ -127,7 +130,7 @@ function submit() {
               <div>
                 <p class="font-semibold text-gray-900">{{ plan.name }}</p>
                 <p class="text-lg font-bold text-indigo-600">
-                  {{ plan.price > 0 ? `${plan.price} €/mois` : 'Gratuit' }}
+                  {{ plan.price > 0 ? `${fmt(plan.price)}/mois` : 'Gratuit' }}
                 </p>
               </div>
               <ul class="space-y-1">

@@ -25,11 +25,13 @@ class DepotController extends Controller
      */
     public function index()
     {
+        $shop = app('current_shop');
+
         $depots = Depot::withCount('stocks')
             ->with('users:id,name')
             ->get();
 
-        $shopUsers = User::where('shop_id', app('current_shop')->id)
+        $shopUsers = User::where('shop_id', $shop->id)
             ->role('technicien')
             ->select('id', 'name')
             ->get();
@@ -37,6 +39,8 @@ class DepotController extends Controller
         return Inertia::render('Depot/Index', [
             'depots' => DepotResource::collection($depots),
             'shopUsers' => $shopUsers,
+            'depotLimit' => $shop->plan?->max_depots,
+            'canAddDepot' => $shop->canAddDepot(),
         ]);
     }
 
@@ -53,6 +57,12 @@ class DepotController extends Controller
      */
     public function store(StoreDepotRequest $request)
     {
+        $shop = app('current_shop');
+
+        if (! $shop->canAddDepot()) {
+            return back()->with('error', "Limite de dépôts atteinte pour l'offre {$shop->plan?->name} ({$shop->plan?->max_depots}). Passez à une offre supérieure pour en ajouter.");
+        }
+
         $depot = Depot::create($request->validated());
         $depot->users()->attach($request->users);
 
