@@ -17,8 +17,12 @@ class LoginController extends Controller
 
     public function store(LoginRequest $request)
     {
-        $request->authenticate();
+        $user = $request->authenticate();
         $request->session()->regenerate();
+
+        if (! $user->shop_id) {
+            return redirect()->intended(route('admin.plans.index'));
+        }
 
         return redirect()->intended(route('dashboard'));
     }

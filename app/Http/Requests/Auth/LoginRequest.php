@@ -41,27 +41,28 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    public function authenticate():User{
+    public function authenticate(): User
+    {
         $cretendials = $this->only('email', 'password');
 
-        if(!Auth::attempt($cretendials, $this->boolean('remember'))) {
-            throw  ValidationException::withMessages([
-                'email' => 'Identifiant incorrects'
+        if (! Auth::attempt($cretendials, $this->boolean('remember'))) {
+            throw ValidationException::withMessages([
+                'email' => 'Identifiant incorrects',
             ]);
         }
         $user = Auth::user();
 
-        if(!$user->is_active){
+        if (! $user->is_active) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'email' => 'Ce compte est desactivé'
+                'email' => 'Ce compte est desactivé',
             ]);
         }
 
-        if(!$user->shop || !$user->shop->is_active){
+        if ($user->shop_id && (! $user->shop || ! $user->shop->is_active)) {
             Auth::logout();
             throw ValidationException::withMessages([
-                'email' => 'La boutique associée à ce compte est desactivée'
+                'email' => 'La boutique associée à ce compte est desactivée',
             ]);
         }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -46,6 +47,10 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+Route::middleware(['auth', 'platform.admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('plans', PlanController::class)->except(['show', 'create', 'edit']);
+});
 
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
     // Sélection de dépôt (non-admins avec plusieurs dépôts)

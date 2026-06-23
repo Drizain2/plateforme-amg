@@ -10,15 +10,16 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,          // 1. Rôles Spatie (requis en premier)
-            PlanSeeder::class,          // 2. Offres d'abonnement
-            ShopSeeder::class,          // 3. Shops (tenant root)
-            UserSeeder::class,          // 4. Admin + techniciens par shop
-            DepotSeeder::class,         // 5. Dépôts + affectation utilisateurs
-            SupplierSeeder::class,      // 6. Fournisseurs
-            CategorieSeeder::class,     // 7. Catégories de pièces
-            PartSeeder::class,          // 8. Pièces (nécessite catégories + fournisseurs)
-            StockDepotSeeder::class,    // 9. Stock par pièce × dépôt
-            StockMovementSeeder::class, // 10. Historique des mouvements
+            PlatformAdminSeeder::class, // 2. Opérateur plateforme (sans shop)
+            PlanSeeder::class,          // 3. Offres d'abonnement
+            ShopSeeder::class,          // 4. Shops (tenant root)
+            UserSeeder::class,          // 5. Admin + techniciens par shop
+            DepotSeeder::class,         // 6. Dépôts + affectation utilisateurs
+            SupplierSeeder::class,      // 7. Fournisseurs
+            CategorieSeeder::class,     // 8. Catégories de pièces
+            PartSeeder::class,          // 9. Pièces (nécessite catégories + fournisseurs)
+            StockDepotSeeder::class,    // 10. Stock par pièce × dépôt
+            StockMovementSeeder::class, // 11. Historique des mouvements
         ]);
     }
 }

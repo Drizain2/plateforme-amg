@@ -45,10 +45,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user?->load('roles'),
                 'shop' => $user?->shop,
-                'depotActive' => fn() => $user?->depotActive,
-                'depots' => fn() => $this->availableDepots($user),
-                'isGlobalView' => fn() => $user && $user->isAdminOrSuperAdmin() && ! $user->depot_active_id,
-                'unread_count' => fn() => $user?->unreadNotifications()->count() ?? 0,
+                'depotActive' => fn () => $user?->depotActive,
+                'depots' => fn () => $this->availableDepots($user),
+                'isGlobalView' => fn () => $user && $user->isAdminOrSuperAdmin() && ! $user->depot_active_id,
+                'unread_count' => fn () => $user?->unreadNotifications()->count() ?? 0,
                 'permissions' => $user ? $permService->effectivePermissions($user) : [],
             ],
             'flash' => [
@@ -63,7 +63,7 @@ class HandleInertiaRequests extends Middleware
      */
     private function availableDepots($user): array
     {
-        if (! $user) {
+        if (! $user || ! $user->shop) {
             return [];
         }
 
@@ -73,7 +73,7 @@ class HandleInertiaRequests extends Middleware
                 ->get([
                     'depots.id',
                     'depots.name',
-                    'depots.is_active'
+                    'depots.is_active',
                 ])
                 ->toArray();
         }
@@ -83,7 +83,7 @@ class HandleInertiaRequests extends Middleware
             ->get([
                 'depots.id',
                 'depots.name',
-                'depots.is_active'
+                'depots.is_active',
             ])
             ->toArray();
     }

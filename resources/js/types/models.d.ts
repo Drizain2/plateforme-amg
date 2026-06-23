@@ -4,7 +4,12 @@ export interface Plan {
     slug: string;
     description?: string | null;
     price: number;
+    max_users?: number | null;
+    max_depots?: number | null;
     features: string[];
+    sort_order?: number;
+    is_active?: boolean;
+    shops_count?: number;
 }
 
 export interface Shop {

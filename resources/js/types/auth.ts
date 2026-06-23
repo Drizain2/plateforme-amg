@@ -2,7 +2,7 @@ import type { AppNotification, Depot, Shop } from './models';
 
 export type User = {
     id: number;
-    shop_id: number;
+    shop_id: number | null;
     name: string;
     email: string;
     avatar?: string;
@@ -74,7 +74,7 @@ export interface ShopUser {
 }
 export type Auth = {
     user: User;
-    shop: Shop;
+    shop: Shop | null;
     depotActive: Depot | null;
     depots: Pick<Depot, 'id' | 'name' | 'is_active'>[];
     isGlobalView: boolean;
