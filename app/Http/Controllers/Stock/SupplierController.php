@@ -7,6 +7,7 @@ use App\Http\Requests\Stock\StoreSupplierRequest;
 use App\Http\Requests\Stock\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
 use App\Models\Supplier;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -30,9 +31,13 @@ class SupplierController extends Controller
         ]);
     }
 
-    public function store(StoreSupplierRequest $request): RedirectResponse
+    public function store(StoreSupplierRequest $request): RedirectResponse|JsonResponse
     {
-        Supplier::create($request->validated());
+        $supplier = Supplier::create($request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json(new SupplierResource($supplier));
+        }
 
         return back()->with('success', 'Fournisseur ajouté.');
     }

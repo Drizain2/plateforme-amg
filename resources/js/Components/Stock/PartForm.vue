@@ -1,11 +1,13 @@
 <!-- resources/js/Components/Stock/PartForm.vue -->
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { router, useForm } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
+import SupplierController from '@/actions/App/Http/Controllers/Stock/SupplierController'
 import Button from '@/Components/UI/Button.vue'
+import Combobox from '@/Components/UI/Combobox.vue'
 import Input from '@/Components/UI/Input.vue'
-import Select from '@/Components/UI/Select.vue'
+import { useToast } from '@/Composables/useToast'
 import type { Part, Category, Supplier } from '@/types'
 
 const props = defineProps<{
@@ -15,6 +17,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ saved: []; cancel: [] }>()
+
+const { error: toastError } = useToast()
 
 const form = useForm({
   name:        props.part?.name ?? '',
@@ -38,7 +42,61 @@ function submit() {
 }
 
 const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id, label: c.name })))
-const supplierOptions = computed(() => (props.suppliers ?? []).map(s => ({ value: s.id, label: s.name })))
+
+const newSuppliers = ref<Pick<Supplier, 'id' | 'name'>[]>([])
+const creatingSupplier = ref(false)
+
+const supplierOptions = computed(() => {
+  const known = props.suppliers ?? []
+  const extra = newSuppliers.value.filter(s => !known.some(k => k.id === s.id))
+
+  return [...known, ...extra].map(s => ({ value: s.id, label: s.name }))
+})
+
+async function createSupplier(name: string) {
+  if (!name || creatingSupplier.value) {
+    return
+  }
+
+  creatingSupplier.value = true
+
+  try {
+    const res = await fetch(SupplierController.store.url(), {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      toastError(body?.message ?? 'Impossible de créer le fournisseur.')
+
+      return
+    }
+
+    const supplier = await res.json()
+    newSuppliers.value.push({ id: supplier.id, name: supplier.name })
+    form.supplier_id = supplier.id
+    router.reload({ only: ['suppliers'] })
+  } finally {
+    creatingSupplier.value = false
+  }
+}
+
+function generateSku() {
+  const ascii = Array.from(form.name.normalize('NFD')).filter(ch => ch.codePointAt(0)! < 128).join('')
+  const words = ascii.toUpperCase().replace(/[^A-Z0-9\s]/g, '').trim().split(/\s+/).filter(Boolean)
+  const letters = words.filter(w => /^[A-Z]/.test(w))
+
+  const prefix = letters.length > 1
+    ? letters.map(w => w[0]).join('').slice(0, 4)
+    : (letters[0] ?? words[0] ?? 'PCE').slice(0, 3)
+
+  const digits = String(Math.floor(Math.random() * 10000)).padStart(4, '0')
+  const suffix = Array.from({ length: 2 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('')
+
+  form.sku = `${prefix}-${digits}-${suffix}`
+}
 </script>
 
 <template>
@@ -51,17 +109,30 @@ const supplierOptions = computed(() => (props.suppliers ?? []).map(s => ({ value
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-        <Input v-model="form.sku" placeholder="EX-0001-AA" :error="form.errors.sku" />
+        <div class="flex items-start gap-2">
+          <Input v-model="form.sku" placeholder="EX-0001-AA" :error="form.errors.sku" class="flex-1 min-w-0" />
+          <Button variant="secondary" type="button" :disabled="!form.name.trim()" @click="generateSku">
+            Générer
+          </Button>
+        </div>
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-        <Select v-model="form.category_id" :options="categoryOptions" placeholder="Aucune" :error="form.errors.category_id" />
+        <Combobox v-model="form.category_id" :options="categoryOptions" placeholder="Rechercher une catégorie..." :error="form.errors.category_id" />
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Fournisseur</label>
-        <Select v-model="form.supplier_id" :options="supplierOptions" placeholder="Aucun" :error="form.errors.supplier_id" />
+        <Combobox
+          v-model="form.supplier_id"
+          :options="supplierOptions"
+          placeholder="Rechercher ou créer un fournisseur..."
+          :error="form.errors.supplier_id"
+          allow-create
+          :creating="creatingSupplier"
+          @create="createSupplier"
+        />
       </div>
 
       <div>

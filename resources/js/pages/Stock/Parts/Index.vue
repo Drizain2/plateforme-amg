@@ -19,11 +19,12 @@ import { useFilters } from '@/Composables/useFilters'
 import { usePermission } from '@/Composables/usePermission'
 import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import type { PaginatedResource, Part, Category, StockDepot } from '@/types'
+import type { PaginatedResource, Part, Category, StockDepot, Supplier } from '@/types'
 
 const props = defineProps<{
   parts: PaginatedResource<Part>
   categories: Pick<Category, 'id' | 'name'>[]
+  suppliers: Pick<Supplier, 'id' | 'name'>[]
   filters: {
     search?: string
     category_id?: string
@@ -388,6 +389,7 @@ const fmtXof = (v: number) =>
       <PartForm
         :part="editingPart"
         :categories="categories"
+        :suppliers="suppliers"
         @saved="onSaved"
         @cancel="showModal = false"
       />
