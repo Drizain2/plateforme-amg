@@ -77,6 +77,45 @@ test('marquer un achat comme reçu incrémente le stock et trace le mouvement', 
     expect($purchase->refresh()->status->value)->toBe('received');
 });
 
+test('le seuil d\'alerte précisé à l\'achat est appliqué au stock créé à la réception', function () {
+    $this->actingAs($this->admin)->post(route('purchases.store'), purchasePayload([
+        'supplier_id' => $this->supplier->id,
+        'lines' => [
+            ['part_id' => $this->part->id, 'label' => $this->part->name, 'quantity' => 5, 'unit_price' => 12, 'alert_quantity' => 8],
+        ],
+    ]));
+    $purchase = Purchase::latest('id')->first();
+
+    $this->actingAs($this->admin)->post(route('purchases.transition', $purchase->id), ['status' => 'received']);
+
+    $stock = StockDepot::where('part_id', $this->part->id)->where('depot_id', $this->depot->id)->first();
+    expect($stock->alert_quantity)->toBe(8);
+});
+
+test('un nouveau seuil d\'alerte précisé à un second achat met à jour le stock existant', function () {
+    StockDepot::factory()->create([
+        'shop_id' => $this->shop->id,
+        'part_id' => $this->part->id,
+        'depot_id' => $this->depot->id,
+        'quantity' => 2,
+        'alert_quantity' => 3,
+    ]);
+
+    $this->actingAs($this->admin)->post(route('purchases.store'), purchasePayload([
+        'supplier_id' => $this->supplier->id,
+        'lines' => [
+            ['part_id' => $this->part->id, 'label' => $this->part->name, 'quantity' => 5, 'unit_price' => 12, 'alert_quantity' => 15],
+        ],
+    ]));
+    $purchase = Purchase::latest('id')->first();
+
+    $this->actingAs($this->admin)->post(route('purchases.transition', $purchase->id), ['status' => 'received']);
+
+    $stock = StockDepot::where('part_id', $this->part->id)->where('depot_id', $this->depot->id)->first();
+    expect($stock->alert_quantity)->toBe(15);
+    expect($stock->quantity)->toBe(7);
+});
+
 test('marquer un achat reçu comme payé ne modifie pas le stock', function () {
     $this->actingAs($this->admin)->post(route('purchases.store'), purchasePayload([
         'supplier_id' => $this->supplier->id,

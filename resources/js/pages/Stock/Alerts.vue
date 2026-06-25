@@ -25,7 +25,7 @@ defineProps<{
       <!-- Header -->
       <div>
         <h1 class="text-xl font-semibold text-gray-900">Alertes de stock</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Pièces en dessous du seuil d'alerte</p>
+        <p class="text-sm text-gray-500 mt-0.5">Articles en dessous du seuil d'alerte</p>
       </div>
 
       <!-- Vide -->
@@ -43,7 +43,7 @@ defineProps<{
           <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Pièce</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Article</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Dépôt</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Stock</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Seuil</th>

@@ -125,7 +125,7 @@ class InvoiceService
                     $stock = StockDepot::where('part_id', $line['part_id'])->first();
 
                     if (! $stock) {
-                        throw new InsufficientStockException('Aucun stock pour cette pièce dans ce dépôt.');
+                        throw new InsufficientStockException('Aucun stock pour cet article dans ce dépôt.');
                     }
 
                     $this->stockService->consume($stock, $line['quantity'], null, $by, $invoice->id, $invoiceLine->id);
@@ -223,7 +223,7 @@ class InvoiceService
                 $stock = StockDepot::where('part_id', $data['part_id'])->first();
 
                 if (! $stock) {
-                    throw new InsufficientStockException('Aucun stock pour cette pièce dans ce dépôt.');
+                    throw new InsufficientStockException('Aucun stock pour cet article dans ce dépôt.');
                 }
 
                 $this->stockService->consume($stock, $data['quantity'], null, $by, $invoice->id, $line->id);

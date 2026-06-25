@@ -79,7 +79,7 @@ function submitTransition(status: string) {
           <!-- Lignes -->
           <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div class="px-5 py-4 border-b">
-              <p class="text-sm font-medium text-gray-700">Pièces commandées</p>
+              <p class="text-sm font-medium text-gray-700">Articles commandés</p>
             </div>
 
             <table class="min-w-full divide-y divide-gray-100 text-sm">

@@ -21,6 +21,7 @@ class StorePurchaseRequest extends FormRequest
             'lines.*.part_id' => ['required', 'integer', 'exists:parts,id'],
             'lines.*.label' => ['required', 'string', 'max:255'],
             'lines.*.quantity' => ['required', 'integer', 'min:1'],
+            'lines.*.alert_quantity' => ['nullable', 'integer', 'min:0'],
             'lines.*.unit_price' => ['required', 'numeric', 'min:0'],
         ];
     }

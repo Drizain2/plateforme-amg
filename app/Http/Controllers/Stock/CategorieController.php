@@ -67,7 +67,7 @@ class CategorieController extends Controller
         if ($categorie->parts()->exists()) {
             $categorie->update(['is_active' => false]);
 
-            return back()->with('success', 'Catégorie désactivée (pièces existantes).');
+            return back()->with('success', 'Catégorie désactivée (articles existants).');
         }
 
         $categorie->delete();

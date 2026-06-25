@@ -33,6 +33,7 @@ class PurchaseService
                     'part_id' => $line['part_id'],
                     'label' => $line['label'],
                     'quantity' => $line['quantity'],
+                    'alert_quantity' => $line['alert_quantity'] ?? null,
                     'unit_price' => $line['unit_price'],
                 ]);
             }
@@ -67,8 +68,12 @@ class PurchaseService
         foreach ($purchase->lines as $line) {
             $stock = StockDepot::withoutGlobalScopes()->firstOrCreate(
                 ['part_id' => $line->part_id, 'depot_id' => $purchase->depot_id],
-                ['quantity' => 0, 'alert_quantity' => 0]
+                ['quantity' => 0, 'alert_quantity' => $line->alert_quantity ?? 0]
             );
+
+            if ($line->alert_quantity !== null && ! $stock->wasRecentlyCreated) {
+                $stock->update(['alert_quantity' => $line->alert_quantity]);
+            }
 
             $this->stockService->restock(
                 $stock,

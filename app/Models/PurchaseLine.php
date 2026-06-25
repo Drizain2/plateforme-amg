@@ -11,7 +11,7 @@ class PurchaseLine extends Model
     use HasShopScope;
 
     protected $fillable = [
-        'shop_id', 'purchase_id', 'part_id', 'label', 'quantity', 'unit_price', 'total',
+        'shop_id', 'purchase_id', 'part_id', 'label', 'quantity', 'alert_quantity', 'unit_price', 'total',
     ];
 
     protected static function booted(): void

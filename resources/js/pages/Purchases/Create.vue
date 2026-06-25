@@ -20,6 +20,7 @@ interface Line {
   quantity: number
   unit_price: number
   part_id: number
+  alert_quantity: number | ''
 }
 
 const page = usePage()
@@ -48,6 +49,7 @@ function addPartFromStock(result: StockSearchResult) {
     label: result.name,
     quantity: 1,
     unit_price: result.unit_price,
+    alert_quantity: result.alert_quantity ?? '',
   })
 }
 
@@ -83,7 +85,7 @@ function submit() {
 
 <template>
   <AppLayout title="Nouvel achat">
-    <div class="max-w-6xl space-y-6">
+    <div class="w-full px-4 space-y-6">
 
       <!-- Header -->
       <div class="flex items-center gap-3">
@@ -101,10 +103,10 @@ function submit() {
         Sélectionnez un dépôt actif (en haut) pour créer un achat — le stock sera reçu dans ce dépôt.
       </div>
 
-      <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div v-else class="flex flex-row gap-6 items-start">
 
         <!-- Gauche : achat -->
-        <form @submit.prevent="submit" class="space-y-6">
+        <form @submit.prevent="submit" class="space-y-6 w-4/3">
 
           <!-- Infos générales -->
           <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
@@ -134,16 +136,17 @@ function submit() {
 
           <!-- Lignes -->
           <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-gray-700">Pièces commandées</h2>
+            <h2 class="text-sm font-semibold text-gray-700">Articles commandés</h2>
 
             <div v-if="form.lines.length === 0" class="text-center text-sm text-gray-400 py-6">
-              Cliquez sur une pièce du catalogue à droite pour l'ajouter.
+              Cliquez sur un article du catalogue à droite pour l'ajouter.
             </div>
 
             <div v-else class="space-y-2">
               <!-- En-tête colonnes -->
               <div class="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase tracking-wide px-1">
                 <div class="col-span-6">Désignation</div>
+                <div class="col-span-2">seuil</div>
                 <div class="col-span-2">Qté</div>
                 <div class="col-span-2">Prix unit.</div>
                 <div class="col-span-1">Total</div>
@@ -153,9 +156,12 @@ function submit() {
               <div
                 v-for="(line, i) in form.lines"
                 :key="i"
-                class="grid grid-cols-12 gap-2 items-center"
+                class="grid grid-cols-12 gap-2 items-center pb-2 border-b border-gray-50 last:border-0"
               >
                 <p class="col-span-6 text-sm font-medium text-gray-900 px-1 truncate">{{ line.label }}</p>
+                <div class="col-span-2">
+                  <Input v-model.number="line.alert_quantity" type="number" min="0" placeholder="Non modifié" class="w-28" />
+                </div>
                 <div class="col-span-2">
                   <Input v-model.number="line.quantity" type="number" min="1" />
                 </div>
@@ -202,8 +208,8 @@ function submit() {
         </form>
 
         <!-- Droite : catalogue -->
-        <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4 lg:sticky lg:top-6">
-          <h2 class="text-sm font-semibold text-gray-700">Catalogue pièces</h2>
+        <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4 lg:sticky lg:top-6 w-2/3">
+          <h2 class="text-sm font-semibold text-gray-700">Catalogue d'articles</h2>
           <PartStockPicker :depot-id="depotActive.id" mode="purchase" @select="addPartFromStock" />
         </div>
 

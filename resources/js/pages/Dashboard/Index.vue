@@ -57,7 +57,7 @@ const depotValues  = computed(() => props.charts.tickets_by_depot.map(d => d.tot
         <StatCard
           label="Stock critique"
           :value="stats.low_stock_count"
-          sub="pièces sous seuil"
+          sub="articles sous seuil"
           :variant="stats.low_stock_count > 0 ? 'danger' : 'default'"
         />
         <StatCard

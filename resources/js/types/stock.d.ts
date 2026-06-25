@@ -8,6 +8,7 @@ export interface StockSearchResult {
     sell_price: number;
     unit_price: number;
     avg_cost_price: number;
+    alert_quantity: number | null;
 }
 
 export type StockMovementType =

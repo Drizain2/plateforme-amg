@@ -42,7 +42,7 @@ class InvoiceSent extends Notification implements ShouldQueue
             ->greeting("Bonjour {$notifiable->name},")
             ->line('Veuillez trouver ci-joint votre facture.')
             ->line("**Numéro :** {$this->invoice->number}")
-            ->line('**Montant TTC :** '.number_format($this->invoice->total_ttc, 2, ',', ' ').' €')
+            ->line('**Montant TTC :** '.number_format($this->invoice->total_ttc, 0, ' ', ' ').' FCFA')
             ->when(
                 $this->invoice->due_at,
                 fn ($m) => $m->line("**Échéance :** {$this->invoice->due_at->format('d/m/Y')}")

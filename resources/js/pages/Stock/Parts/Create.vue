@@ -13,7 +13,7 @@ defineProps<{
 </script>
 
 <template>
-  <AppLayout title="Ajouter une pièce">
+  <AppLayout title="Ajouter un article">
     <div class="max-w-2xl space-y-6">
 
       <!-- Header -->
@@ -21,7 +21,7 @@ defineProps<{
         <Button variant="ghost" size="sm" @click="router.visit(PartController.index.url())">
           ← Retour
         </Button>
-        <h1 class="text-xl font-semibold text-gray-900">Ajouter une pièce</h1>
+        <h1 class="text-xl font-semibold text-gray-900">Ajouter un article</h1>
       </div>
 
       <!-- Formulaire -->

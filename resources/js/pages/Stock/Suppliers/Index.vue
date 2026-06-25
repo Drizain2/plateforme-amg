@@ -82,7 +82,7 @@ const deletingId = ref<number | null>(null)
 
 function confirmDelete(supplier: Supplier & { parts_count: number }) {
   const msg = supplier.parts_count > 0
-    ? `Ce fournisseur a ${supplier.parts_count} pièce(s) associée(s). Il sera désactivé. Continuer ?`
+    ? `Ce fournisseur a ${supplier.parts_count} article(s) associé(s). Il sera désactivé. Continuer ?`
     : `Supprimer le fournisseur "${supplier.name}" ?`
 
   if (!confirm(msg)) {
@@ -147,7 +147,7 @@ return
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Email</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Téléphone</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Adresse</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Pièces</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Articles</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Statut</th>
                 <th class="px-4 py-3" />
               </tr>

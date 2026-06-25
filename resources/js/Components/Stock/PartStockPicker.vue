@@ -26,7 +26,7 @@ const isLossMaking = (r: StockSearchResult) =>
 const fmtXof = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
-const emptyLabel = computed(() => props.mode === 'purchase' ? 'Aucune pièce trouvée' : 'Aucune pièce en stock')
+const emptyLabel = computed(() => props.mode === 'purchase' ? 'Aucun article trouvé' : 'Aucun article en stock')
 
 onMounted(runSearch)
 watch(() => props.depotId, runSearch)

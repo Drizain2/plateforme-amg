@@ -90,7 +90,7 @@ const groups: SidebarGroup[] = [
     label: 'Stock',
     items: [
       {
-        label: 'Pièces',
+        label: 'Articles',
         href: PartController.index.url(),
         path: '/stock/parts',
         permission: 'stock.view',

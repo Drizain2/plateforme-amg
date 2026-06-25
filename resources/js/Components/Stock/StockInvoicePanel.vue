@@ -240,7 +240,7 @@ watch(() => props.show, (shown) => {
                 </div>
 
                 <div v-if="lines.length === 0" class="text-center text-sm text-gray-400 py-8 border border-dashed border-gray-200 rounded-lg">
-                  Cliquez sur une pièce à droite pour l'ajouter à la facture.
+                  Cliquez sur un article à droite pour l'ajouter à la facture.
                 </div>
 
                 <div v-else class="space-y-2">

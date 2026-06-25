@@ -131,7 +131,7 @@ function generateSku() {
 
   const prefix = letters.length > 1
     ? letters.map(w => w[0]).join('').slice(0, 4)
-    : (letters[0] ?? words[0] ?? 'PCE').slice(0, 3)
+    : (letters[0] ?? words[0] ?? 'ART').slice(0, 3)
 
   const digits = String(Math.floor(Math.random() * 10000)).padStart(4, '0')
   const suffix = Array.from({ length: 2 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('')
@@ -183,7 +183,7 @@ function generateSku() {
     </div>
 
     <p class="text-xs text-gray-500">
-      Le stock se gère par dépôt depuis l'écran « Mouvements » une fois la pièce créée.
+      Le stock se gère par dépôt depuis l'écran « Mouvements » une fois l'article créé.
     </p>
 
     <div class="flex justify-end gap-2 pt-2">

@@ -37,12 +37,12 @@ class LowStockAlert extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("⚠️ Stock critique — {$this->stockDepot->part->name}")
             ->greeting("Bonjour {$notifiable->name},")
-            ->line("Une pièce est en dessous du seuil critique.")
-            ->line("**Pièce :** {$this->stockDepot->part->name}")
+            ->line('Un article est en dessous du seuil critique.')
+            ->line("**Article :** {$this->stockDepot->part->name}")
             ->line("**Dépôt :** {$this->stockDepot->depot->name}")
             ->line("**Stock actuel :** {$this->stockDepot->quantity} / Seuil : {$this->stockDepot->alert_quantity}")
             ->action('Voir le stock critique', $url)
-            ->salutation("SAV Platform");
+            ->salutation('SAV Platform');
     }
 
     /**
@@ -50,15 +50,15 @@ class LowStockAlert extends Notification implements ShouldQueue
      *
      * @return array<string, mixed>
      */
-     public function toArray(object $notifiable): array
+    public function toArray(object $notifiable): array
     {
         return [
-            'type'          => 'low_stock',
-            'part_id'       => $this->stockDepot->part->id,
-            'part_name'     => $this->stockDepot->part->name,
-            'quantity'      => $this->stockDepot->quantity,
+            'type' => 'low_stock',
+            'part_id' => $this->stockDepot->part->id,
+            'part_name' => $this->stockDepot->part->name,
+            'quantity' => $this->stockDepot->quantity,
             'min_threshold' => $this->stockDepot->alert_quantity,
-            'depot_name'    => $this->stockDepot->depot->name,
+            'depot_name' => $this->stockDepot->depot->name,
         ];
     }
 }

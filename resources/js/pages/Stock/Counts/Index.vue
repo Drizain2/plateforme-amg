@@ -124,7 +124,7 @@ function goToPage(url: string | null) {
     <Modal :show="showStartModal" title="Démarrer un inventaire" max-width="sm" @close="showStartModal = false">
       <form @submit.prevent="submitStart" class="space-y-4">
         <p class="text-sm text-gray-500">
-          Un instantané de la quantité et du coût moyen actuels de chaque pièce du dépôt actif sera créé. Vous pourrez ensuite saisir les quantités comptées.
+          Un instantané de la quantité et du coût moyen actuels de chaque article du dépôt actif sera créé. Vous pourrez ensuite saisir les quantités comptées.
         </p>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>

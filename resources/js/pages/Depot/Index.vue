@@ -70,7 +70,7 @@ const deletingId = ref<number | null>(null)
 
 function confirmDelete(depot: typeof props.depots.data[0]) {
   const msg = (depot.stocks_count ?? 0) > 0
-    ? `Ce dépôt contient ${depot.stocks_count ?? 0} pièce(s). Il sera désactivé. Continuer ?`
+    ? `Ce dépôt contient ${depot.stocks_count ?? 0} article(s). Il sera désactivé. Continuer ?`
     : `Supprimer le dépôt "${depot.name}" ?`
 
   if (!confirm(msg)){
@@ -207,7 +207,7 @@ const availableUsers = computed(() => {
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-gray-50 rounded-lg px-3 py-2 text-center">
               <p class="text-lg font-bold text-indigo-600">{{ depot.stocks_count ?? 0 }}</p>
-              <p class="text-xs text-gray-500">Pièces</p>
+              <p class="text-xs text-gray-500">Articles</p>
             </div>
             <div class="bg-gray-50 rounded-lg px-3 py-2 text-center">
               <p class="text-lg font-bold text-indigo-600">{{ depot.users?.length }}</p>

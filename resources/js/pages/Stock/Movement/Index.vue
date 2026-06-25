@@ -326,7 +326,7 @@ const isDebit = (m: StockMovement) => m.type === 'out' || m.type === 'transfer_o
               <tr>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Date</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Type</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Pièce</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Article</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Dépôt</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Quantité</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Coût unit.</th>
@@ -354,7 +354,7 @@ const isDebit = (m: StockMovement) => m.type === 'out' || m.type === 'transfer_o
                   </Badge>
                 </td>
 
-                <!-- Pièce -->
+                <!-- Article -->
                 <td class="px-4 py-3">
                   <p class="text-gray-900 font-medium text-xs">{{ movement.stock?.part?.name }}</p>
                   <p v-if="movement.stock?.part?.sku" class="text-gray-400 font-mono text-xs">
@@ -426,11 +426,11 @@ const isDebit = (m: StockMovement) => m.type === 'out' || m.type === 'transfer_o
     <Modal :show="showModal" title="Enregistrer un mouvement" max-width="md" @close="showModal = false">
       <form @submit.prevent="submitMovement" class="space-y-4">
 
-        <!-- Recherche pièce -->
+        <!-- Recherche article -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Pièce *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Article *</label>
           <div class="relative">
-            <Input v-model="partSearch" placeholder="Rechercher une pièce..." @input="searchParts"
+            <Input v-model="partSearch" placeholder="Rechercher un article..." @input="searchParts"
               :error="movementForm.errors.part_id" />
             <div v-if="foundParts.length"
               class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg divide-y max-h-48 overflow-y-auto">
@@ -446,7 +446,7 @@ const isDebit = (m: StockMovement) => m.type === 'out' || m.type === 'transfer_o
           </div>
           <button v-if="movementForm.part_id" type="button" @click="clearPart"
             class="text-xs text-indigo-600 hover:underline mt-1">
-            Changer de pièce
+            Changer d'article
           </button>
         </div>
 
@@ -507,11 +507,11 @@ const isDebit = (m: StockMovement) => m.type === 'out' || m.type === 'transfer_o
             :error="transferForm.errors.from_depot_id" />
         </div>
 
-        <!-- Recherche pièce -->
+        <!-- Recherche article -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Pièce *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Article *</label>
           <div class="relative">
-            <Input v-model="transferPartSearch" placeholder="Rechercher une pièce..." @input="searchTransferParts"
+            <Input v-model="transferPartSearch" placeholder="Rechercher un article..." @input="searchTransferParts"
               :error="transferForm.errors.part_id" />
             <div v-if="foundTransferParts.length"
               class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg divide-y max-h-48 overflow-y-auto">

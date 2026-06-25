@@ -163,15 +163,15 @@ const fmtXof = (v: number) =>
 </script>
 
 <template>
-  <AppLayout title="Pièces détachées">
+  <AppLayout title="Articles">
     <div class="space-y-6">
 
       <!-- Header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900">Pièces détachées</h1>
+          <h1 class="text-xl font-semibold text-gray-900">Articles</h1>
           <p class="text-sm text-gray-500 mt-0.5">
-            {{ parts.meta.total }} pièce{{ parts.meta.total > 1 ? 's' : '' }} au total
+            {{ parts.meta.total }} article{{ parts.meta.total > 1 ? 's' : '' }} au total
           </p>
           <p v-if="!depotActive" class="text-xs text-amber-600 mt-1">
             Sélectionnez un dépôt actif (en haut) pour ravitailler ou facturer depuis le stock.
@@ -192,7 +192,7 @@ const fmtXof = (v: number) =>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Ajouter une pièce
+            Ajouter un article
           </Button>
         </div>
       </div>
@@ -252,7 +252,7 @@ const fmtXof = (v: number) =>
           <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Pièce</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Article</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">SKU</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Catégorie</th>
                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wide text-xs">Stock par dépôt</th>
@@ -264,7 +264,7 @@ const fmtXof = (v: number) =>
             <tbody class="divide-y divide-gray-100">
               <tr v-if="parts.data.length === 0">
                 <td colspan="8" class="px-4 py-12 text-center text-gray-400">
-                  Aucune pièce trouvée
+                  Aucun article trouvé
                 </td>
               </tr>
               <tr
@@ -322,7 +322,7 @@ const fmtXof = (v: number) =>
                       Mouvements
                     </Button>
                     <Button
-                      title="Modifier la pièce"
+                      title="Modifier l'article"
                       v-show="can('stock.edit')"
                       variant="ghost"
                       size="sm"
@@ -333,7 +333,7 @@ const fmtXof = (v: number) =>
                       </svg>
                     </Button>
                     <Button
-                      title="Supprimer la pièce"
+                      title="Supprimer l'article"
                       v-show="can('stock.delete')"
                       variant="ghost"
                       size="sm"
@@ -386,7 +386,7 @@ const fmtXof = (v: number) =>
     <!-- Modal création / édition -->
     <Modal
       :show="showModal"
-      :title="editingPart ? 'Modifier la pièce' : 'Ajouter une pièce'"
+      :title="editingPart ? 'Modifier l\'article' : 'Ajouter un article'"
       max-width="lg"
       @close="showModal = false"
     >

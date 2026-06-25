@@ -106,7 +106,7 @@ class PartController extends Controller
     {
         Part::create($request->validated());
 
-        return redirect()->route('stock.parts.index')->with('success', 'Pièce ajoutée.');
+        return redirect()->route('stock.parts.index')->with('success', 'Article ajouté.');
     }
 
     public function edit(Part $part): InertiaResponse
@@ -122,7 +122,7 @@ class PartController extends Controller
     {
         $part->update($request->validated());
 
-        return back()->with('success', 'Pièce mise à jour.');
+        return back()->with('success', 'Article mis à jour.');
     }
 
     public function destroy(Part $part)
@@ -132,13 +132,13 @@ class PartController extends Controller
         if ($hasMovements) {
             $part->update(['is_active' => false]);
 
-            return back()->with('success', 'Pièce désactivée (mouvements existants).');
+            return back()->with('success', 'Article désactivé (mouvements existants).');
         }
 
         $part->stockDepots()->delete();
         $part->delete();
 
-        return back()->with('success', 'Pièce supprimée.');
+        return back()->with('success', 'Article supprimé.');
     }
 
     public function search(): JsonResponse
@@ -179,6 +179,7 @@ class PartController extends Controller
                     'sell_price' => $part->sell_price,
                     'unit_price' => $part->unit_price,
                     'avg_cost_price' => 0,
+                    'alert_quantity' => null,
                 ]];
             }
 
@@ -191,6 +192,7 @@ class PartController extends Controller
                 'sell_price' => $part->sell_price,
                 'unit_price' => $part->unit_price,
                 'avg_cost_price' => $sd->avg_cost_price,
+                'alert_quantity' => $sd->alert_quantity,
             ]);
         });
 

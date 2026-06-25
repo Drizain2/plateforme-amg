@@ -84,9 +84,9 @@ const domainLabels: Record<string, string> = {
 function permLabel(perm: string): string {
     const labels: Record<string, string> = {
         'stock.view': 'Voir le stock',
-        'stock.create': 'Créer des pièces',
-        'stock.edit': 'Modifier les pièces',
-        'stock.delete': 'Supprimer les pièces',
+        'stock.create': 'Créer des articles',
+        'stock.edit': 'Modifier les articles',
+        'stock.delete': 'Supprimer les articles',
         'stock.restock': 'Ravitailler le stock',
         'stock.transfer': 'Transférer entre dépôts',
         'stock.adjust': 'Ajuster l\'inventaire',
