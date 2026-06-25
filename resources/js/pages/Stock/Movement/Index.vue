@@ -211,8 +211,42 @@ const hasActiveFilters = computed(() =>
   !!(type.value || from.value || to.value)
 )
 
+const formatDate = (d: string) => {
+  if (!d) {
+return "Date invalide";
+} // Gère les cas null/undefined/empty
+
+  const date = new Date(d);
+
+  if (isNaN(date.getTime())) {
+return "Date invalide";
+}
+
+  try {
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  } catch (e) {
+    console.error(e);
+
+    // Si 'fr-FR' n'est pas supporté, on essaie avec 'fr'
+    return new Intl.DateTimeFormat('fr', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  }
+};
 const fmtXof = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
+
+const isDebit = (m: StockMovement) => m.type === 'out' || m.type === 'transfer_out'
 </script>
 
 <template>
@@ -310,7 +344,7 @@ const fmtXof = (v: number) =>
               <tr v-for="movement in movements.data" :key="movement.id" class="hover:bg-gray-50 transition">
                 <!-- Date -->
                 <td class="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
-                  {{ movement.created_at }}
+                  {{ formatDate(movement.created_at) }}
                 </td>
 
                 <!-- Type -->
@@ -338,8 +372,8 @@ const fmtXof = (v: number) =>
 
                 <!-- Quantité -->
                 <td class="px-4 py-3 text-right">
-                  <span class="font-bold text-sm" :class="movement.is_debit ? 'text-red-600' : 'text-green-600'">
-                    {{ movement.is_debit ? '-' : '+' }}{{ movement.quantity }}
+                  <span class="font-bold text-sm" :class="isDebit(movement) ? 'text-red-600' : 'text-green-600'">
+                    {{ isDebit(movement) ? '-' : '+' }}{{ movement.quantity }}
                   </span>
                 </td>
 

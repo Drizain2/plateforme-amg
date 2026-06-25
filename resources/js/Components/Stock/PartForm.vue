@@ -2,6 +2,7 @@
 <script setup lang="ts">
 import { router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import CategorieController from '@/actions/App/Http/Controllers/Stock/CategorieController'
 import PartController from '@/actions/App/Http/Controllers/Stock/PartController'
 import SupplierController from '@/actions/App/Http/Controllers/Stock/SupplierController'
 import Button from '@/Components/UI/Button.vue'
@@ -21,12 +22,12 @@ const emit = defineEmits<{ saved: []; cancel: [] }>()
 const { error: toastError } = useToast()
 
 const form = useForm({
-  name:        props.part?.name ?? '',
-  sku:         props.part?.sku ?? '',
+  name: props.part?.name ?? '',
+  sku: props.part?.sku ?? '',
   category_id: props.part?.category?.id ?? '',
   supplier_id: props.part?.supplier?.id ?? '',
-  unit_price:  props.part?.unit_price ?? 0,
-  sell_price:  props.part?.sell_price ?? 0,
+  unit_price: props.part?.unit_price ?? 0,
+  sell_price: props.part?.sell_price ?? 0,
 })
 
 function submit() {
@@ -45,6 +46,42 @@ const categoryOptions = computed(() => props.categories.map(c => ({ value: c.id,
 
 const newSuppliers = ref<Pick<Supplier, 'id' | 'name'>[]>([])
 const creatingSupplier = ref(false)
+const creatingCategory = ref(false)
+
+async function createCategory(name: string) {
+  if (!name || creatingCategory.value) {
+    return
+  }
+
+  creatingCategory.value = true
+
+  try {
+    const res = await fetch(CategorieController.store.url(), {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content,
+      },
+      body: JSON.stringify({ name }),
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+
+      toastError(body?.message ?? 'Impossible de créer la catégorie.')
+
+      return
+    }
+
+    const category = await res.json()
+    newSuppliers.value.push({ id: category.id, name: category.name })
+    form.category_id = category.id
+    router.reload({ only: ['categories'] })
+  } finally {
+    creatingCategory.value = false
+  }
+}
 
 const supplierOptions = computed(() => {
   const known = props.suppliers ?? []
@@ -63,7 +100,11 @@ async function createSupplier(name: string) {
   try {
     const res = await fetch(SupplierController.store.url(), {
       method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content,
+      },
       body: JSON.stringify({ name }),
     })
 
@@ -119,20 +160,15 @@ function generateSku() {
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-        <Combobox v-model="form.category_id" :options="categoryOptions" placeholder="Rechercher une catégorie..." :error="form.errors.category_id" />
+        <Combobox v-model="form.category_id" :options="categoryOptions" placeholder="Rechercher une catégorie..."
+          :error="form.errors.category_id" allow-create :creating="creatingCategory" @create="createCategory" />
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Fournisseur</label>
-        <Combobox
-          v-model="form.supplier_id"
-          :options="supplierOptions"
-          placeholder="Rechercher ou créer un fournisseur..."
-          :error="form.errors.supplier_id"
-          allow-create
-          :creating="creatingSupplier"
-          @create="createSupplier"
-        />
+        <Combobox v-model="form.supplier_id" :options="supplierOptions"
+          placeholder="Rechercher ou créer un fournisseur..." :error="form.errors.supplier_id" allow-create
+          :creating="creatingSupplier" @create="createSupplier" />
       </div>
 
       <div>

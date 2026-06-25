@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Stock;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Categorie;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -27,7 +28,7 @@ class CategorieController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $this->authorizeAdmin();
 
@@ -36,7 +37,11 @@ class CategorieController extends Controller
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
-        Categorie::create($request->only('name', 'is_active'));
+        $categorie = Categorie::create($request->only('name', 'is_active'));
+
+        if ($request->wantsJson()) {
+            return response()->json($categorie);
+        }
 
         return back()->with('success', 'Catégorie ajoutée.');
     }

@@ -32,7 +32,7 @@ class PartController extends Controller
         $filters = $request->only(['search', 'category_id', 'critical']);
 
         $parts = Part::query()
-            ->with(['category:id,name', 'supplier:id,name', 'stockDepots:id,part_id,depot_id,quantity,alert_quantity'])
+            ->with(['category:id,name', 'supplier:id,name', 'stockDepots:id,part_id,depot_id,quantity,alert_quantity', 'stockDepots.depot:id,name'])
             ->tap(fn ($q) => $this->applyPartFilters($q, $filters))
             ->whereHas('stockDepots')
             ->latest()
