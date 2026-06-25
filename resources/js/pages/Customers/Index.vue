@@ -1,13 +1,12 @@
 <!-- resources/js/Pages/Customers/Index.vue -->
 <script setup lang="ts">
-import { router, usePage, Link, useForm } from '@inertiajs/vue3'
+import { router, Link, useForm } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import CustomerController from '@/actions/App/Http/Controllers/Customer/CustomerController'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import { useFilters } from '@/Composables/useFilters'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Customer, PaginatedResource } from '@/types'
 
@@ -16,19 +15,7 @@ const props = defineProps<{
   filters: { search?: string }
 }>()
 
-const { success, error } = useToast()
 const { applyFilter } = useFilters('customers.index')
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-    success(flash.success)
-  }
-
-  if (flash.error) {
-    error(flash.error)
-  }
-}, { immediate: true })
 
 const search = ref(props.filters.search ?? '')
 watch(search, val => applyFilter({ search: val || undefined }))

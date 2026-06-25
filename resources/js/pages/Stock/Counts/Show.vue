@@ -1,29 +1,15 @@
 <!-- resources/js/pages/Stock/Counts/Show.vue -->
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3'
-import { computed, watch } from 'vue'
+import { useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
 import StockCountController from '@/actions/App/Http/Controllers/Stock/StockCountController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { BadgeVariant, StockCount } from '@/types'
 
 const props = defineProps<{ stockCount: StockCount }>()
-
-const { success, error } = useToast()
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-    success(flash.success)
-  }
-
-  if (flash.error) {
-    error(flash.error)
-  }
-}, { immediate: true })
 
 const isDraft = computed(() => props.stockCount.status === 'draft')
 

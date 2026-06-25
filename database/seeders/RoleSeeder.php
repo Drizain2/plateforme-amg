@@ -122,6 +122,7 @@ class RoleSeeder extends Seeder
 
             'users.view',
             'users.manage',
+            'settings.manage',
 
             'dashboard.view',
             'dashboard.analytics',

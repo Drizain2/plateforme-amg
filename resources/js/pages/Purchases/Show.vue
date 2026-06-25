@@ -1,27 +1,12 @@
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3'
-import { watch } from 'vue'
+import { useForm } from '@inertiajs/vue3'
 import PurchaseController from '@/actions/App/Http/Controllers/PurchaseController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { BadgeVariant, Purchase } from '@/types'
 
 const props = defineProps<{ purchase: Purchase }>()
-
-const { success, error } = useToast()
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-    success(flash.success)
-  }
-
-  if (flash.error) {
-    error(flash.error)
-  }
-}, { immediate: true })
 
 const fmt = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)

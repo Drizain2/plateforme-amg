@@ -1,11 +1,10 @@
 <!-- resources/js/Pages/Users/Permissions.vue -->
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue'
+import { router } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
 import UserPermissionController from '@/actions/App/Http/Controllers/UserPermissionController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 // import type { Permission } from '@/Types/models'
 
@@ -16,19 +15,6 @@ const props = defineProps<{
     rolePerms: string[]
     overrides: Record<string, { granted: boolean }>
 }>()
-
-const { success, error } = useToast()
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-    if (flash.success) {
-        success(flash.success)
-    }
-
-    if (flash.error) {
-        error(flash.error)
-    }
-}, { immediate: true })
 
 // Grouper les permissions par domaine
 const grouped = computed(() => {

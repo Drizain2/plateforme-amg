@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router, usePage, Link } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import PurchaseController from '@/actions/App/Http/Controllers/PurchaseController'
 import Badge from '@/Components/UI/Badge.vue'
@@ -7,7 +7,6 @@ import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { BadgeVariant, Purchase } from '@/types/models'
 import type { PaginatedResource } from '@/types/pagination'
@@ -18,19 +17,7 @@ const props = defineProps<{
   statuses: { value: string; label: string }[]
 }>()
 
-const { success, error } = useToast()
 const { applyFilter } = useFilters(PurchaseController.index.url())
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-    success(flash.success)
-  }
-
-  if (flash.error) {
-    error(flash.error)
-  }
-}, { immediate: true })
 
 const search = ref(props.filters.search ?? '')
 const status = ref(props.filters.status ?? '')

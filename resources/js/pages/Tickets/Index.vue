@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Tickets/Index.vue -->
 <script setup lang="ts">
-import { router, usePage, Link } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
 import Badge from '@/Components/UI/Badge.vue'
@@ -9,7 +9,6 @@ import Input from '@/Components/UI/Input.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
 import { usePermission } from '@/Composables/usePermission'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { BadgeVariant, PaginatedResource, Ticket } from '@/types'
 
@@ -22,20 +21,8 @@ const props = defineProps<{
     priorities: { value: string; label: string }[]
 }>()
 
-const { success, error } = useToast()
 const { applyFilter } = useFilters('tickets.index')
 const { can } = usePermission()
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-    if (flash.success) {
-        success(flash.success)
-    }
-
-    if (flash.error) {
-        error(flash.error)
-    }
-}, { immediate: true })
 
 const search = ref(props.filters.search ?? '')
 const status = ref(props.filters.status ?? '')

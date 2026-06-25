@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { router, useForm, usePage } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { router, useForm } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import CustomerController from '@/actions/App/Http/Controllers/Customer/CustomerController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { BadgeVariant, Customer } from '@/types'
 
@@ -14,19 +13,6 @@ const props = defineProps<{
   customer: Customer
   total_spent: number
 }>()
-
-const { success, error } = useToast()
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
- success(flash.success) 
-}
-
-  if (flash.error) {
- error(flash.error) 
-}
-}, { immediate: true })
 
 const fmt = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' })
 

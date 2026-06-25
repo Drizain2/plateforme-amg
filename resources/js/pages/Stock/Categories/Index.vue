@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { router, useForm, usePage } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { router, useForm } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import CategorieController from '@/actions/App/Http/Controllers/Stock/CategorieController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import { usePermission } from '@/Composables/usePermission'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Category } from '@/types'
 
@@ -16,18 +15,6 @@ const props = defineProps<{
 }>()
 
 const { isAdmin } = usePermission()
-const { success, error } = useToast()
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
- success(flash.success) 
-}
-
-  if (flash.error) {
- error(flash.error) 
-}
-}, { immediate: true })
 
 // Création
 const showCreateModal = ref(false)

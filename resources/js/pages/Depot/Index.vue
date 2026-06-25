@@ -1,14 +1,13 @@
 <!-- resources/js/Pages/Stock/Depots/Index.vue -->
 <script setup lang="ts">
-import { router, usePage, useForm } from '@inertiajs/vue3'
-import { computed, ref, watch } from 'vue'
+import { router, useForm } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 import DepotController from '@/actions/App/Http/Controllers/Stock/DepotController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import { usePermission } from '@/Composables/usePermission'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Depot, PaginatedResource } from '@/types'
 
@@ -18,19 +17,7 @@ const props = defineProps<{
   depotLimit: number | null
   canAddDepot: boolean
 }>()
-const { success, error } = useToast()
 const { can } = usePermission()
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success){
-    success(flash.success)
-  }
-
-  if (flash.error){
-    error(flash.error)
-  }
-}, { immediate: true })
 
 // -----------------------------------------------
 // Modal création / édition dépôt

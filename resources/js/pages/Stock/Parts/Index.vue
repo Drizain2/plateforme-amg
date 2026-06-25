@@ -17,7 +17,6 @@ import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
 import { usePermission } from '@/Composables/usePermission'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { PaginatedResource, Part, Category, StockDepot, Supplier } from '@/types'
 
@@ -38,22 +37,10 @@ const props = defineProps<{
   }
 }>()
 
-const { success, error } = useToast()
 const { can } = usePermission()
 const { applyFilter } = useFilters(PartController.index.url())
 const page = usePage()
 const depotActive = computed(() => page.props.auth.depotActive)
-
-// Flash messages
-watch(() => page.props.flash, (flash) => {
-  if (flash.success){
-    success(flash.success)
-  }
-
-  if (flash.error)   {
-    error(flash.error)
-  }
-}, { immediate: true })
 
 // Filtres locaux
 const search     = ref(props.filters.search ?? '')

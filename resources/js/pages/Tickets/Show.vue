@@ -1,7 +1,7 @@
 <!-- resources/js/Pages/Tickets/Show.vue -->
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3'
-import { computed, ref, watch } from 'vue'
+import { useForm } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
 import type { BadgeVariant } from '@/Components/UI/Badge.vue';
 import Badge from '@/Components/UI/Badge.vue'
@@ -10,7 +10,6 @@ import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
 // import { usePermission } from '@/Composables/usePermission'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Ticket } from '@/types'
 
@@ -20,21 +19,9 @@ const props = defineProps<{
     depotParts: { id: number; name: string; quantity: number; unit_price: number }[]
 }>()
 
-const { success, error } = useToast()
 // const { isAdmin } = usePermission()
-const page = usePage()
 
 const ticketData = computed(() => props.ticket)
-
-watch(() => page.props.flash, (flash) => {
-    if (flash.success) {
-        success(flash.success)
-    }
-
-    if (flash.error) {
-        error(flash.error)
-    }
-}, { immediate: true })
 
 // Transition statut
 const transitionForm = useForm({ status: '', note: '' })

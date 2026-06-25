@@ -10,26 +10,14 @@ import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { StockSearchResult } from '@/types'
 import type { Invoice, BadgeVariant } from '@/types/models'
 
 const props = defineProps<{ invoice: Invoice }>()
 
-const { success, error } = useToast()
 const page = usePage()
 const depotActive = computed(() => page.props.auth.depotActive)
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-success(flash.success)
-}
-
-  if (flash.error)   {
-error(flash.error)
-}
-}, { immediate: true })
 
 const fmt = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)

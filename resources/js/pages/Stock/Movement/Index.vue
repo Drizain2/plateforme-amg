@@ -12,7 +12,6 @@ import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
 import { usePermission } from '@/Composables/usePermission'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { StockMovement, StockMovementType, PaginatedResource, BadgeVariant } from '@/types'
 
@@ -24,7 +23,6 @@ const props = defineProps<{
   types: { value: string; label: string }[]
 }>()
 
-const { success, error } = useToast()
 const { applyFilter } = useFilters(StockMovementController.index.url())
 const { can } = usePermission()
 const page = usePage()
@@ -32,16 +30,6 @@ const page = usePage()
 const activeDepot = computed(() => page.props.auth.depotActive)
 const isGlobalView = computed(() => page.props.auth.isGlobalView)
 const activeDepotId = page.props.auth.depotActive ? String(page.props.auth.depotActive.id) : ''
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-    success(flash.success)
-  }
-
-  if (flash.error) {
-    error(flash.error)
-  }
-}, { immediate: true })
 
 // -----------------------------------------------
 // Filtres

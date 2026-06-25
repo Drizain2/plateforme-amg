@@ -1,13 +1,12 @@
 <!-- resources/js/pages/Stock/Counts/Index.vue -->
 <script setup lang="ts">
 import { Link, router, useForm, usePage } from '@inertiajs/vue3'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import StockCountController from '@/actions/App/Http/Controllers/Stock/StockCountController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { BadgeVariant, PaginatedResource, StockCount } from '@/types'
 
@@ -15,19 +14,8 @@ defineProps<{
   counts: PaginatedResource<StockCount>
 }>()
 
-const { success, error } = useToast()
 const page = usePage()
 const depotActive = computed(() => page.props.auth.depotActive)
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-    success(flash.success)
-  }
-
-  if (flash.error) {
-    error(flash.error)
-  }
-}, { immediate: true })
 
 const showStartModal = ref(false)
 const startForm = useForm({ note: '' })

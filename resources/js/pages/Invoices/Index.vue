@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Invoices/Index.vue -->
 <script setup lang="ts">
-import { router, usePage, Link } from '@inertiajs/vue3'
+import { router, Link } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
 import Badge from '@/Components/UI/Badge.vue'
@@ -8,7 +8,6 @@ import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Select from '@/Components/UI/Select.vue'
 import { useFilters } from '@/Composables/useFilters'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Invoice, BadgeVariant } from '@/types/models'
 import type { PaginatedResource } from '@/types/pagination'
@@ -20,19 +19,7 @@ const props = defineProps<{
   summary:  { total_draft: number; total_sent: number; total_paid: number }
 }>()
 
-const { success, error } = useToast()
-const { applyFilter }    = useFilters(InvoiceController.index.url())
-const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-  if (flash.success) {
-success(flash.success)
-}
-
-  if (flash.error)   {
-error(flash.error)
-}
-}, { immediate: true })
+const { applyFilter } = useFilters(InvoiceController.index.url())
 
 const search = ref(props.filters.search ?? '')
 const status = ref(props.filters.status ?? '')

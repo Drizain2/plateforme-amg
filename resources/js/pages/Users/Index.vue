@@ -1,7 +1,7 @@
 <!-- resources/js/Pages/Users/Index.vue -->
 <script setup lang="ts">
 import { router, usePage, useForm } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import ShopUserController from '@/actions/App/Http/Controllers/ShopUserController'
 // import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
@@ -10,7 +10,6 @@ import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
 import UserCard from '@/Components/Users/UserCard.vue'
 import { usePermission } from '@/Composables/usePermission'
-import { useToast } from '@/Composables/useToast'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { ShopUser, UserRole } from '@/types'
 
@@ -21,19 +20,8 @@ const props = defineProps<{
     canAddUser: boolean
 }>()
 
-const { success, error } = useToast()
 const { can } = usePermission()
 const page = usePage()
-
-watch(() => page.props.flash, (flash) => {
-    if (flash.success) {
-        success(flash.success)
-    }
-
-    if (flash.error) {
-        error(flash.error)
-    }
-}, { immediate: true })
 
 const currentUserId = computed(() => page.props.auth.user.id)
 
