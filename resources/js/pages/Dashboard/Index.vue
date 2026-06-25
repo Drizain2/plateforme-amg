@@ -9,6 +9,7 @@ import LineChart from '@/Components/Dashboard/LineChart.vue'
 import StatCard from '@/Components/Dashboard/StatCard.vue'
 import type { BadgeVariant } from '@/Components/UI/Badge.vue';
 import Badge from '@/Components/UI/Badge.vue'
+import { usePermission } from '@/Composables/usePermission'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { DashboardStats, DashboardCharts, DashboardRecent, DashboardAlerts } from '@/types'
 
@@ -19,17 +20,29 @@ const props = defineProps<{
   alerts:  DashboardAlerts
 }>()
 
+const { can } = usePermission()
+const canTickets = computed(() => can('tickets.view'))
+const canStock = computed(() => can('stock.view'))
+const canAnalytics = computed(() => can('dashboard.analytics'))
+const canPurchases = computed(() => can('purchases.view'))
+
 const formatCurrency = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
-const lineLabels = computed(() => props.charts.tickets_by_day.map(d => d.label))
-const lineValues = computed(() => props.charts.tickets_by_day.map(d => d.total))
+const lineLabels = computed(() => (props.charts.tickets_by_day ?? []).map(d => d.label))
+const lineValues = computed(() => (props.charts.tickets_by_day ?? []).map(d => d.total))
 
-const statusLabels = computed(() => props.charts.tickets_by_status.map(d => d.status))
-const statusValues = computed(() => props.charts.tickets_by_status.map(d => d.total))
+const statusLabels = computed(() => (props.charts.tickets_by_status ?? []).map(d => d.status))
+const statusValues = computed(() => (props.charts.tickets_by_status ?? []).map(d => d.total))
 
-const depotLabels  = computed(() => props.charts.tickets_by_depot.map(d => d.depot))
-const depotValues  = computed(() => props.charts.tickets_by_depot.map(d => d.total))
+const depotLabels  = computed(() => (props.charts.tickets_by_depot ?? []).map(d => d.depot))
+const depotValues  = computed(() => (props.charts.tickets_by_depot ?? []).map(d => d.total))
+
+const stockLineLabels = computed(() => (props.charts.stock_movements_by_day ?? []).map(d => d.label))
+const stockLineValues = computed(() => (props.charts.stock_movements_by_day ?? []).map(d => d.total))
+
+const stockDepotLabels = computed(() => (props.charts.stock_by_depot ?? []).map(d => d.depot))
+const stockDepotValues = computed(() => (props.charts.stock_by_depot ?? []).map(d => d.total))
 </script>
 
 <template>
@@ -39,42 +52,55 @@ const depotValues  = computed(() => props.charts.tickets_by_depot.map(d => d.tot
       <h1 class="text-xl font-semibold text-gray-900">Tableau de bord</h1>
 
       <!-- KPIs -->
-      <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         <StatCard
+          v-if="canTickets"
           label="Tickets ouverts"
-          :value="stats.tickets_open"
+          :value="stats.tickets_open ?? 0"
           sub="en cours"
         />
         <StatCard
+          v-if="canTickets"
           label="Créés aujourd'hui"
-          :value="stats.tickets_today"
+          :value="stats.tickets_today ?? 0"
         />
         <StatCard
+          v-if="canTickets"
           label="Terminés ce mois"
-          :value="stats.tickets_done_month"
+          :value="stats.tickets_done_month ?? 0"
           variant="success"
         />
         <StatCard
-          label="Stock critique"
-          :value="stats.low_stock_count"
-          sub="articles sous seuil"
-          :variant="stats.low_stock_count > 0 ? 'danger' : 'default'"
-        />
-        <StatCard
-          label="CA ce mois"
-          :value="formatCurrency(stats.revenue_month)"
-          variant="success"
-        />
-        <StatCard
+          v-if="canTickets"
           label="Délai moyen"
-          :value="`${stats.avg_repair_days}j`"
+          :value="`${stats.avg_repair_days ?? 0}j`"
           sub="de réparation"
+        />
+        <StatCard
+          v-if="canStock"
+          label="Stock critique"
+          :value="stats.low_stock_count ?? 0"
+          sub="articles sous seuil"
+          :variant="(stats.low_stock_count ?? 0) > 0 ? 'danger' : 'default'"
+        />
+        <StatCard
+          v-if="canAnalytics"
+          label="CA ce mois"
+          :value="formatCurrency(stats.revenue_month ?? 0)"
+          variant="success"
+        />
+        <StatCard
+          v-if="canPurchases"
+          label="Achats en attente"
+          :value="stats.purchases_pending_count ?? 0"
+          sub="à réceptionner/payer"
+          :variant="(stats.purchases_pending_count ?? 0) > 0 ? 'warning' : 'default'"
         />
       </div>
 
       <!-- Alertes retard -->
       <div
-        v-if="alerts.overdue.length"
+        v-if="canTickets && alerts.overdue?.length"
         class="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2"
       >
         <p class="text-sm font-semibold text-red-700">
@@ -94,7 +120,7 @@ const depotValues  = computed(() => props.charts.tickets_by_depot.map(d => d.tot
       </div>
 
       <!-- Graphiques -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div v-if="canTickets" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
           <p class="text-sm font-medium text-gray-700 mb-4">Tickets créés — 30 derniers jours</p>
@@ -113,11 +139,29 @@ const depotValues  = computed(() => props.charts.tickets_by_depot.map(d => d.tot
 
       </div>
 
+      <div v-else-if="canStock" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <p class="text-sm font-medium text-gray-700 mb-4">Mouvements de stock — 30 derniers jours</p>
+          <LineChart :labels="stockLineLabels" :values="stockLineValues" />
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <p class="text-sm font-medium text-gray-700 mb-4">Stock par dépôt</p>
+          <DonutChart :labels="stockDepotLabels" :values="stockDepotValues" />
+        </div>
+
+      </div>
+
+      <div v-else class="bg-white rounded-xl border border-gray-200 p-8 text-center text-sm text-gray-400">
+        Aucune donnée à afficher.
+      </div>
+
       <!-- Tableaux récents -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div v-if="canTickets || canStock" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- Derniers tickets -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div v-if="canTickets" class="bg-white rounded-xl border border-gray-200 overflow-hidden" :class="{ 'lg:col-span-2': !canStock }">
           <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <p class="text-sm font-medium text-gray-700">Derniers tickets</p>
             <Link :href="TicketController.index.url()" class="text-xs text-indigo-600 hover:underline">
@@ -148,14 +192,14 @@ const depotValues  = computed(() => props.charts.tickets_by_depot.map(d => d.tot
               </div>
               <span class="text-xs text-gray-400 shrink-0 ml-3">{{ t.created_at }}</span>
             </div>
-            <div v-if="!recent.tickets.length" class="px-5 py-8 text-center text-sm text-gray-400">
+            <div v-if="!recent.tickets?.length" class="px-5 py-8 text-center text-sm text-gray-400">
               Aucun ticket
             </div>
           </div>
         </div>
 
         <!-- Stock critique -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div v-if="canStock" class="bg-white rounded-xl border border-gray-200 overflow-hidden" :class="{ 'lg:col-span-2': !canTickets }">
           <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <p class="text-sm font-medium text-gray-700">Stock critique</p>
             <Link :href="StockMovementController.alerts.url()" class="text-xs text-indigo-600 hover:underline">
@@ -182,7 +226,7 @@ const depotValues  = computed(() => props.charts.tickets_by_depot.map(d => d.tot
                 <span class="text-xs text-gray-400"> / {{ p.alert_quantity }}</span>
               </div>
             </div>
-            <div v-if="!recent.low_stock.length" class="px-5 py-8 text-center text-sm text-gray-400">
+            <div v-if="!recent.low_stock?.length" class="px-5 py-8 text-center text-sm text-gray-400">
               Aucune alerte stock
             </div>
           </div>
