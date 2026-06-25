@@ -28,7 +28,7 @@ const { can } = usePermission()
 const page = usePage()
 
 const activeDepot = computed(() => page.props.auth.depotActive)
-const isGlobalView = computed(() => page.props.auth.isGlobalView)
+// const isGlobalView = computed(() => page.props.auth.isGlobalView)
 const activeDepotId = page.props.auth.depotActive ? String(page.props.auth.depotActive.id) : ''
 
 // -----------------------------------------------

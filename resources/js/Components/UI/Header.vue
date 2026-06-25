@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { router, usePage } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import { useSidebar } from '@/Composables/useSidebar'
 import NotificationBell from './NotificationBell.vue';
 
 defineProps<{
@@ -8,6 +9,7 @@ defineProps<{
 }>()
 
 const page = usePage()
+const { toggleMobile } = useSidebar()
 const auth = computed(() => page.props.auth)
 const isAdmin = computed(() => {
     const role = auth.value.user?.roles?.[0]?.name
@@ -35,10 +37,20 @@ function switchDepot(depotId: number | null) {
 </script>
 
 <template>
-    <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-        <h2 class="text-sm font-medium text-gray-700">{{ title }}</h2>
+    <header class="bg-white border-b border-gray-200 px-4 lg:px-8 py-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <button type="button"
+                class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:bg-gray-100 transition shrink-0"
+                title="Ouvrir le menu" @click="toggleMobile">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <h2 class="text-sm font-medium text-gray-700 truncate">{{ title }}</h2>
+        </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 shrink-0">
             <div v-if="!isAdmin && auth.depotActive"
                 class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-700">
                 <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -10,7 +10,7 @@ import { usePermission } from '@/Composables/usePermission'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Category } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   categories: Pick<Category, 'id' | 'name' | 'is_active'>[]
 }>()
 

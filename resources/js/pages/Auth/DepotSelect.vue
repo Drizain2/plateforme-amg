@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
-import Button from '@/Components/UI/Button.vue'
 import type { Depot } from '@/types/models'
 
 const props = defineProps<{

@@ -1,8 +1,8 @@
 <!-- resources/js/Pages/Track/Show.vue -->
 <script setup lang="ts">
 import { computed } from 'vue'
-import { track } from '@/routes'
 import Button from '@/Components/UI/Button.vue'
+import { track } from '@/routes'
 import type { TrackingTicket, TrackingStep } from '@/types'
 
 const props = defineProps<{ ticket: TrackingTicket }>()

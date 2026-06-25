@@ -9,7 +9,7 @@ import Modal from '@/Components/UI/Modal.vue'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import type { Plan } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   plans: (Plan & { shops_count: number })[]
 }>()
 
@@ -65,12 +65,16 @@ function submit() {
   if (editingPlan.value) {
     form.transform(() => payload).put(PlanController.update.url(editingPlan.value!.id), {
       preserveScroll: true,
-      onSuccess: () => { showModal.value = false },
+      onSuccess: () => {
+        showModal.value = false
+      },
     })
   } else {
     form.transform(() => payload).post(PlanController.store.url(), {
       preserveScroll: true,
-      onSuccess: () => { showModal.value = false },
+      onSuccess: () => {
+        showModal.value = false
+      },
     })
   }
 }
@@ -92,7 +96,9 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
   deletingId.value = plan.id
   router.delete(PlanController.destroy.url(plan.id), {
     preserveScroll: true,
-    onFinish: () => { deletingId.value = null },
+    onFinish: () => {
+      deletingId.value = null
+    },
   })
 }
 </script>
@@ -132,12 +138,8 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
                   Aucune offre pour le moment
                 </td>
               </tr>
-              <tr
-                v-for="plan in plans"
-                :key="plan.id"
-                class="hover:bg-gray-50 transition"
-                :class="{ 'opacity-60': !plan.is_active }"
-              >
+              <tr v-for="plan in plans" :key="plan.id" class="hover:bg-gray-50 transition"
+                :class="{ 'opacity-60': !plan.is_active }">
                 <td class="px-4 py-3">
                   <p class="font-medium text-gray-900">{{ plan.name }}</p>
                   <p class="text-xs text-gray-400">{{ plan.slug }}</p>
@@ -153,7 +155,8 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
                 </td>
 
                 <td class="px-4 py-3">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
                     {{ plan.shops_count }}
                   </span>
                 </td>
@@ -169,13 +172,8 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
                     <Button variant="ghost" size="sm" @click="openEdit(plan)">
                       Modifier
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      :loading="deletingId === plan.id"
-                      @click="confirmDelete(plan)"
-                      class="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
+                    <Button variant="ghost" size="sm" :loading="deletingId === plan.id" @click="confirmDelete(plan)"
+                      class="text-red-500 hover:text-red-700 hover:bg-red-50">
                       {{ plan.shops_count > 0 ? 'Désactiver' : 'Supprimer' }}
                     </Button>
                   </div>
@@ -189,12 +187,8 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
     </div>
 
     <!-- Modal -->
-    <Modal
-      :show="showModal"
-      :title="editingPlan ? 'Modifier l\'offre' : 'Nouvelle offre'"
-      max-width="lg"
-      @close="showModal = false"
-    >
+    <Modal :show="showModal" :title="editingPlan ? 'Modifier l\'offre' : 'Nouvelle offre'" max-width="lg"
+      @close="showModal = false">
       <form @submit.prevent="submit" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -232,12 +226,9 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Fonctionnalités (une par ligne)</label>
-          <textarea
-            v-model="form.features"
-            rows="4"
+          <textarea v-model="form.features" rows="4"
             class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300"
-            placeholder="Dépôts illimités&#10;10 utilisateurs&#10;Facturation"
-          />
+            placeholder="Dépôts illimités&#10;10 utilisateurs&#10;Facturation" />
           <span v-if="form.errors.features" class="text-xs text-red-500">{{ form.errors.features }}</span>
         </div>
 
@@ -248,7 +239,8 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
           </div>
 
           <label class="flex items-center gap-2 cursor-pointer select-none pb-2">
-            <input type="checkbox" v-model="form.is_active" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+            <input type="checkbox" v-model="form.is_active"
+              class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
             <span class="text-sm text-gray-600">Offre active (proposée à l'inscription)</span>
           </label>
         </div>

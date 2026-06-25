@@ -34,11 +34,16 @@
 <body>
 
 <div class="header">
-  <div>
-    <div class="shop-name">{{ $shop->name }}</div>
-    <div style="color:#6b7280; margin-top:4px; font-size:12px;">
-      {{ $shop->address }}<br>
-      {{ $shop->email }} · {{ $shop->phone }}
+  <div style="display:flex; align-items:center; gap:14px;">
+    @if($logo = $shop->logoBase64())
+      <img src="{{ $logo }}" style="height:56px; max-width:120px; object-fit:contain;">
+    @endif
+    <div>
+      <div class="shop-name">{{ $shop->name }}</div>
+      <div style="color:#6b7280; margin-top:4px; font-size:12px;">
+        {{ $shop->address }}<br>
+        {{ $shop->email }} · {{ $shop->phone }}
+      </div>
     </div>
   </div>
   <div class="invoice-meta">

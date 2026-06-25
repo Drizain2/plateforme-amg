@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+import RegisterController from '@/actions/App/Http/Controllers/Auth/RegisterController';
 import Button from '@/Components/UI/Button.vue';
 import Input from '@/Components/UI/Input.vue';
-import RegisterController from '@/actions/App/Http/Controllers/Auth/RegisterController';
 import { login } from '@/routes';
 import type { Plan } from '@/types';
 

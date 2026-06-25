@@ -2,9 +2,9 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import UserPermissionController from '@/actions/App/Http/Controllers/UserPermissionController';
-import { usePermission } from '@/Composables/usePermission';
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
+import { usePermission } from '@/Composables/usePermission';
 import type { ShopUser } from '@/types'
 
 const props = defineProps<{

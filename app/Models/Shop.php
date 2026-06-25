@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 class Shop extends Model
 {
@@ -68,5 +69,27 @@ class Shop extends Model
         $max = $this->plan?->max_users;
 
         return $max === null || $this->users()->count() < $max;
+    }
+
+    /**
+     * Logo encodé en data URI, pour l'intégrer dans un PDF (dompdf ne peut pas
+     * charger les fichiers via une URL HTTP locale).
+     */
+    public function logoBase64(): ?string
+    {
+        if (! $this->logo_url) {
+            return null;
+        }
+
+        $path = str_replace('/storage/', '', $this->logo_url);
+
+        if (! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        $mime = Storage::disk('public')->mimeType($path);
+        $contents = Storage::disk('public')->get($path);
+
+        return "data:{$mime};base64,".base64_encode($contents);
     }
 }

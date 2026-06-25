@@ -2,8 +2,8 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { watch } from 'vue'
 import { toast, Toaster } from 'vue-sonner'
-import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController'
 import PlanController from '@/actions/App/Http/Controllers/Admin/PlanController'
+import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController'
 
 defineProps<{
   title: string

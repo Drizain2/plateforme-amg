@@ -16,14 +16,14 @@ const colors = {
 </script>
 
 <template>
-  <div class="bg-white rounded-xl border border-gray-200 p-5">
-    <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">{{ label }}</p>
+  <div class="bg-white rounded-xl border border-gray-200 p-5 min-w-0 overflow-hidden">
+    <p class="text-xs font-medium text-gray-400 uppercase tracking-wide truncate">{{ label }}</p>
     <p
-      class="text-3xl font-bold mt-2"
+      class="text-3xl font-bold mt-2 truncate"
       :class="colors[variant ?? 'default'].split(' ')[0]"
     >
       {{ value }}
     </p>
-    <p v-if="sub" class="text-xs text-gray-400 mt-1">{{ sub }}</p>
+    <p v-if="sub" class="text-xs text-gray-400 mt-1 truncate">{{ sub }}</p>
   </div>
 </template>

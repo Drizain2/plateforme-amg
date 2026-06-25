@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router, usePage } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import ReportController from '@/actions/App/Http/Controllers/ReportController'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
@@ -23,7 +23,7 @@ const props = defineProps<{
     filters: { from: string; to: string }
 }>()
 
-const page = usePage()
+// const page = usePage()
 
 const from = ref(props.filters.from)
 const to = ref(props.filters.to)
@@ -45,11 +45,13 @@ function quickPeriod(preset: 'week' | 'month' | 'quarter' | 'year') {
             const d = new Date(now)
             d.setDate(d.getDate() - d.getDay() + 1)
             const e = new Date(d); e.setDate(d.getDate() + 6)
+
             return [d, e]
         })(),
         month: [new Date(now.getFullYear(), now.getMonth(), 1), new Date(now.getFullYear(), now.getMonth() + 1, 0)],
         quarter: (() => {
             const q = Math.floor(now.getMonth() / 3)
+
             return [new Date(now.getFullYear(), q * 3, 1), new Date(now.getFullYear(), q * 3 + 3, 0)]
         })(),
         year: [new Date(now.getFullYear(), 0, 1), new Date(now.getFullYear(), 11, 31)],
