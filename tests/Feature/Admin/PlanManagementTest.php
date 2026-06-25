@@ -61,6 +61,34 @@ test('un opérateur plateforme peut créer une offre', function () {
     expect(Plan::where('slug', 'premium')->exists())->toBeTrue();
 });
 
+test('un opérateur plateforme peut créer une offre avec le module tickets désactivé', function () {
+    $response = $this->actingAs($this->platformAdmin)->post(route('admin.plans.store'), [
+        'name' => 'Stock seul',
+        'slug' => 'stock-seul',
+        'price' => 9900,
+        'disabled_modules' => ['tickets'],
+        'sort_order' => 5,
+        'is_active' => true,
+    ]);
+
+    $response->assertSessionHasNoErrors();
+    expect(Plan::where('slug', 'stock-seul')->first()->disabled_modules)->toBe(['tickets']);
+});
+
+test('la création d\'une offre rejette une valeur non autorisée dans disabled_modules', function () {
+    $response = $this->actingAs($this->platformAdmin)->post(route('admin.plans.store'), [
+        'name' => 'Invalide',
+        'slug' => 'invalide',
+        'price' => 0,
+        'disabled_modules' => ['settings'],
+        'sort_order' => 0,
+        'is_active' => true,
+    ]);
+
+    $response->assertSessionHasErrors('disabled_modules.0');
+    expect(Plan::where('slug', 'invalide')->exists())->toBeFalse();
+});
+
 test('un opérateur plateforme peut mettre à jour une offre', function () {
     $plan = Plan::factory()->create(['name' => 'Ancien nom']);
 

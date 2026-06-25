@@ -44,7 +44,7 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'shop_name.required' => 'Le nom de l\'atelier est requis.',
+            'shop_name.required' => 'Le nom de l\'entreprise est requis.',
             'name.required' => 'Votre nom est requis.',
             'email.required' => 'L\'email est requis.',
             'email.email' => 'L\'email doit être une adresse email valide.',

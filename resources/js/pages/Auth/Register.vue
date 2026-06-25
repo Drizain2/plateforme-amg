@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
 import RegisterController from '@/actions/App/Http/Controllers/Auth/RegisterController';
 import Button from '@/Components/UI/Button.vue';
 import Input from '@/Components/UI/Input.vue';
@@ -17,8 +18,25 @@ const form = useForm({
     phone: '',
     password: '',
     password_confirmation: '',
-    plan_id: props.plans[0]?.id ?? null as number | null,
+    plan_id: null as number | null,
 });
+
+// -----------------------------------------------
+// Choix du type d'activité : atelier (SAV + stock) ou stock seul
+// -----------------------------------------------
+const isStockOnly = (plan: Plan) => (plan.disabled_modules ?? []).includes('tickets')
+
+const track = ref<'full' | 'stock'>('full')
+
+const filteredPlans = computed(() =>
+    props.plans.filter(plan => isStockOnly(plan) === (track.value === 'stock'))
+)
+
+watch(filteredPlans, (plans) => {
+    if (!plans.some(p => p.id === form.plan_id)) {
+        form.plan_id = plans[0]?.id ?? null
+    }
+}, { immediate: true })
 
 function submit() {
     form.post(RegisterController.store.url(), {
@@ -37,7 +55,7 @@ const fmt = (v: number) =>
       <!-- Logo / titre -->
       <div class="text-center mb-8">
         <h1 class="text-2xl font-bold text-indigo-600">SAV Platform</h1>
-        <p class="text-sm text-gray-500 mt-1">Créez votre atelier</p>
+        <p class="text-sm text-gray-500 mt-1">Créez votre espace professionnel</p>
       </div>
 
       <!-- Erreur globale -->
@@ -51,10 +69,10 @@ const fmt = (v: number) =>
       <form @submit.prevent="submit" class="space-y-6">
         <div class="grid grid-cols-2 gap-4">
           <div class="col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'atelier</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'entreprise</label>
             <Input
               v-model="form.shop_name"
-              placeholder="Atelier Demo"
+              placeholder="Mon Entreprise"
               :error="form.errors.shop_name"
               autofocus
             />
@@ -111,12 +129,37 @@ const fmt = (v: number) =>
 
         <!-- Offres d'abonnement -->
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Quelle est votre activité ?</label>
+
+          <div class="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit mb-4">
+            <button
+              type="button"
+              @click="track = 'full'"
+              :class="[
+                'px-4 py-1.5 rounded-lg text-sm font-medium transition',
+                track === 'full' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              ]"
+            >
+              Atelier (SAV + Stock)
+            </button>
+            <button
+              type="button"
+              @click="track = 'stock'"
+              :class="[
+                'px-4 py-1.5 rounded-lg text-sm font-medium transition',
+                track === 'stock' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              ]"
+            >
+              Stock seul
+            </button>
+          </div>
+
           <label class="block text-sm font-medium text-gray-700 mb-2">Choisissez une offre</label>
           <p v-if="form.errors.plan_id" class="text-xs text-red-500 mb-2">{{ form.errors.plan_id }}</p>
 
-          <div class="grid grid-cols-3 gap-4">
+          <div :class="['grid gap-4', filteredPlans.length >= 3 ? 'grid-cols-3' : 'grid-cols-2']">
             <button
-              v-for="plan in plans"
+              v-for="plan in filteredPlans"
               :key="plan.id"
               type="button"
               @click="form.plan_id = plan.id"
@@ -151,7 +194,7 @@ const fmt = (v: number) =>
           :disabled="form.processing"
           class="w-full justify-center"
         >
-          Créer mon atelier
+          Créer mon espace
         </Button>
 
         <p class="text-center text-sm text-gray-500">

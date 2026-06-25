@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $user?->shop?->loadMissing('plan');
         $permService = app(PermissionService::class);
 
         return [

@@ -7,6 +7,7 @@ export interface Plan {
     max_users?: number | null;
     max_depots?: number | null;
     features: string[];
+    disabled_modules?: string[] | null;
     sort_order?: number;
     is_active?: boolean;
     shops_count?: number;

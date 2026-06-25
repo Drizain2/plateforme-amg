@@ -43,6 +43,28 @@ class PlanSeeder extends Seeder
                 'features' => ['Tout en illimité', 'Support prioritaire', 'API access'],
                 'sort_order' => 3,
             ],
+            [
+                'name' => 'Stock Starter',
+                'slug' => 'stock-starter',
+                'description' => 'Pour démarrer la gestion de stock sans service de réparation.',
+                'price' => 0,
+                'max_users' => 3,
+                'max_depots' => 1,
+                'features' => ['1 dépôt', '3 utilisateurs', 'Gestion de stock & facturation'],
+                'disabled_modules' => ['tickets'],
+                'sort_order' => 4,
+            ],
+            [
+                'name' => 'Stock Pro',
+                'slug' => 'stock-pro',
+                'description' => 'Pour les entreprises de stock avec plusieurs dépôts.',
+                'price' => 15000,
+                'max_users' => 10,
+                'max_depots' => null,
+                'features' => ['Dépôts illimités', '10 utilisateurs', 'Achats fournisseurs', 'Analytics'],
+                'disabled_modules' => ['tickets'],
+                'sort_order' => 5,
+            ],
         ];
 
         foreach ($plans as $plan) {

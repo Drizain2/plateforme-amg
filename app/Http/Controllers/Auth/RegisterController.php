@@ -22,7 +22,7 @@ class RegisterController extends Controller
         return Inertia::render('Auth/Register', [
             'plans' => Plan::where('is_active', true)
                 ->orderBy('sort_order')
-                ->get(['id', 'name', 'slug', 'description', 'price', 'features']),
+                ->get(['id', 'name', 'slug', 'description', 'price', 'features', 'disabled_modules']),
         ]);
     }
 

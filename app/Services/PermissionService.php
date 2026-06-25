@@ -22,14 +22,16 @@ class PermissionService
         $override = ShopUserPermission::getOverride($user->id, $user->shop_id, $permission);
 
         if ($override !== null) {
-            return $override;
+            $result = $override;
+        } else {
+            try {
+                $result = $user->hasPermissionTo($permission);
+            } catch (PermissionDoesNotExist) {
+                $result = false;
+            }
         }
 
-        try {
-            return $user->hasPermissionTo($permission);
-        } catch (PermissionDoesNotExist) {
-            return false;
-        }
+        return $result && ! $this->isDisabledByPlan($user, $permission);
     }
 
     /**
@@ -57,7 +59,7 @@ class PermissionService
             }
         }
 
-        return $rolePerms;
+        return array_values(array_filter($rolePerms, fn ($p) => ! $this->isDisabledByPlan($user, $p)));
     }
 
     /**
@@ -91,5 +93,14 @@ class PermissionService
         ShopUserPermission::where('user_id', $user->id)
             ->where('shop_id', $user->shop_id)
             ->delete();
+    }
+
+    /**
+     * Rempart final : même accordée par le rôle ou un override, une
+     * permission reste bloquée si le plan de l'atelier désactive son module.
+     */
+    private function isDisabledByPlan(User $user, string $permission): bool
+    {
+        return $user->shop?->plan?->disablesPermissionDomain($permission) ?? false;
     }
 }

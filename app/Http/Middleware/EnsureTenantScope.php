@@ -26,6 +26,8 @@ class EnsureTenantScope
             abort(403, 'Vous devez avoir un shop pour accéder à cette page');
         }
 
+        $user->shop->loadMissing('plan');
+
         if (! $user->shop->is_active) {
             abort(403, 'Votre shop est desactivé');
         }

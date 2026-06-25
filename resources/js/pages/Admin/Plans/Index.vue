@@ -30,6 +30,7 @@ const form = useForm({
   max_users: '',
   max_depots: '',
   features: '',
+  disable_tickets_module: false,
   sort_order: 0,
   is_active: true,
 })
@@ -49,6 +50,7 @@ function openEdit(plan: Plan & { shops_count: number }) {
   form.max_users = plan.max_users?.toString() ?? ''
   form.max_depots = plan.max_depots?.toString() ?? ''
   form.features = (plan.features ?? []).join('\n')
+  form.disable_tickets_module = (plan.disabled_modules ?? []).includes('tickets')
   form.sort_order = plan.sort_order ?? 0
   form.is_active = plan.is_active ?? true
   showModal.value = true
@@ -60,6 +62,7 @@ function submit() {
     max_users: form.max_users === '' ? null : Number(form.max_users),
     max_depots: form.max_depots === '' ? null : Number(form.max_depots),
     features: form.features.split('\n').map(f => f.trim()).filter(Boolean),
+    disabled_modules: form.disable_tickets_module ? ['tickets'] : [],
   }
 
   if (editingPlan.value) {
@@ -231,6 +234,12 @@ function confirmDelete(plan: Plan & { shops_count: number }) {
             placeholder="Dépôts illimités&#10;10 utilisateurs&#10;Facturation" />
           <span v-if="form.errors.features" class="text-xs text-red-500">{{ form.errors.features }}</span>
         </div>
+
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" v-model="form.disable_tickets_module"
+            class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+          <span class="text-sm text-gray-600">Plan « Stock seul » (masque le module Tickets/SAV)</span>
+        </label>
 
         <div class="grid grid-cols-2 gap-4 items-end">
           <div>

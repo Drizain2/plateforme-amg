@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\UserRole;
+use App\Models\Plan;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -33,6 +34,8 @@ class UpdatePlanRequest extends FormRequest
             'max_depots' => ['nullable', 'integer', 'min:1'],
             'features' => ['nullable', 'array'],
             'features.*' => ['string', 'max:255'],
+            'disabled_modules' => ['nullable', 'array'],
+            'disabled_modules.*' => ['string', Rule::in(Plan::DISABLEABLE_MODULES)],
             'sort_order' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
         ];
@@ -46,6 +49,7 @@ class UpdatePlanRequest extends FormRequest
             'price' => 'Prix',
             'max_users' => "Nombre d'utilisateurs max",
             'max_depots' => 'Nombre de dépôts max',
+            'disabled_modules' => 'Modules désactivés',
         ];
     }
 }
