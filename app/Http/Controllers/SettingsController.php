@@ -20,7 +20,7 @@ class SettingsController extends Controller
         // Le profil personnel (nom, email, mot de passe) est accessible à
         // tout utilisateur authentifié. Seuls les paramètres de l'atelier
         // (boutique, abonnement) requièrent la permission settings.manage.
-        $this->middleware('perm:settings.manage')->only(['updateShop']);
+        $this->middleware('perm:settings.manage')->only(['updateShop', 'updatePlan']);
     }
 
     public function edit(): Response
@@ -65,6 +65,27 @@ class SettingsController extends Controller
         $shop->update($data);
 
         return back()->with('success', 'Paramètres mis à jour.');
+    }
+
+    public function updatePlan(Plan $plan): RedirectResponse
+    {
+        $shop = app('current_shop');
+
+        if (! $plan->is_active) {
+            return back()->with('error', "L'offre {$plan->name} n'est plus disponible.");
+        }
+
+        if ($shop->plan_id === $plan->id) {
+            return back();
+        }
+
+        if ($error = $shop->exceedsLimitsOf($plan)) {
+            return back()->with('error', "{$error} Réduisez votre utilisation avant de changer d'offre.");
+        }
+
+        $shop->update(['plan_id' => $plan->id]);
+
+        return back()->with('success', "Vous êtes maintenant sur l'offre {$plan->name}.");
     }
 
     public function updateProfile(Request $request): RedirectResponse

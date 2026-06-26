@@ -72,6 +72,28 @@ class Shop extends Model
     }
 
     /**
+     * Vérifie que l'usage actuel de l'atelier (users/depots) rentre dans les
+     * limites de l'offre visée, pour bloquer un changement d'offre qui
+     * laisserait l'atelier hors-limites.
+     */
+    public function exceedsLimitsOf(Plan $plan): ?string
+    {
+        $userCount = $this->users()->count();
+
+        if ($plan->max_users !== null && $userCount > $plan->max_users) {
+            return "Vous avez {$userCount} utilisateurs, l'offre {$plan->name} est limitée à {$plan->max_users}.";
+        }
+
+        $depotCount = $this->depots()->count();
+
+        if ($plan->max_depots !== null && $depotCount > $plan->max_depots) {
+            return "Vous avez {$depotCount} dépôts, l'offre {$plan->name} est limitée à {$plan->max_depots}.";
+        }
+
+        return null;
+    }
+
+    /**
      * Logo encodé en data URI, pour l'intégrer dans un PDF (dompdf ne peut pas
      * charger les fichiers via une URL HTTP locale).
      */

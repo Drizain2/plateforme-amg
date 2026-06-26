@@ -142,6 +142,7 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/shop', [SettingsController::class, 'updateShop'])->name('shop');
         Route::put('/profile', [SettingsController::class, 'updateProfile'])->name('profile');
         Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
+        Route::put('/plan/{plan}', [SettingsController::class, 'updatePlan'])->name('plan');
     });
 
     Route::prefix('users/{user}/permissions')->name('users.permissions.')->group(function () {

@@ -103,6 +103,16 @@ const planColors: Record<string, 'default' | 'info' | 'success'> = {
     pro: 'info',
     enterprise: 'success',
 }
+
+const planForm = useForm({})
+
+function switchPlan(plan: Plan) {
+    if (!confirm(`Passer à l'offre "${plan.name}" ?`)) {
+        return
+    }
+
+    planForm.put(SettingsController.updatePlan.url(plan.id), { preserveScroll: true })
+}
 </script>
 
 <template>
@@ -288,16 +298,13 @@ const planColors: Record<string, 'default' | 'info' | 'success'> = {
                                 </li>
                             </ul>
                             <Button v-if="shop.plan.id !== plan.id" variant="secondary" size="sm" class="w-full justify-center"
-                                @click="() => { }">
+                                :loading="planForm.processing" :disabled="planForm.processing"
+                                @click="switchPlan(plan)">
                                 Passer à {{ plan.name }}
                             </Button>
                             <p v-else class="text-xs text-center text-indigo-600 font-medium">Plan actif</p>
                         </div>
                     </div>
-
-                    <p class="text-xs text-center text-gray-400">
-                        Pour modifier votre abonnement, contactez le support.
-                    </p>
                 </div>
             </div>
 
