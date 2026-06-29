@@ -14,7 +14,7 @@ defineProps<{
   categories: Pick<Category, 'id' | 'name' | 'is_active'>[]
 }>()
 
-const { isAdmin } = usePermission()
+const { can } = usePermission()
 
 // Création
 const showCreateModal = ref(false)
@@ -72,7 +72,7 @@ function confirmDelete(cat: Pick<Category, 'id' | 'name'>) {
 
 <template>
   <AppLayout title="Catégories">
-    <div class="space-y-6 min-w-200 max-w-200 mx-auto">
+    <div class="space-y-6 max-w-7xl mx-auto">
 
       <!-- Header -->
       <div class="flex items-center justify-between">
@@ -80,7 +80,7 @@ function confirmDelete(cat: Pick<Category, 'id' | 'name'>) {
           <h1 class="text-xl font-semibold text-gray-900">Catégories d'articles</h1>
           <p class="text-sm text-gray-500 mt-0.5">{{ categories.length }} catégorie{{ categories.length > 1 ? 's' : '' }}</p>
         </div>
-        <Button v-if="isAdmin" @click="showCreateModal = true">
+        <Button v-if="can('stock.create')" @click="showCreateModal = true">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -133,8 +133,9 @@ function confirmDelete(cat: Pick<Category, 'id' | 'name'>) {
                   </Badge>
                 </td>
                 <td class="px-4 py-3">
-                  <div v-if="isAdmin" class="flex items-center justify-end gap-1">
+                  <div v-if="can('stock.edit') || can('stock.delete')" class="flex items-center justify-end gap-1">
                     <Button
+                      v-if="can('stock.edit')"
                       title="Modifier la catégorie"
                       variant="ghost"
                       size="sm"
@@ -145,6 +146,7 @@ function confirmDelete(cat: Pick<Category, 'id' | 'name'>) {
                       </svg>
                     </Button>
                     <Button
+                      v-if="can('stock.delete')"
                       title="Supprimer la catégorie"
                       variant="ghost"
                       size="sm"

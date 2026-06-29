@@ -17,7 +17,7 @@ class StoreShopUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'role' => ['required', Rule::in(['admin', 'technicien','caissiere','gestionnaire'])],
+            'role' => ['required', Rule::in(['admin', 'technicien', 'caissiere', 'manager'])],
             'depot_ids' => ['nullable', 'array'],
             'depot_ids.*' => ['exists:depots,id'],
         ];

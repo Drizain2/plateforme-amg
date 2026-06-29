@@ -17,7 +17,7 @@ const props = defineProps<{
   filters: { search?: string }
 }>()
 
-const { isAdmin } = usePermission()
+const { can } = usePermission()
 const { applyFilter } = useFilters(SupplierController.index.url())
 
 // -----------------------------------------------
@@ -120,7 +120,7 @@ return
             {{ suppliers.meta.total }} fournisseur{{ suppliers.meta.total > 1 ? 's' : '' }}
           </p>
         </div>
-        <Button v-if="isAdmin" @click="openCreate">
+        <Button v-if="can('stock.create')" @click="openCreate">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
@@ -207,7 +207,7 @@ return
                 <td class="px-4 py-3">
                   <div class="flex items-center justify-end gap-1">
                     <Button
-                      v-if="isAdmin"
+                      v-if="can('stock.edit')"
                       variant="ghost"
                       size="sm"
                       @click="openEdit(supplier)"
@@ -217,7 +217,7 @@ return
                       </svg>
                     </Button>
                     <Button
-                      v-if="isAdmin"
+                      v-if="can('stock.delete')"
                       variant="ghost"
                       size="sm"
                       :loading="deletingId === supplier.id"

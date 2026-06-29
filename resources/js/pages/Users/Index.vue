@@ -137,7 +137,7 @@ function confirmDelete(user: ShopUser) {
 // -----------------------------------------------
 const roleOptions = [
     { value: 'admin', label: 'Administrateur' },
-    { value: 'gestionnaire', label: 'Gestionnaire' },
+    { value: 'manager', label: 'Gestionnaire' },
     { value: 'technicien', label: 'Technicien' },
     { value: 'caissiere', label: 'Caissière' },
 ]

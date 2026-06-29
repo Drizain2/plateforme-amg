@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Stock;
 
-use App\Enums\UserRole;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -11,7 +10,7 @@ class UpdatePartRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->hasRole(UserRole::Admin) || $this->user()->hasRole(UserRole::SuperAdmin);
+        return true;
     }
 
     /**

@@ -13,7 +13,7 @@ export type User = {
     [key: string]: unknown;
 };
 
-export type UserRoleName = 'super_admin' | 'admin' | 'gestionnaire' | 'technicien' | 'caissiere';
+export type UserRoleName = 'super_admin' | 'admin' | 'manager' | 'technicien' | 'caissiere';
 
 export type Role = {
     id: string | number;

@@ -7,11 +7,10 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSupplierRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-        public function authorize(): bool { return $this->user()->hasRole('admin'); }
-
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -21,10 +20,10 @@ class UpdateSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
-             'name'      => ['sometimes', 'string', 'max:255'],
-            'email'     => ['nullable', 'email'],
-            'phone'     => ['nullable', 'string', 'max:20'],
-            'address'   => ['nullable', 'string', 'max:500'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['nullable', 'email'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:500'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
