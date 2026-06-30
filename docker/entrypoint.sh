@@ -1,8 +1,10 @@
 #!/bin/sh
 set -e
 
-mkdir -p database
-touch -a database/database.sqlite
+if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
+    mkdir -p database
+    touch -a database/database.sqlite
+fi
 
 # Variables réelles fournies par la plateforme d'hébergement à ce stade,
 # donc le cache reflète bien l'environnement de production/test.

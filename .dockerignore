@@ -23,6 +23,11 @@ public/build
 public/hot
 public/storage
 
+# Caches générés localement (auto-discovery dev, config/route cache) :
+# régénérés proprement pendant le build / au démarrage du conteneur.
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+
 tests
 .phpunit.cache
 .phpunit.result.cache

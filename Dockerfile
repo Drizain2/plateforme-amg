@@ -8,12 +8,12 @@ FROM php:8.4-cli-bookworm AS build
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions \
-    && install-php-extensions pdo_sqlite pdo_mysql mbstring gd zip bcmath pcntl intl
+    && install-php-extensions pdo_sqlite pdo_mysql mbstring gd exif zip bcmath pcntl intl
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
@@ -46,7 +46,7 @@ FROM php:8.4-cli-bookworm AS runtime
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions \
-    && install-php-extensions pdo_sqlite pdo_mysql mbstring gd zip bcmath pcntl intl opcache
+    && install-php-extensions pdo_sqlite pdo_mysql mbstring gd exif zip bcmath pcntl intl opcache
 
 WORKDIR /app
 
