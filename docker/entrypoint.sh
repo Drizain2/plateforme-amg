@@ -9,6 +9,16 @@ fi
 # Variables réelles fournies par la plateforme d'hébergement à ce stade,
 # donc le cache reflète bien l'environnement de production/test.
 php artisan migrate --force
+
+# Rôles/permissions/plans : seeders idempotents (firstOrCreate), requis
+# au fonctionnement de l'app (ex: inscription -> assignRole('admin')).
+# Les seeders de données de démo (ShopSeeder et suivants) ne tournent
+# pas ici : ils dépendent de fakerphp/faker, qui est en require-dev et
+# absent de cette image --no-dev. Créez un compte via /register.
+php artisan db:seed --force --class=RoleSeeder
+php artisan db:seed --force --class=PlatformAdminSeeder
+php artisan db:seed --force --class=PlanSeeder
+
 php artisan storage:link 2>/dev/null || true
 php artisan config:cache
 php artisan route:cache
