@@ -33,15 +33,15 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         // Pages d'erreur Inertia pour 403 / 404 / 500 / 503 (prod uniquement)
-        // $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
-        //     if (
-        //         ! config('app.debug') &&
-        //         in_array($response->getStatusCode(), [403, 404, 500, 503], true) &&
-        //         ! $request->is('api/*')
-        //     ) {
-        //         return Inertia::render('Errors/Error', ['status' => $response->getStatusCode()])
-        //             ->toResponse($request)
-        //             ->setStatusCode($response->getStatusCode());
-        //     }
-        // });
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+            if (
+                ! config('app.debug') &&
+                in_array($response->getStatusCode(), [403, 404, 500, 503], true) &&
+                ! $request->is('api/*')
+            ) {
+                return Inertia::render('Errors/Error', ['status' => $response->getStatusCode()])
+                    ->toResponse($request)
+                    ->setStatusCode($response->getStatusCode());
+            }
+        });
     })->create();

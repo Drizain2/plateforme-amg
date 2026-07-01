@@ -38,6 +38,7 @@ class RegisterRequest extends FormRequest
                 'required',
                 Rule::exists('plans', 'id')->where('is_active', true),
             ],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }
 

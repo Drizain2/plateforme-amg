@@ -18,6 +18,7 @@ export interface Shop {
     name: string;
     slug: string;
     email: string;
+    logo_url?: string | null;
     plan?: Plan;
     is_active: boolean;
 }

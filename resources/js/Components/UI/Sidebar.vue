@@ -212,10 +212,26 @@ const userRoleLabel = computed(() => {
   >
 
     <!-- Logo -->
-    <div class="px-4 py-5 border-b shrink-0 flex items-center gap-2" :class="collapsed ? 'lg:justify-center lg:px-2' : 'justify-between'">
-      <div class="min-w-0" :class="{ 'lg:hidden': collapsed }">
-        <span class="font-bold text-indigo-600 text-lg block truncate">SAV Platform</span>
-        <p class="text-xs text-gray-400 mt-0.5 truncate">{{ page.props.auth.shop?.name }}</p>
+    <div class="px-4 py-5 border-b shrink-0 flex items-center gap-3" :class="collapsed ? 'lg:justify-center lg:px-2' : 'justify-between'">
+      <div class="flex items-center gap-3 min-w-0">
+        <!-- Avatar logo -->
+        <div class="shrink-0 w-9 h-9 rounded-xl overflow-hidden bg-indigo-100 flex items-center justify-center border border-indigo-100">
+          <img
+            v-if="page.props.auth.shop?.logo_url"
+            :src="page.props.auth.shop.logo_url"
+            alt="Logo"
+            class="w-full h-full object-contain p-0.5"
+          />
+          <span v-else class="text-indigo-600 font-bold text-sm leading-none">
+            {{ (page.props.auth.shop?.name ?? 'SA').slice(0, 2).toUpperCase() }}
+          </span>
+        </div>
+
+        <!-- Texte (masqué en mode réduit) -->
+        <div class="min-w-0" :class="{ 'lg:hidden': collapsed }">
+          <span class="font-bold text-indigo-600 text-base block truncate">SAV Platform</span>
+          <p class="text-xs text-gray-400 mt-0.5 truncate">{{ page.props.auth.shop?.name }}</p>
+        </div>
       </div>
 
       <button
