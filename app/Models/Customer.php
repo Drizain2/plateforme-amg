@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasShopScope;
+use Database\Factories\CustomerFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +12,8 @@ use Illuminate\Notifications\Notifiable;
 
 class Customer extends Model
 {
-    use HasShopScope, Notifiable;
+    /** @use HasFactory<CustomerFactory> */
+    use HasFactory, HasShopScope, Notifiable;
 
     protected $fillable = ['shop_id', 'name', 'email', 'phone', 'address', 'notes'];
 
@@ -29,7 +32,8 @@ class Customer extends Model
         return $this->hasMany(Ticket::class);
     }
 
-    public function invoices(): HasMany{
-        return  $this->hasMany(Invoice::class);
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 }

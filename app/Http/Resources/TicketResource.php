@@ -78,6 +78,7 @@ class TicketResource extends JsonResource
                     'part' => ['id' => $p->part->id, 'name' => $p->part->name],
                 ])
             ),
+            'invoice_id' => $this->whenLoaded('invoice', fn () => $this->invoice?->id),
             'tracking_token' => $this->tracking_token,
         ];
     }

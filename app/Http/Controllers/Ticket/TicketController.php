@@ -6,7 +6,9 @@ use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddNoteRequest;
+use App\Http\Requests\AssignTechnicianRequest;
 use App\Http\Requests\ConsumePartRequest;
+use App\Http\Requests\SetDiagnosisRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\TransitionTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
@@ -30,7 +32,8 @@ class TicketController extends Controller
     {
         $this->middleware('perm:tickets.view')->only(['index', 'show']);
         $this->middleware('perm:tickets.create')->only(['create', 'store']);
-        $this->middleware('perm:tickets.edit')->only(['update', 'addNote', 'consumePart']);
+        $this->middleware('perm:tickets.edit')->only(['update', 'addNote', 'consumePart', 'setDiagnosis']);
+        $this->middleware('perm:tickets.assign')->only(['assignTechnician']);
         $this->middleware('perm:tickets.transition')->only(['transition']);
     }
 
@@ -121,6 +124,7 @@ class TicketController extends Controller
             'depot',
             'events.user',
             'parts.part',
+            'invoice:id,ticket_id',
         ]);
 
         return Inertia::render('Tickets/Show', [
@@ -192,6 +196,22 @@ class TicketController extends Controller
         $this->ticketService->consumePart($ticket, $part, $request->quantity, $request->user());
 
         return back()->with('success', 'Pièce consommée.');
+    }
+
+    public function setDiagnosis(SetDiagnosisRequest $request, Ticket $ticket): RedirectResponse
+    {
+        $data = $request->validated();
+        $this->ticketService->setDiagnosis($ticket, $data['diagnosis'], $data['estimated_price'] ?? null, $request->user());
+
+        return back()->with('success', 'Diagnostic enregistré.');
+    }
+
+    public function assignTechnician(AssignTechnicianRequest $request, Ticket $ticket): RedirectResponse
+    {
+        $technician = User::findOrFail($request->validated()['technician_id']);
+        $this->ticketService->assignTechnician($ticket, $technician, $request->user());
+
+        return back()->with('success', 'Technicien assigné.');
     }
 
     /** @return Collection<int, User> */

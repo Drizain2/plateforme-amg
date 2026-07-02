@@ -10,8 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureTenantScope
 {
     /**
-     * Handle an incoming request.
-     *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
@@ -34,41 +32,41 @@ class EnsureTenantScope
 
         app()->instance('current_shop', $user->shop);
 
-        $this->resolveDepotScope($request, $user);
+        if ($redirect = $this->resolveDepotScope($request, $user)) {
+            return $redirect;
+        }
 
         return $next($request);
     }
 
-    private function resolveDepotScope(Request $request, User $user): void
+    private function resolveDepotScope(Request $request, User $user): ?Response
     {
         if ($user->depot_active_id) {
             if ($user->depotActive?->is_active) {
                 app()->instance('current_depot', $user->depotActive);
             }
 
-            return;
+            return null;
         }
 
-        // Admin en vue globale : pas de filtre depot
         if ($user->isAdminOrSuperAdmin()) {
-            return;
+            return null;
         }
 
-        // Non-admin sans depot sélectionné
         $depots = $user->depots()->where('is_active', true)->get();
 
         if ($depots->count() === 1) {
-            // Auto-sélection du seul depot disponible
             $user->depot_active_id = $depots->first()->id;
             $user->save();
             app()->instance('current_depot', $depots->first());
 
-            return;
+            return null;
         }
 
         if ($depots->count() > 1 && ! $request->routeIs('depot.select', 'depot.save', 'logout')) {
-            // Plusieurs depots : doit choisir
-            redirect()->route('depot.select')->send();
+            return redirect()->route('depot.select');
         }
+
+        return null;
     }
 }

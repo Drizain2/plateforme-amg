@@ -126,7 +126,7 @@ class TicketService
     public function assignTechnician(Ticket $ticket, User $technicien, User $by): void
     {
         DB::transaction(function () use ($ticket, $technicien, $by) {
-            $ticket->update(['technician_id' => $technicien->id]);
+            $ticket->update(['technicien_id' => $technicien->id]);
 
             TicketEvent::create([
                 'ticket_id' => $ticket->id,

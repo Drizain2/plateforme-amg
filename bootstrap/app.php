@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BootTenantScope;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -18,10 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            HandleInertiaRequests::class,
-            AddLinkHeadersForPreloadedAssets::class,
-        ]);
+        $middleware->web(
+            prepend: [BootTenantScope::class],
+            append: [
+                HandleInertiaRequests::class,
+                AddLinkHeadersForPreloadedAssets::class,
+            ],
+        );
         $middleware->alias([
             'perm' => CheckPermission::class,
             'platform.admin' => EnsurePlatformAdmin::class,
@@ -43,5 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     ->toResponse($request)
                     ->setStatusCode($response->getStatusCode());
             }
+
+            return $response;
         });
     })->create();

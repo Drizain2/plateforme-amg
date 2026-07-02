@@ -9,6 +9,7 @@ use App\Models\Ticket;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -39,11 +40,12 @@ class ReportController extends Controller
 
     private function summary(CarbonInterface $from, CarbonInterface $to): array
     {
+        // DATEDIFF is MySQL-only — compute in PHP for cross-database compat
         $avgDays = Invoice::where('status', InvoiceStatus::Paid)
             ->whereBetween('paid_at', [$from, $to])
             ->whereNotNull('issued_at')
-            ->selectRaw('AVG(DATEDIFF(paid_at, issued_at)) as avg')
-            ->value('avg');
+            ->get(['paid_at', 'issued_at'])
+            ->avg(fn ($i) => $i->paid_at->diffInDays($i->issued_at));
 
         return [
             'revenue_paid' => (float) Invoice::where('status', InvoiceStatus::Paid)
@@ -70,9 +72,14 @@ class ReportController extends Controller
         $groupByMonth = $from->diffInDays($to) > 90;
 
         if ($groupByMonth) {
+            // DATE_FORMAT is MySQL-only — use strftime for SQLite compat
+            $monthExpr = DB::connection()->getDriverName() === 'sqlite'
+                ? "strftime('%Y-%m', paid_at) as period"
+                : "DATE_FORMAT(paid_at, '%Y-%m') as period";
+
             $rows = Invoice::where('status', InvoiceStatus::Paid)
                 ->whereBetween('paid_at', [$from, $to])
-                ->selectRaw("DATE_FORMAT(paid_at, '%Y-%m') as period, SUM(total_ttc) as total, COUNT(*) as count")
+                ->selectRaw("$monthExpr, SUM(total_ttc) as total, COUNT(*) as count")
                 ->groupBy('period')
                 ->orderBy('period')
                 ->get()

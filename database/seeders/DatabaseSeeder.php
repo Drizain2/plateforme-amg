@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             PartSeeder::class,          // 9. Pièces (nécessite catégories + fournisseurs)
             StockDepotSeeder::class,    // 10. Stock par pièce × dépôt
             StockMovementSeeder::class, // 11. Historique des mouvements
+            TicketSeeder::class,        // 12. Tickets SAV (nécessite dépôts + utilisateurs)
         ]);
     }
 }

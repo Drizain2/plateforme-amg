@@ -165,6 +165,7 @@ export interface Ticket {
     depot?: { id: number; name: string };
     events?: TicketEvent[];
     parts?: TicketPart[];
+    invoice_id?: number | null;
     tracking_token: string
 }
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'cancelled';

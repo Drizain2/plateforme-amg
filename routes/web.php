@@ -99,6 +99,8 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::post('/{ticket}/transition', [TicketController::class, 'transition'])->name('transition');
         Route::post('/{ticket}/notes', [TicketController::class, 'addNote'])->name('notes.store');
         Route::post('/{ticket}/parts', [TicketController::class, 'consumePart'])->name('parts.store');
+        Route::post('/{ticket}/diagnosis', [TicketController::class, 'setDiagnosis'])->name('diagnosis');
+        Route::post('/{ticket}/assign', [TicketController::class, 'assignTechnician'])->name('assign');
         Route::post('/{ticket}/invoice', [InvoiceController::class, 'fromTicket'])->name('invoice');
     });
 
