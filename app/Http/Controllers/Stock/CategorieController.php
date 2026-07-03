@@ -43,27 +43,27 @@ class CategorieController extends Controller
         return back()->with('success', 'Catégorie ajoutée.');
     }
 
-    public function update(Request $request, Categorie $categorie): RedirectResponse
+    public function update(Request $request, Categorie $category): RedirectResponse
     {
         $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
 
-        $categorie->update($request->only('name', 'is_active'));
+        $category->update($request->only('name', 'is_active'));
 
         return back()->with('success', 'Catégorie mise à jour.');
     }
 
-    public function destroy(Categorie $categorie): RedirectResponse
+    public function destroy(Categorie $category): RedirectResponse
     {
-        if ($categorie->parts()->exists()) {
-            $categorie->update(['is_active' => false]);
+        if ($category->parts()->exists()) {
+            $category->update(['is_active' => false]);
 
             return back()->with('success', 'Catégorie désactivée (articles existants).');
         }
 
-        $categorie->delete();
+        $category->delete();
 
         return back()->with('success', 'Catégorie supprimée.');
     }

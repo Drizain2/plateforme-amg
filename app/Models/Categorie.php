@@ -23,6 +23,6 @@ class Categorie extends Model
 
     public function parts(): HasMany
     {
-        return $this->hasMany(Part::class);
+        return $this->hasMany(Part::class, 'category_id');
     }
 }
