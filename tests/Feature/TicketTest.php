@@ -1,10 +1,14 @@
 <?php
 
+use App\Enums\InvoiceStatus;
 use App\Enums\TicketStatus;
 use App\Models\Customer;
 use App\Models\Depot;
 use App\Models\Device;
+use App\Models\Invoice;
+use App\Models\Part;
 use App\Models\Shop;
+use App\Models\StockDepot;
 use App\Models\Ticket;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -253,6 +257,214 @@ test('un technicien peut ajouter une note', function () {
         'ticket_id' => $ticket->id,
         'type' => 'note_added',
         'note' => 'En attente de la pièce du fournisseur',
+    ]);
+});
+
+// ── Filtrage par rôle ────────────────────────────────────────────────────────
+
+test('un technicien ne voit que ses propres tickets dans la liste', function () {
+    $autretech = User::factory()->technicien()->create([
+        'shop_id' => $this->shop->id,
+        'depot_active_id' => $this->depot->id,
+    ]);
+
+    $monTicket = Ticket::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'technicien_id' => $this->technicien->id,
+    ]);
+
+    Ticket::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'technicien_id' => $autretech->id,
+    ]);
+
+    $response = $this->actingAs($this->technicien)->get(route('tickets.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->where('tickets.meta.total', 1)
+        ->where('tickets.data.0.id', $monTicket->id)
+    );
+});
+
+test("la liste des techniciens n'est pas exposée à un technicien", function () {
+    $response = $this->actingAs($this->technicien)->get(route('tickets.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->where('technicians', [])
+    );
+});
+
+test('un admin voit tous les tickets et reçoit la liste des techniciens', function () {
+    Ticket::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'technicien_id' => $this->technicien->id,
+    ]);
+
+    Ticket::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'technicien_id' => null,
+    ]);
+
+    $response = $this->actingAs($this->admin)->get(route('tickets.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->where('tickets.meta.total', 2)
+        ->has('technicians', 1)
+    );
+});
+
+// ── Consommation de pièce ────────────────────────────────────────────────────
+
+test('un technicien peut consommer une pièce sur un ticket', function () {
+    Notification::fake();
+
+    $part = Part::factory()->create(['shop_id' => $this->shop->id]);
+    $stock = StockDepot::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'part_id' => $part->id,
+        'quantity' => 5,
+        'alert_quantity' => 0,
+    ]);
+
+    $ticket = Ticket::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+    ]);
+
+    $response = $this->actingAs($this->technicien)
+        ->post(route('tickets.parts.store', $ticket), [
+            'part_id' => $stock->id,
+            'quantity' => 2,
+        ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('ticket_parts', [
+        'ticket_id' => $ticket->id,
+        'stock_depot_id' => $stock->id,
+        'quantity' => 2,
+    ]);
+});
+
+test('la consommation décrémente le stock du dépôt', function () {
+    Notification::fake();
+
+    $part = Part::factory()->create(['shop_id' => $this->shop->id]);
+    $stock = StockDepot::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'part_id' => $part->id,
+        'quantity' => 5,
+        'alert_quantity' => 0,
+    ]);
+
+    $ticket = Ticket::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+    ]);
+
+    $this->actingAs($this->technicien)
+        ->post(route('tickets.parts.store', $ticket), [
+            'part_id' => $stock->id,
+            'quantity' => 3,
+        ]);
+
+    expect($stock->fresh()->quantity)->toBe(2);
+});
+
+test('la consommation crée un événement part_consumed', function () {
+    Notification::fake();
+
+    $part = Part::factory()->create(['shop_id' => $this->shop->id]);
+    $stock = StockDepot::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'part_id' => $part->id,
+        'quantity' => 5,
+        'alert_quantity' => 0,
+    ]);
+
+    $ticket = Ticket::factory()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+    ]);
+
+    $this->actingAs($this->technicien)
+        ->post(route('tickets.parts.store', $ticket), [
+            'part_id' => $stock->id,
+            'quantity' => 1,
+        ]);
+
+    $this->assertDatabaseHas('ticket_events', [
+        'ticket_id' => $ticket->id,
+        'type' => 'part_consumed',
+    ]);
+});
+
+// ── Facture depuis ticket ────────────────────────────────────────────────────
+
+test('un admin peut créer une facture depuis un ticket terminé', function () {
+    $customer = Customer::factory()->create(['shop_id' => $this->shop->id]);
+    $ticket = Ticket::factory()->done()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'customer_id' => $customer->id,
+        'estimated_price' => 25000,
+    ]);
+
+    $response = $this->actingAs($this->admin)
+        ->post(route('tickets.invoice', $ticket));
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('invoices', [
+        'ticket_id' => $ticket->id,
+        'customer_id' => $customer->id,
+        'status' => InvoiceStatus::Draft->value,
+    ]);
+});
+
+test('une facture créée depuis un ticket inclut la ligne main d\'œuvre', function () {
+    $customer = Customer::factory()->create(['shop_id' => $this->shop->id]);
+    $ticket = Ticket::factory()->done()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'customer_id' => $customer->id,
+        'estimated_price' => 15000,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->post(route('tickets.invoice', $ticket));
+
+    $invoice = Invoice::where('ticket_id', $ticket->id)->first();
+    $this->assertDatabaseHas('invoice_lines', [
+        'invoice_id' => $invoice->id,
+        'type' => 'service',
+        'unit_price' => 15000,
+    ]);
+});
+
+test('une facture depuis ticket porte le bon ticket_id et customer_id', function () {
+    $customer = Customer::factory()->create(['shop_id' => $this->shop->id]);
+    $ticket = Ticket::factory()->done()->create([
+        'shop_id' => $this->shop->id,
+        'depot_id' => $this->depot->id,
+        'customer_id' => $customer->id,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->post(route('tickets.invoice', $ticket));
+
+    $this->assertDatabaseHas('invoices', [
+        'ticket_id' => $ticket->id,
+        'customer_id' => $customer->id,
+        'status' => InvoiceStatus::Draft->value,
     ]);
 });
 
