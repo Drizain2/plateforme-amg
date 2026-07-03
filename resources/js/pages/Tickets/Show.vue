@@ -320,11 +320,6 @@ const fmt = (v: number) =>
         </div>
 
         <!-- Modal : transition statut -->
-
-            </div>
-        </div>
-
-        <!-- Modal : transition statut -->
         <Modal :show="showTransitionModal" :title="`Passer à : ${selectedStatus?.label}`" max-width="sm"
             @close="showTransitionModal = false">
             <form @submit.prevent="submitTransition" class="space-y-4">

@@ -39,10 +39,19 @@ class TicketController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+        $isManager = $user->hasAnyRole(['admin', 'super_admin', 'manager']);
+
         $filters = request()->only(['search', 'status', 'priority', 'technician_id']);
 
+        // Les techniciens ne voient que leurs propres tickets
+        $queryFilters = $filters;
+        if ($user->hasRole('technicien')) {
+            $queryFilters['technician_id'] = $user->id;
+        }
+
         $tickets = Ticket::with(['customer', 'device', 'technicien', 'depot'])
-            ->filter($filters)
+            ->filter($queryFilters)
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -50,7 +59,7 @@ class TicketController extends Controller
         return Inertia::render('Tickets/Index', [
             'tickets' => TicketResource::collection($tickets),
             'filters' => $filters,
-            'technicians' => $this->techniciansForDepot(),
+            'technicians' => $isManager ? $this->techniciansForDepot() : collect(),
             'statuses' => array_map(fn ($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),

@@ -75,11 +75,11 @@ const priorityOptions = computed(() => props.priorities.map(p => ({ value: p.val
 
             <!-- Filtres -->
             <div class="bg-white rounded-xl border border-gray-200 p-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" :class="technicians.length ? 'lg:grid-cols-4' : 'lg:grid-cols-3'">
                     <Input v-model="search" placeholder="Réf, client, appareil..." />
                     <Select v-model="status" :options="statusOptions" placeholder="Tous statuts" />
                     <Select v-model="priority" :options="priorityOptions" placeholder="Toutes priorités" />
-                    <Select v-model="technicianId" :options="technicianOptions" placeholder="Tous techniciens" />
+                    <Select v-if="technicians.length" v-model="technicianId" :options="technicianOptions" placeholder="Tous techniciens" />
                 </div>
             </div>
 
