@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\BootTenantScope;
 use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\CheckSubscription;
 use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -29,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'perm' => CheckPermission::class,
             'platform.admin' => EnsurePlatformAdmin::class,
+            'subscription.check' => CheckSubscription::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -258,6 +258,39 @@ export interface StockCount {
     lines?: StockCountLine[];
 }
 
+export interface Subscription {
+    id: number
+    shop_id: number
+    plan_id: number
+    billing_period: 'monthly' | 'annual'
+    starts_at: string
+    ends_at: string
+    status: 'trial' | 'active' | 'expired' | 'cancelled' | 'suspended'
+    gateway: string
+    cancelled_at?: string | null
+    plan?: Plan
+}
+
+export interface Payment {
+    id: number
+    shop_id: number
+    plan_id: number
+    billing_period: 'monthly' | 'annual'
+    amount: number
+    currency: string
+    reference: string
+    status: 'pending' | 'validated' | 'rejected' | 'refunded'
+    gateway: string
+    notes?: string | null
+    rejected_reason?: string | null
+    validated_at?: string | null
+    rejected_at?: string | null
+    created_at: string
+    plan?: Plan
+    shop?: Pick<Shop, 'id' | 'name'>
+    validated_by?: { id: number; name: string } | null
+}
+
 export interface AppNotification {
   id: string
   data: {

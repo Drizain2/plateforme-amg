@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepotSwitchController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
@@ -19,13 +21,21 @@ use App\Http\Controllers\Stock\PartController;
 use App\Http\Controllers\Stock\StockCountController;
 use App\Http\Controllers\Stock\StockMovementController;
 use App\Http\Controllers\Stock\SupplierController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\Ticket\TicketController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\UserPermissionController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
+
+// Page publique (accessible sans auth)
+Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
+
+// Webhooks passerelles (pas d'auth, la vérification est dans la gateway)
+Route::post('/webhooks/{gateway}', [WebhookController::class, 'handle'])->name('webhooks.handle');
 
 Route::get('/track/{token}', [TrackController::class, 'show'])->name('track');
 
@@ -50,6 +60,12 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 Route::middleware(['auth', 'platform.admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('plans', PlanController::class)->except(['show', 'create', 'edit']);
+
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
+        Route::post('/{payment}/approve', [AdminPaymentController::class, 'approve'])->name('approve');
+        Route::post('/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('reject');
+    });
 });
 
 Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
@@ -137,6 +153,11 @@ Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
         Route::delete('/{user}', [ShopUserController::class, 'destroy'])->name('destroy');
         Route::post('/{user}/toggle-active', [ShopUserController::class, 'toggleActive'])->name('toggle-active');
         Route::post('/{user}/reset-password', [ShopUserController::class, 'resetPassword'])->name('reset-password');
+    });
+
+    Route::prefix('subscription')->name('subscription.')->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->name('index');
+        Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscribe');
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {

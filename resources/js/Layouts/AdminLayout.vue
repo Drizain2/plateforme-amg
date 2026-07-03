@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { watch } from 'vue'
 import { toast, Toaster } from 'vue-sonner'
+import AdminPaymentController from '@/actions/App/Http/Controllers/Admin/PaymentController'
 import PlanController from '@/actions/App/Http/Controllers/Admin/PlanController'
 import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController'
 
@@ -35,6 +36,9 @@ watch(
         <nav class="flex items-center gap-4 text-sm font-medium">
           <Link :href="PlanController.index.url()" class="text-gray-600 hover:text-indigo-600 transition">
             Offres
+          </Link>
+          <Link :href="AdminPaymentController.index.url()" class="text-gray-600 hover:text-indigo-600 transition">
+            Paiements
           </Link>
         </nav>
       </div>

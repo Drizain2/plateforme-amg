@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SubscriptionStatus;
 use Database\Factories\ShopFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +51,30 @@ class Shop extends Model
     {
         return $this->hasOne(User::class)->whereHas('roles', fn ($q) => $q->where('name', 'admin')
         );
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /** Abonnement en cours (actif ou en essai, non expiré). */
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)
+            ->whereIn('status', [SubscriptionStatus::Active->value, SubscriptionStatus::Trial->value])
+            ->where('ends_at', '>', now())
+            ->latestOfMany();
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        return $this->activeSubscription()->exists();
     }
 
     public function isOnTrial(): bool
