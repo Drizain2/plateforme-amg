@@ -88,6 +88,88 @@ test('un utilisateur non authentifié ne peut pas créer un ticket', function ()
     $response->assertRedirect(route('login'));
 });
 
+test('un ticket peut être créé avec un nouveau client et un nouvel appareil à la volée', function () {
+    $response = $this->actingAs($this->admin)->post(route('tickets.store'), [
+        'customer_name' => 'Nouveau Client',
+        'customer_email' => 'nouveau@example.com',
+        'customer_phone' => '0600000001',
+        'device_type' => 'smartphone',
+        'device_brand' => 'Samsung',
+        'device_model' => 'Galaxy S22',
+        'device_serial' => 'SN123456',
+        'depot_id' => $this->depot->id,
+        'priority' => 'urgent',
+        'description' => 'Écran brisé',
+    ]);
+
+    $response->assertRedirect(route('tickets.index'));
+
+    $customer = Customer::where('name', 'Nouveau Client')->first();
+    expect($customer)->not->toBeNull();
+    expect($customer->email)->toBe('nouveau@example.com');
+
+    $device = Device::where('brand', 'Samsung')->where('model', 'Galaxy S22')->first();
+    expect($device)->not->toBeNull();
+    expect($device->customer_id)->toBe($customer->id);
+
+    $this->assertDatabaseHas('tickets', [
+        'shop_id' => $this->shop->id,
+        'customer_id' => $customer->id,
+        'device_id' => $device->id,
+    ]);
+});
+
+test('un ticket peut être créé avec un client existant et un nouvel appareil', function () {
+    $customer = Customer::factory()->create(['shop_id' => $this->shop->id]);
+
+    $response = $this->actingAs($this->admin)->post(route('tickets.store'), [
+        'customer_id' => $customer->id,
+        'device_type' => 'tablette',
+        'device_brand' => 'Apple',
+        'device_model' => 'iPad Pro',
+        'depot_id' => $this->depot->id,
+        'priority' => 'normal',
+        'description' => 'Ne charge plus',
+    ]);
+
+    $response->assertRedirect(route('tickets.index'));
+
+    $device = Device::where('model', 'iPad Pro')->first();
+    expect($device)->not->toBeNull();
+    expect($device->customer_id)->toBe($customer->id);
+
+    $this->assertDatabaseHas('tickets', [
+        'customer_id' => $customer->id,
+        'device_id' => $device->id,
+    ]);
+});
+
+test('la validation rejette si customer_name manque sans customer_id', function () {
+    $response = $this->actingAs($this->admin)->post(route('tickets.store'), [
+        'device_type' => 'smartphone',
+        'device_brand' => 'Apple',
+        'device_model' => 'iPhone 14',
+        'depot_id' => $this->depot->id,
+        'priority' => 'normal',
+        'description' => 'Test',
+    ]);
+
+    $response->assertSessionHasErrors('customer_name');
+});
+
+test('la validation rejette si les champs appareil manquent sans device_id', function () {
+    $customer = Customer::factory()->create(['shop_id' => $this->shop->id]);
+
+    $response = $this->actingAs($this->admin)->post(route('tickets.store'), [
+        'customer_id' => $customer->id,
+        'depot_id' => $this->depot->id,
+        'priority' => 'normal',
+        'description' => 'Test',
+    ]);
+
+    $response->assertSessionHasErrors(['device_type', 'device_brand', 'device_model']);
+});
+
 // ── Transitions ──────────────────────────────────────────────────────────────
 
 test('un technicien peut passer un ticket de reçu à diagnostic', function () {
