@@ -7,6 +7,8 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\Plan;
 use App\Models\Shop;
 use App\Models\User;
+use App\Notifications\WelcomeNotification;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -63,7 +65,14 @@ class RegisterController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+        event(new Registered($user));
+
+        $user->notify(new WelcomeNotification(
+            shopName: $user->shop->name,
+            trialEndsAt: $user->shop->trial_ends_at->translatedFormat('d F Y'),
+        ));
+
+        return redirect()->route('verification.notice');
     }
 
     private function uniqueSlug(string $name): string

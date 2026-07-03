@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\Subscription;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class PaymentValidated extends Notification implements ShouldQueue
@@ -17,7 +18,21 @@ class PaymentValidated extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $amount = number_format($this->payment->amount, 0, ',', ' ');
+        $endsAt = $this->subscription->ends_at->translatedFormat('d F Y');
+
+        return (new MailMessage)
+            ->subject('Paiement validé — votre abonnement est actif')
+            ->greeting("Bonjour {$notifiable->name},")
+            ->line("Votre paiement de **{$amount} {$this->payment->currency}** (réf. `{$this->payment->reference}`) a bien été validé.")
+            ->line("Votre abonnement est actif jusqu'au **{$endsAt}**.")
+            ->action('Accéder à mon espace', route('dashboard'))
+            ->salutation("L'équipe ".config('app.name'));
     }
 
     /** @return array<string, mixed> */

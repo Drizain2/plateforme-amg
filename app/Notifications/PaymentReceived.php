@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Payment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class PaymentReceived extends Notification implements ShouldQueue
@@ -16,7 +17,21 @@ class PaymentReceived extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $amount = number_format($this->payment->amount, 0, ',', ' ');
+        $period = $this->payment->billing_period->value === 'monthly' ? 'mensuel' : 'annuel';
+
+        return (new MailMessage)
+            ->subject("Nouveau paiement reçu — {$this->payment->shop->name}")
+            ->greeting("Bonjour {$notifiable->name},")
+            ->line("L'atelier **{$this->payment->shop->name}** a soumis un paiement de **{$amount} {$this->payment->currency}** pour un abonnement {$period}.")
+            ->line("Référence : `{$this->payment->reference}`")
+            ->action('Valider le paiement', route('admin.payments.index'))
+            ->salutation("L'équipe ".config('app.name'));
     }
 
     /** @return array<string, mixed> */

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -58,7 +59,14 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-Route::middleware(['auth', 'platform.admin'])->prefix('admin')->name('admin.')->group(function () {
+// Vérification email (auth requise, sans exiger la vérification)
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->middleware('signed')->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])->middleware('throttle:6,1')->name('verification.send');
+});
+
+Route::middleware(['auth', 'verified', 'platform.admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('plans', PlanController::class)->except(['show', 'create', 'edit']);
 
     Route::prefix('payments')->name('payments.')->group(function () {
@@ -68,7 +76,7 @@ Route::middleware(['auth', 'platform.admin'])->prefix('admin')->name('admin.')->
     });
 });
 
-Route::middleware(['auth', EnsureTenantScope::class])->group(function () {
+Route::middleware(['auth', 'verified', EnsureTenantScope::class])->group(function () {
     // Sélection de dépôt (non-admins avec plusieurs dépôts)
     Route::get('/depot/select', [DepotSwitchController::class, 'select'])->name('depot.select');
     Route::post('/depot/select', [DepotSwitchController::class, 'save'])->name('depot.save');

@@ -28,7 +28,7 @@ test('un visiteur peut créer un atelier avec une offre et est connecté automat
         'plan_id' => $this->plan->id,
     ]);
 
-    $response->assertRedirect(route('dashboard'));
+    $response->assertRedirect(route('verification.notice'));
 
     $shop = Shop::where('email', 'jean@atelier-test.fr')->first();
     expect($shop)->not->toBeNull();

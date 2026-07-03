@@ -25,6 +25,7 @@ class CheckSubscription
         'login',
         'register',
         'password.*',
+        'verification.*',
         'admin.*',
         'depot.select',
         'depot.save',
