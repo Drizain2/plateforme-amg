@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepotSwitchController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ShopUserController;
 use App\Http\Controllers\Stock\CategorieController;
@@ -46,15 +49,19 @@ Route::get('/invoices/{invoice}/pdf/public', [InvoiceController::class, 'publicP
     ->name('invoices.pdf.public')
     ->middleware('signed');
 
+// Challenge 2FA — accessible sans auth complète (login.id en session)
+Route::get('/two-factor-challenge', [TwoFactorController::class, 'challengeCreate'])->name('two-factor.challenge');
+Route::post('/two-factor-challenge', [TwoFactorController::class, 'challenge'])->middleware('throttle:5,1');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store']);
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
 
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
-    Route::post('/register', [RegisterController::class, 'store']);
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:10,1');
 
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'create'])->name('password.reset');
-    Route::post('/reset-password', [PasswordResetController::class, 'store'])->name('password.update');
+    Route::post('/reset-password', [PasswordResetController::class, 'store'])->name('password.update')->middleware('throttle:5,1');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])
@@ -186,6 +193,17 @@ Route::middleware(['auth', 'verified', EnsureTenantScope::class, 'subscription.c
         Route::put('/profile', [SettingsController::class, 'updateProfile'])->name('profile');
         Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
         Route::put('/plan/{plan}', [SettingsController::class, 'updatePlan'])->name('plan');
+        Route::get('/activity', [ActivityController::class, 'index'])->name('activity');
+        Route::get('/sessions', [SessionController::class, 'index'])->name('sessions');
+        // 2FA management
+        Route::post('/two-factor', [TwoFactorController::class, 'enable'])->name('two-factor.enable');
+        Route::post('/two-factor/confirm', [TwoFactorController::class, 'confirm'])->name('two-factor.confirm');
+        Route::delete('/two-factor', [TwoFactorController::class, 'disable'])->name('two-factor.disable');
+        Route::get('/two-factor/qr-code', [TwoFactorController::class, 'qrCode'])->name('two-factor.qr-code');
+        Route::get('/two-factor/recovery-codes', [TwoFactorController::class, 'recoveryCodes'])->name('two-factor.recovery-codes');
+        Route::post('/two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('two-factor.recovery-codes.regenerate');
+        Route::delete('/sessions/{session}', [SessionController::class, 'destroy'])->name('sessions.destroy');
+        Route::delete('/sessions', [SessionController::class, 'destroyAll'])->name('sessions.destroy-all');
     });
 
     Route::prefix('users/{user}/permissions')->name('users.permissions.')->group(function () {

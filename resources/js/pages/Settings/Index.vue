@@ -1,7 +1,8 @@
 <!-- resources/js/Pages/Settings/Index.vue -->
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3'
+import { useForm, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import TwoFactorController from '@/actions/App/Http/Controllers/Auth/TwoFactorController'
 import SettingsController from '@/actions/App/Http/Controllers/SettingsController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
@@ -14,6 +15,7 @@ const props = defineProps<{
     shop: ShopSettings
     plans: Plan[]
     profile: ProfileSettings
+    twoFactor: { enabled: boolean; confirmed: boolean }
 }>()
 
 const { can } = usePermission()
@@ -29,6 +31,7 @@ const allTabs = [
     { id: 'shop', label: 'Atelier', adminOnly: true },
     { id: 'profile', label: 'Mon profil', adminOnly: false },
     { id: 'password', label: 'Mot de passe', adminOnly: false },
+    { id: 'security', label: 'Sécurité', adminOnly: false },
     { id: 'plan', label: 'Abonnement', adminOnly: true },
 ]
 const tabs = computed(() => allTabs.filter(t => !t.adminOnly || canManageShop.value))
@@ -92,6 +95,55 @@ function submitPassword() {
     passwordForm.put(SettingsController.updatePassword.url(), {
         preserveScroll: true,
         onSuccess: () => passwordForm.reset(),
+    })
+}
+
+// -----------------------------------------------
+// 2FA
+// -----------------------------------------------
+const enableForm = useForm({})
+const confirmForm = useForm({ code: '' })
+const disableForm = useForm({})
+const regenerateForm = useForm({})
+const recoveryCodes = ref<string[]>([])
+const showCodes = ref(false)
+
+function enableTwoFactor() {
+    enableForm.post(TwoFactorController.enable.url(), { preserveScroll: true })
+}
+
+function confirmTwoFactor() {
+    confirmForm.post(TwoFactorController.confirm.url(), {
+        preserveScroll: true,
+        onSuccess: () => confirmForm.reset(),
+    })
+}
+
+function disableTwoFactor() {
+    if (!confirm('Désactiver le 2FA ? Votre compte sera moins sécurisé.')) {
+        return
+    }
+
+    disableForm.delete(TwoFactorController.disable.url(), { preserveScroll: true })
+}
+
+async function loadRecoveryCodes() {
+    const res = await fetch(TwoFactorController.recoveryCodes.url())
+    recoveryCodes.value = await res.json()
+    showCodes.value = true
+}
+
+function regenerateCodes() {
+    if (!confirm('Générer de nouveaux codes ? Les anciens seront invalidés.')) {
+        return
+    }
+
+    regenerateForm.post(TwoFactorController.regenerateRecoveryCodes.url(), {
+        preserveScroll: true,
+        onSuccess: () => {
+            recoveryCodes.value = []
+            showCodes.value = false
+        },
     })
 }
 
@@ -245,6 +297,141 @@ function switchPlan(plan: Plan) {
                         <Button type="submit" :loading="passwordForm.processing">Changer le mot de passe</Button>
                     </div>
                 </form>
+            </div>
+
+            <!-- -----------------------------------------------
+           Onglet Sécurité — 2FA
+      ----------------------------------------------- -->
+            <div v-if="activeTab === 'security'" class="space-y-4">
+
+                <!-- État 2FA -->
+                <div class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+                    <div class="p-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">Double authentification (2FA)</p>
+                            <p class="text-sm text-gray-500 mt-0.5">
+                                Protégez votre compte avec un code TOTP (Google Authenticator, Authy…).
+                            </p>
+                        </div>
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            :class="twoFactor.confirmed ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+                        >
+                            {{ twoFactor.confirmed ? 'Activé' : 'Désactivé' }}
+                        </span>
+                    </div>
+
+                    <!-- Pas encore activé -->
+                    <div v-if="!twoFactor.enabled" class="p-6">
+                        <p class="text-sm text-gray-600 mb-4">
+                            Activez le 2FA pour ajouter une couche de sécurité supplémentaire lors de la connexion.
+                        </p>
+                        <Button @click="enableTwoFactor" :loading="enableForm.processing">
+                            Activer le 2FA
+                        </Button>
+                    </div>
+
+                    <!-- Activé mais pas encore confirmé — affichage QR code -->
+                    <div v-else-if="!twoFactor.confirmed" class="p-6 space-y-5">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 mb-1">1. Scannez ce QR code</p>
+                            <p class="text-sm text-gray-500 mb-3">
+                                Ouvrez Google Authenticator ou Authy et scannez l'image ci-dessous.
+                            </p>
+                            <img
+                                :src="TwoFactorController.qrCode.url()"
+                                alt="QR Code 2FA"
+                                class="w-40 h-40 border border-gray-200 rounded-xl p-2"
+                            />
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700 mb-2">2. Confirmez avec un code</p>
+                            <form @submit.prevent="confirmTwoFactor" class="flex items-start gap-3 max-w-xs">
+                                <div class="flex-1">
+                                    <Input
+                                        v-model="confirmForm.code"
+                                        type="text"
+                                        inputmode="numeric"
+                                        placeholder="000000"
+                                        autocomplete="one-time-code"
+                                        :error="confirmForm.errors.code"
+                                    />
+                                </div>
+                                <Button type="submit" :loading="confirmForm.processing">Confirmer</Button>
+                            </form>
+                        </div>
+                        <div class="pt-2">
+                            <button
+                                type="button"
+                                class="text-sm text-gray-400 hover:text-red-500 transition"
+                                @click="disableTwoFactor"
+                            >
+                                Annuler la configuration
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pleinement activé -->
+                    <div v-else class="p-6 space-y-4">
+                        <p class="text-sm text-gray-600">
+                            Le 2FA est actif. Un code sera demandé à chaque connexion.
+                        </p>
+                        <Button variant="danger" @click="disableTwoFactor" :loading="disableForm.processing">
+                            Désactiver le 2FA
+                        </Button>
+                    </div>
+                </div>
+
+                <!-- Codes de récupération (uniquement si 2FA confirmé) -->
+                <div v-if="twoFactor.confirmed" class="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+                    <div class="p-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">Codes de récupération</p>
+                            <p class="text-sm text-gray-500 mt-0.5">
+                                Utilisez-les si vous perdez accès à votre application d'authentification.
+                            </p>
+                        </div>
+                        <Button variant="secondary" size="sm" @click="loadRecoveryCodes" v-if="!showCodes">
+                            Afficher
+                        </Button>
+                        <Button variant="secondary" size="sm" @click="showCodes = false" v-else>
+                            Masquer
+                        </Button>
+                    </div>
+
+                    <div v-if="showCodes" class="p-6 space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <code
+                                v-for="code in recoveryCodes"
+                                :key="code"
+                                class="text-xs font-mono bg-gray-50 border border-gray-200 rounded px-3 py-2 text-gray-700"
+                            >
+                                {{ code }}
+                            </code>
+                        </div>
+                        <div class="pt-2">
+                            <Button variant="secondary" size="sm" @click="regenerateCodes" :loading="regenerateForm.processing">
+                                Régénérer les codes
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liens vers sessions et journal -->
+                <div class="flex gap-3">
+                    <a
+                        :href="'/settings/sessions'"
+                        class="flex-1 bg-white rounded-xl border border-gray-200 p-4 text-sm font-medium text-gray-700 hover:bg-gray-50 transition text-center"
+                    >
+                        Sessions actives →
+                    </a>
+                    <a
+                        :href="'/settings/activity'"
+                        class="flex-1 bg-white rounded-xl border border-gray-200 p-4 text-sm font-medium text-gray-700 hover:bg-gray-50 transition text-center"
+                    >
+                        Journal d'activité →
+                    </a>
+                </div>
             </div>
 
             <!-- -----------------------------------------------

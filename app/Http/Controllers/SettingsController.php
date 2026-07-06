@@ -42,6 +42,10 @@ class SettingsController extends Controller
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
             ],
+            'twoFactor' => [
+                'enabled' => (bool) auth()->user()->two_factor_secret,
+                'confirmed' => (bool) auth()->user()->two_factor_confirmed_at,
+            ],
         ]);
     }
 
