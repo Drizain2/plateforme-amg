@@ -79,11 +79,11 @@ const fmt = (v: number) =>
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4 py-12">
+  <div class="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4 py-12">
     <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
 
       <!-- Header -->
-      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-7 text-white">
+      <div class="bg-linear-to-r from-indigo-600 to-purple-600 px-8 py-7 text-white">
         <div class="flex items-center gap-3 mb-1">
           <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

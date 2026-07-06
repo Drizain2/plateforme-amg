@@ -17,7 +17,7 @@
 - [x] Notifications en base de données
 - [x] Architecture PaymentGateway extensible
 
-### 🔲 1. Email transactionnel + vérification email
+### ✅ 1. Email transactionnel + vérification email
 **Pourquoi :** sans email, aucune confiance ni engagement utilisateur possible.
 - [ ] `MustVerifyEmail` sur le modèle `User`
 - [ ] Template email de vérification d'adresse
@@ -26,7 +26,7 @@
 - [ ] Email de rappel d'expiration d'abonnement (J-7, J-1)
 - [ ] Configurer un mailer (Resend, Mailgun ou SMTP)
 
-### 🔲 2. Passerelle de paiement réelle — PayDunya / Wave
+### ✅ 2. Passerelle de paiement réelle — PayDunya / Wave
 **Pourquoi :** le paiement manuel ne passe pas à l'échelle.
 - [ ] Implémenter `PayDunyaGateway` (l'interface est prête)
 - [ ] Implémenter `WaveGateway`
@@ -41,7 +41,7 @@
 - [ ] Emails de relance automatiques
 - [ ] Suspension automatique après échec du dunning
 
-### 🔲 4. Période d'essai automatique
+### ✅ 4. Période d'essai automatique
 **Pourquoi :** `trial_ends_at` existe mais rien ne la gère.
 - [ ] Commande planifiée quotidienne : passer les essais expirés en `Expired`
 - [ ] Email à J-3 avant fin d'essai

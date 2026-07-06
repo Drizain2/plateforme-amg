@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
+import EmailVerificationController from '@/actions/App/Http/Controllers/Auth/EmailVerificationController';
+import LoginController from '@/actions/App/Http/Controllers/Auth/LoginController';
 import Button from '@/Components/UI/Button.vue'
 
 defineProps<{
@@ -9,7 +11,7 @@ defineProps<{
 const form = useForm({})
 
 function resend() {
-    form.post(route('verification.send'))
+    form.post(EmailVerificationController.resend.url())
 }
 </script>
 
@@ -50,9 +52,9 @@ function resend() {
                 </Button>
 
                 <a
-                    :href="route('logout')"
+                    :href="LoginController.logout.url()"
                     class="block text-center text-sm text-gray-500 hover:text-gray-700"
-                    @click.prevent="$inertia.post(route('logout'))"
+                    @click.prevent="$inertia.post(LoginController.logout.url())"
                 >
                     Se déconnecter
                 </a>
