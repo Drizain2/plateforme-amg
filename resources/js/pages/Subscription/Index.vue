@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { useForm, usePage } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 import SubscriptionController from '@/actions/App/Http/Controllers/SubscriptionController'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
@@ -8,11 +8,16 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Payment, Plan, Subscription } from '@/types'
 import type { PaginatedResponse } from '@/types/pagination'
 
-defineProps<{
+const props = defineProps<{
   shop: { id: number; name: string; plan: Plan }
   subscription: Subscription | null
   payments: PaginatedResponse<Payment>
+  plans: Plan[]
+  hasPendingPayment: boolean
 }>()
+
+const page = usePage()
+const flash = computed(() => page.props.flash as { success?: string; error?: string; instructions?: string; reference?: string })
 
 const fmt = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF', maximumFractionDigits: 0 }).format(v)
@@ -24,9 +29,16 @@ const fmtDate = (d: string) =>
 const showSubscribePanel = ref(false)
 
 const subscribeForm = useForm({
-  plan_id: 0,
+  plan_id: props.shop.plan?.id ?? 0,
   billing_period: 'monthly' as 'monthly' | 'annual',
 })
+
+const selectedPlan = computed(() =>
+  props.plans.find((p) => p.id === subscribeForm.plan_id) ?? props.shop.plan,
+)
+
+const monthlyPrice = computed(() => selectedPlan.value?.price ?? 0)
+const annualPrice = computed(() => monthlyPrice.value * 10)
 
 function submit() {
   subscribeForm.post(SubscriptionController.subscribe.url(), {
@@ -61,6 +73,27 @@ const subStatusBadge = (status: Subscription['status']) =>
     <div class="max-w-3xl space-y-6">
 
       <h1 class="text-xl font-semibold text-gray-900">Mon abonnement</h1>
+
+      <!-- Instructions de paiement manuel (flash) -->
+      <div v-if="flash.reference" class="bg-amber-50 border border-amber-300 rounded-xl p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-700 font-semibold text-sm">Demande enregistrée — paiement en attente</span>
+        </div>
+        <p class="text-sm text-amber-800">{{ flash.instructions }}</p>
+        <div class="flex items-center gap-2 bg-white rounded-lg border border-amber-200 px-3 py-2 w-fit">
+          <span class="text-xs text-gray-500">Référence :</span>
+          <span class="font-mono text-sm font-semibold text-gray-800 select-all">{{ flash.reference }}</span>
+        </div>
+        <p class="text-xs text-amber-700">Votre abonnement sera activé dès validation par notre équipe.</p>
+      </div>
+
+      <!-- Alerte paiement déjà en attente -->
+      <div v-else-if="hasPendingPayment" class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
+        <p class="text-sm text-amber-800">
+          Vous avez déjà un paiement en attente de validation par notre équipe.
+          Une nouvelle demande annulera automatiquement l'ancienne.
+        </p>
+      </div>
 
       <!-- Abonnement actif -->
       <div class="bg-white rounded-xl border border-gray-200 p-6">
@@ -98,46 +131,75 @@ const subStatusBadge = (status: Subscription['status']) =>
       </div>
 
       <!-- Panneau souscription -->
-      <div v-if="showSubscribePanel" class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 space-y-4">
-        <h2 class="font-medium text-indigo-900">Nouvelle demande d'abonnement</h2>
-        <p class="text-sm text-indigo-600">
-          Votre demande sera traitée manuellement. Vous recevrez une confirmation une fois le paiement validé.
-        </p>
+      <div v-if="showSubscribePanel" class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 space-y-5">
+        <div>
+          <h2 class="font-medium text-indigo-900">Nouvelle demande d'abonnement</h2>
+          <p class="text-sm text-indigo-600 mt-1">
+            Sélectionnez un plan et une période. Votre demande sera traitée par notre équipe.
+          </p>
+        </div>
+
+        <!-- Avertissement si abonnement actif -->
+        <div v-if="subscription?.status === 'active'" class="bg-white border border-indigo-200 rounded-lg px-4 py-3 text-sm text-gray-600">
+          Votre abonnement actuel est valide jusqu'au <strong>{{ fmtDate(subscription.ends_at) }}</strong>.
+          Un renouvellement sera ajouté à la suite.
+        </div>
 
         <form @submit.prevent="submit" class="space-y-4">
+          <!-- Choix du plan -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Plan souhaité</label>
-            <select v-model="subscribeForm.plan_id"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-              <option :value="shop.plan.id">{{ shop.plan.name }} (plan actuel)</option>
-            </select>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+            <div class="space-y-2">
+              <label
+                v-for="plan in plans"
+                :key="plan.id"
+                class="flex items-center justify-between gap-3 bg-white border rounded-lg px-4 py-3 cursor-pointer transition"
+                :class="subscribeForm.plan_id === plan.id
+                  ? 'border-indigo-500 ring-1 ring-indigo-500'
+                  : 'border-gray-200 hover:border-gray-300'"
+              >
+                <div class="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    :value="plan.id"
+                    v-model="subscribeForm.plan_id"
+                    class="text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">{{ plan.name }}</p>
+                    <p v-if="plan.description" class="text-xs text-gray-500">{{ plan.description }}</p>
+                  </div>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">{{ fmt(plan.price) }}/mois</span>
+              </label>
+            </div>
             <p v-if="subscribeForm.errors.plan_id" class="text-xs text-red-500 mt-1">{{ subscribeForm.errors.plan_id }}</p>
           </div>
 
+          <!-- Période de facturation -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Période</label>
             <div class="flex gap-3">
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="radio" v-model="subscribeForm.billing_period" value="monthly"
                   class="text-indigo-600 focus:ring-indigo-500" />
-                <span class="text-sm text-gray-700">Mensuel — {{ fmt(shop.plan.price) }}/mois</span>
+                <span class="text-sm text-gray-700">Mensuel — <strong>{{ fmt(monthlyPrice) }}</strong>/mois</span>
               </label>
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="radio" v-model="subscribeForm.billing_period" value="annual"
                   class="text-indigo-600 focus:ring-indigo-500" />
                 <span class="text-sm text-gray-700">
-                  Annuel — {{ fmt(shop.plan.price * 10) }}/an
+                  Annuel — <strong>{{ fmt(annualPrice) }}</strong>/an
                   <span class="text-green-600 text-xs font-medium ml-1">2 mois offerts</span>
                 </span>
               </label>
             </div>
+            <p v-if="subscribeForm.errors.billing_period" class="text-xs text-red-500 mt-1">
+              {{ subscribeForm.errors.billing_period }}
+            </p>
           </div>
 
-          <div v-if="subscribeForm.errors.billing_period" class="text-xs text-red-500">
-            {{ subscribeForm.errors.billing_period }}
-          </div>
-
-          <div class="flex gap-2">
+          <div class="flex gap-2 pt-1">
             <Button type="submit" :loading="subscribeForm.processing">Envoyer la demande</Button>
             <Button type="button" variant="secondary" @click="showSubscribePanel = false">Annuler</Button>
           </div>
