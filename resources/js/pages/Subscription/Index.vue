@@ -79,7 +79,7 @@ const subStatusBadge = (status: Subscription['status']) =>
         <div class="flex items-center gap-2">
           <span class="text-amber-700 font-semibold text-sm">Demande enregistrée — paiement en attente</span>
         </div>
-        <p class="text-sm text-amber-800">{{ flash.instructions }}</p>
+        <p class="text-sm text-amber-800 whitespace-pre-line">{{ flash.instructions }}</p>
         <div class="flex items-center gap-2 bg-white rounded-lg border border-amber-200 px-3 py-2 w-fit">
           <span class="text-xs text-gray-500">Référence :</span>
           <span class="font-mono text-sm font-semibold text-gray-800 select-all">{{ flash.reference }}</span>

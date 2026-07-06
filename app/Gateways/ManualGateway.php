@@ -59,7 +59,9 @@ class ManualGateway implements PaymentGateway
     {
         $amount = number_format($payment->amount, 0, ',', ' ').' '.$payment->currency;
 
-        return "Veuillez effectuer un virement de {$amount} en indiquant la référence {$payment->reference}. "
-            .'Votre abonnement sera activé dès réception et validation du paiement par notre équipe.';
+        return "Envoyez {$amount} sur l'un des numéros ci-dessous en indiquant la référence {$payment->reference} en commentaire :\n\n"
+            ."• Wave        : 0143421237\n"
+            ."• Orange Money : 0143421237\n\n"
+            .'Votre abonnement sera activé dès réception et validation du paiement.';
     }
 }
