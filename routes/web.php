@@ -76,7 +76,7 @@ Route::middleware(['auth', 'verified', 'platform.admin'])->prefix('admin')->name
     });
 });
 
-Route::middleware(['auth', 'verified', EnsureTenantScope::class])->group(function () {
+Route::middleware(['auth', 'verified', EnsureTenantScope::class, 'subscription.check'])->group(function () {
     // Sélection de dépôt (non-admins avec plusieurs dépôts)
     Route::get('/depot/select', [DepotSwitchController::class, 'select'])->name('depot.select');
     Route::post('/depot/select', [DepotSwitchController::class, 'save'])->name('depot.save');

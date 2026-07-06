@@ -24,7 +24,7 @@ class PlanFactory extends Factory
             'name' => $name,
             'slug' => Str::slug($name),
             'description' => fake()->sentence(),
-            'price' => fake()->randomFloat(2, 0, 200),
+            'price' => fake()->numberBetween(1000, 50000),
             'max_users' => fake()->numberBetween(1, 20),
             'max_depots' => fake()->numberBetween(1, 5),
             'features' => [fake()->word(), fake()->word(), fake()->word()],

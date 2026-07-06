@@ -29,7 +29,7 @@ class ShopFactory extends Factory
             'email' => $facker->companyEmail(),
             'address' => $facker->address(),
             'plan_id' => Plan::inRandomOrder()->value('id') ?? Plan::factory(),
-            'trial_ends_at' => fake()->optional(0.3)->dateTimeBetween('now', '+30 days'),
+            'trial_ends_at' => now()->addDays(14),
             'is_active' => true,
         ];
     }

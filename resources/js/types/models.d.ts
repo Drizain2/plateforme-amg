@@ -21,6 +21,7 @@ export interface Shop {
     logo_url?: string | null;
     plan?: Plan;
     is_active: boolean;
+    trial_ends_at?: string | null;
 }
 
 export interface Depot {
