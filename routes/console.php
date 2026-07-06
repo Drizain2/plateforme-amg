@@ -14,3 +14,9 @@ Artisan::command('inspire', function () {
 Schedule::command(SendSubscriptionExpiryReminders::class)->dailyAt('09:00');
 Schedule::command(SendTrialExpiryReminders::class)->dailyAt('09:00');
 Schedule::command(ProcessSubscriptionDunning::class)->dailyAt('09:00');
+
+// Sauvegardes automatisées
+Schedule::command('backup:run --only-db')->dailyAt('01:00');
+Schedule::command('backup:run --only-files')->weeklyOn(0, '02:00'); // dimanche 02h
+Schedule::command('backup:clean')->dailyAt('03:00');
+Schedule::command('backup:monitor')->dailyAt('09:30');
