@@ -33,7 +33,7 @@
 - [ ] Sélection de gateway dans les settings admin
 - [ ] Tests d'intégration webhook PayDunya / Wave
 
-### 🔲 3. Renouvellement automatique + dunning
+### ✅ 3. Renouvellement automatique + dunning
 **Pourquoi :** sans renouvellement automatique, chaque paiement est manuel.
 - [ ] Commande planifiée : détecter les abonnements expirant dans 7 jours
 - [ ] Tenter le renouvellement automatique via gateway active
@@ -48,7 +48,7 @@
 - [ ] Banner "votre essai se termine dans X jours" sur le dashboard
 - [ ] Flow de conversion essai → payant dans l'UI
 
-### 🔲 5. Dashboard super_admin avec KPIs SaaS
+### ✅ 5. Dashboard super_admin avec KPIs SaaS
 **Pourquoi :** visibilité indispensable sur la santé du business.
 - [ ] MRR (Monthly Recurring Revenue) et ARR
 - [ ] Ateliers actifs / en essai / churned / suspendus
