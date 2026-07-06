@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { computed, watch } from 'vue'
 import { toast, Toaster } from 'vue-sonner'
+import ImpersonationController from '@/actions/App/Http/Controllers/Admin/ImpersonationController'
 import SubscriptionController from '@/actions/App/Http/Controllers/SubscriptionController'
 import Header from '@/Components/UI/Header.vue'
 import Sidebar from '@/Components/UI/Sidebar.vue'
@@ -15,6 +16,7 @@ const page = usePage()
 const flash = () => page.props.flash as Record<string, string>
 
 const shop = computed(() => (page.props.auth as Auth).shop)
+const impersonating = computed(() => page.props.impersonating as { id: number; name: string } | null)
 
 const trialDaysLeft = computed((): number | null => {
     if (!shop.value?.trial_ends_at) return null
@@ -59,6 +61,22 @@ watch(
     <Sidebar />
 
     <div class="flex-1 flex flex-col h-screen overflow-y-auto">
+      <!-- Banner impersonation -->
+      <div v-if="impersonating" class="bg-purple-600 px-4 py-2 flex items-center justify-between gap-4">
+        <span class="text-sm font-medium text-white">
+          Simulation active — vous accédez en tant que <strong>{{ shop?.name }}</strong>
+          (compte original : {{ impersonating.name }})
+        </span>
+        <Link
+          :href="ImpersonationController.stop.url()"
+          method="post"
+          as="button"
+          class="shrink-0 text-xs font-semibold bg-white text-purple-700 hover:bg-purple-50 px-3 py-1 rounded-md transition-colors"
+        >
+          Terminer la simulation
+        </Link>
+      </div>
+
       <!-- Banner essai gratuit -->
       <div
         v-if="trialDaysLeft !== null && trialBannerStyle"

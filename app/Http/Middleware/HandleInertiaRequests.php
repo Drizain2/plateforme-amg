@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Services\PermissionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -58,6 +59,9 @@ class HandleInertiaRequests extends Middleware
                 'instructions' => session('instructions'),
                 'reference' => session('reference'),
             ],
+            'impersonating' => fn () => session()->has('impersonating_user_id')
+                ? User::find(session('impersonating_user_id'))?->only('id', 'name')
+                : null,
         ];
     }
 

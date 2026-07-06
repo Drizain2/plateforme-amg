@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -67,6 +69,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'platform.admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
     Route::resource('plans', PlanController::class)->except(['show', 'create', 'edit']);
 
     Route::prefix('payments')->name('payments.')->group(function () {
@@ -74,7 +78,15 @@ Route::middleware(['auth', 'verified', 'platform.admin'])->prefix('admin')->name
         Route::post('/{payment}/approve', [AdminPaymentController::class, 'approve'])->name('approve');
         Route::post('/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('reject');
     });
+
+    // Impersonation — démarrer (super_admin uniquement)
+    Route::post('/shops/{shop}/impersonate', [ImpersonationController::class, 'start'])->name('impersonate');
 });
+
+// Arrêter l'impersonation — accessible même en tant qu'admin atelier (pas de middleware platform.admin)
+Route::post('/admin/impersonation/stop', [ImpersonationController::class, 'stop'])
+    ->middleware('auth')
+    ->name('admin.impersonation.stop');
 
 Route::middleware(['auth', 'verified', EnsureTenantScope::class, 'subscription.check'])->group(function () {
     // Sélection de dépôt (non-admins avec plusieurs dépôts)
