@@ -121,7 +121,7 @@
 
 ## Priorité 4 — Infrastructure à l'échelle
 
-### 🔲 15. Sauvegardes automatisées
+### ✅ 15. Sauvegardes automatisées
 - [ ] `spatie/laravel-backup` : BDD + fichiers uploadés
 - [ ] Stockage distant (S3, Google Drive ou FTP)
 - [ ] Notification si la sauvegarde échoue
