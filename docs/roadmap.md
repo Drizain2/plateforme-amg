@@ -62,7 +62,7 @@
 
 ## Priorité 2 — Professionnalisation du SaaS
 
-### 🔲 6. Sécurité renforcée
+### ✅ 6. Sécurité renforcée
 - [ ] 2FA (TOTP — Google Authenticator / Authy) via Laravel Fortify
 - [ ] Gestion des sessions actives (liste + révocation)
 - [ ] Journal d'audit visible par atelier (UI sur `spatie/laravel-activitylog`)
