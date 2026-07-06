@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ProcessSubscriptionDunning;
 use App\Console\Commands\SendSubscriptionExpiryReminders;
 use App\Console\Commands\SendTrialExpiryReminders;
 use Illuminate\Foundation\Inspiring;
@@ -12,3 +13,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command(SendSubscriptionExpiryReminders::class)->dailyAt('09:00');
 Schedule::command(SendTrialExpiryReminders::class)->dailyAt('09:00');
+Schedule::command(ProcessSubscriptionDunning::class)->dailyAt('09:00');

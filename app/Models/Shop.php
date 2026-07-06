@@ -20,7 +20,10 @@ class Shop extends Model
         'name', 'slug', 'email', 'phone', 'logo_url', 'address', 'plan_id', 'trial_ends_at', 'is_active',
     ];
 
-    protected $casts = ['trial_ends_at' => 'datetime'];
+    protected $casts = [
+        'trial_ends_at' => 'datetime',
+        'is_active' => 'boolean',
+    ];
 
     public function plan(): BelongsTo
     {
