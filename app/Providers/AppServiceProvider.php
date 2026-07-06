@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contracts\PaymentGateway;
 use App\Gateways\ManualGateway;
+use App\Gateways\PayDunyaGateway;
+use App\Gateways\WaveGateway;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -17,13 +19,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Passerelle active. Pour changer : remplacer ManualGateway par
-        // PayDunyaGateway, WaveGateway, etc. Un seul endroit à modifier.
-        $this->app->bind(PaymentGateway::class, ManualGateway::class);
+        // Passerelle active, choisie via PAYMENT_GATEWAY dans .env.
+        $this->app->bind(PaymentGateway::class, fn () => match (config('payment.gateway', 'manual')) {
+            'paydunya' => $this->app->make(PayDunyaGateway::class),
+            'wave' => $this->app->make(WaveGateway::class),
+            default => $this->app->make(ManualGateway::class),
+        });
 
-        // Binding par nom de gateway pour le WebhookController.
-        // Ajouter ici chaque nouvelle passerelle : 'payment.gateway.paydunya' => PayDunyaGateway::class
+        // Bindings nommés pour le WebhookController (indépendants de la gateway active).
         $this->app->bind('payment.gateway.manual', ManualGateway::class);
+        $this->app->bind('payment.gateway.paydunya', PayDunyaGateway::class);
+        $this->app->bind('payment.gateway.wave', WaveGateway::class);
     }
 
     /**

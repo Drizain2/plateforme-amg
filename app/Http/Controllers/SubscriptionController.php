@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as BaseResponse;
 
 class SubscriptionController extends Controller
 {
@@ -40,7 +41,7 @@ class SubscriptionController extends Controller
     /**
      * Initie une demande d'abonnement (crée un paiement pending).
      */
-    public function subscribe(Request $request): RedirectResponse
+    public function subscribe(Request $request): RedirectResponse|BaseResponse
     {
         $request->validate([
             'plan_id' => ['required', 'exists:plans,id'],
@@ -57,6 +58,12 @@ class SubscriptionController extends Controller
             return back()->with('success', 'Abonnement gratuit activé.');
         }
 
+        // Passerelle automatique (PayDunya, Wave…) : redirige vers la page de paiement.
+        if ($result->redirectUrl) {
+            return Inertia::location($result->redirectUrl);
+        }
+
+        // Mode manuel : affiche les instructions de virement.
         return back()->with([
             'success' => 'Demande enregistrée. Référence : '.$result->reference,
             'instructions' => $result->instructions,
