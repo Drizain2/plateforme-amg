@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Ticket;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddNoteRequest;
 use App\Http\Requests\AssignTechnicianRequest;
@@ -60,11 +61,11 @@ class TicketController extends Controller
             'tickets' => TicketResource::collection($tickets),
             'filters' => $filters,
             'technicians' => $isManager ? $this->techniciansForDepot() : collect(),
-            'statuses' => array_map(fn ($s) => [
+            'statuses' => array_map(fn($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ], TicketStatus::cases()),
-            'priorities' => array_map(fn ($p) => [
+            'priorities' => array_map(fn($p) => [
                 'value' => $p->value,
                 'label' => $p->label(),
             ], TicketPriority::cases()),
@@ -76,7 +77,7 @@ class TicketController extends Controller
         return Inertia::render('Tickets/Create', [
             'depots' => Depot::select('id', 'name')->where('is_active', true)->get(),
             'technicians' => $this->techniciansForDepot(),
-            'priorities' => array_map(fn ($p) => [
+            'priorities' => array_map(fn($p) => [
                 'value' => $p->value,
                 'label' => $p->label(),
             ], TicketPriority::cases()),
@@ -144,7 +145,7 @@ class TicketController extends Controller
                 ->with('part:id,name,sell_price')
                 ->select('id', 'part_id', 'quantity')
                 ->get()
-                ->map(fn (StockDepot $stock) => [
+                ->map(fn(StockDepot $stock) => [
                     'id' => $stock->id,
                     'name' => $stock->part?->name ?? 'Pièce inconnue',
                     'quantity' => $stock->quantity,
@@ -201,10 +202,14 @@ class TicketController extends Controller
 
     public function consumePart(ConsumePartRequest $request, Ticket $ticket): RedirectResponse
     {
-        $part = StockDepot::findOrFail($request->part_id);
-        $this->ticketService->consumePart($ticket, $part, $request->quantity, $request->user());
+        try {
+            $part = StockDepot::findOrFail($request->part_id);
+            $this->ticketService->consumePart($ticket, $part, $request->quantity, $request->user());
 
-        return back()->with('success', 'Pièce consommée.');
+            return back()->with('success', 'Pièce consommée.');
+        } catch (InsufficientStockException $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
     }
 
     public function setDiagnosis(SetDiagnosisRequest $request, Ticket $ticket): RedirectResponse
@@ -229,7 +234,7 @@ class TicketController extends Controller
         $depotId ??= app()->has('current_depot') ? app('current_depot')->id : null;
 
         return User::role('technicien')
-            ->when($depotId, fn ($q) => $q->whereHas('depots', fn ($q) => $q->where('depots.id', $depotId)))
+            ->when($depotId, fn($q) => $q->whereHas('depots', fn($q) => $q->where('depots.id', $depotId)))
             ->select('id', 'name')
             ->get();
     }

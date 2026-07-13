@@ -52,6 +52,9 @@ class HandleInertiaRequests extends Middleware
                 'isGlobalView' => fn () => $user && $user->isAdminOrSuperAdmin() && ! $user->depot_active_id,
                 'unread_count' => fn () => $user?->unreadNotifications()->count() ?? 0,
                 'permissions' => $user ? $permService->effectivePermissions($user) : [],
+                'is_on_trial' => fn () => $user?->shop
+                    ? ($user->shop->isOnTrial() && ! $user->shop->hasActiveSubscription())
+                    : false,
             ],
             'flash' => [
                 'success' => session('success'),

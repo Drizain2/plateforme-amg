@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Tickets/Show.vue -->
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3'
+import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
@@ -19,7 +19,7 @@ const props = defineProps<{
     technicians: { id: number; name: string }[]
     depotParts: { id: number; name: string; quantity: number; unit_price: number }[]
 }>()
-
+const page = usePage()
 const { can } = usePermission()
 
 const ticketData = computed(() => props.ticket)
@@ -112,14 +112,20 @@ const showPartModal = ref(false)
 const partOptions = computed(() =>
     props.depotParts.map(p => ({ value: p.id, label: `${p.name} (stock: ${p.quantity})` }))
 )
-
+const submitError = ref<string|null>(null)
 function submitPart() {
+    submitError.value = null
     partForm.post(TicketController.consumePart.url({ ticket: ticketData.value.id }), {
         preserveScroll: true,
         onSuccess: () => {
-            showPartModal.value = false
-            partForm.reset()
+            if(page.props.flash?.error){
+                submitError.value = page.props.flash.error
+            }else{
+                showPartModal.value = false
+                partForm.reset()
+            }
         },
+       
     })
 }
 
@@ -172,6 +178,9 @@ const fmt = (v: number) =>
                     </Button>
                 </div>
             </div>
+            <div v-if="submitError" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        {{ submitError }}
+      </div>
 
             <div class="grid grid-cols-3 gap-6">
 

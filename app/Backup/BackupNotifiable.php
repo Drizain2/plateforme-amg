@@ -4,12 +4,13 @@ namespace App\Backup;
 
 use App\Models\User;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Backup\Notifications\Notifiable as BackupNotifiableInterface;
 
 /**
  * Destinataire des notifications de sauvegarde : tous les super_admins de la plateforme.
  * Si aucun super_admin n'est trouvé, repli sur BACKUP_NOTIFICATION_EMAIL.
  */
-class BackupNotifiable
+class BackupNotifiable extends BackupNotifiableInterface
 {
     use Notifiable;
 
@@ -28,8 +29,8 @@ class BackupNotifiable
         return $admins;
     }
 
-    public function getKey(): string
+    public function getKey(): int
     {
-        return 'backup-notifiable';
+        return 1;
     }
 }

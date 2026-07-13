@@ -60,6 +60,7 @@ class StockService
             $locked = $this->lockStock($stock);
 
             if ($locked->quantity < $quantity) {
+                
                 throw new InsufficientStockException("Stock insuffisant (disponible : {$locked->quantity}, demandé : {$quantity}).");
             }
 

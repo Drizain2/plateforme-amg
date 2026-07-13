@@ -148,7 +148,7 @@ class PartController extends Controller
 
         // En mode achat, on liste tout le catalogue actif (même les pièces
         // jamais stockées dans ce dépôt) puisqu'on réapprovisionne.
-        $parts = Part::with(['stockDepots' => function ($q) use ($depotId) {
+        $parts = Part::with(['category:id,name','stockDepots' => function ($q) use ($depotId) {
             $q->when($depotId, fn ($q) => $q->where('depot_id', $depotId));
         }])
             ->where(fn ($q) => $q
@@ -157,8 +157,7 @@ class PartController extends Controller
             ->where('is_active', true)
             ->when($depotId && ! $forPurchase, fn ($q) => $q->whereHas('stockDepots', fn ($q) => $q->where('depot_id', $depotId)->where('quantity', '>', 0)))
             ->limit(8)
-            ->get(['id', 'name', 'sku', 'unit_price', 'sell_price']);
-
+            ->get(['id', 'name', 'sku', 'unit_price', 'sell_price','category_id']);
         // Aplatir par dépôt : une entrée par (pièce × dépôt) pour que le frontend
         // reçoive bien depot_id et quantity. En mode vente, on ne garde que les
         // pièces effectivement en stock (>0) dans le dépôt demandé. Sans dépôt
@@ -180,6 +179,7 @@ class PartController extends Controller
                     'unit_price' => $part->unit_price,
                     'avg_cost_price' => 0,
                     'alert_quantity' => null,
+                    'categorie'=>$part->category->name
                 ]];
             }
 
@@ -193,6 +193,7 @@ class PartController extends Controller
                 'unit_price' => $part->unit_price,
                 'avg_cost_price' => $sd->avg_cost_price,
                 'alert_quantity' => $sd->alert_quantity,
+                'categorie'=>$part->category->name
             ]);
         });
 

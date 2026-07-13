@@ -80,4 +80,5 @@ export type Auth = {
     isGlobalView: boolean;
     unread_count: AppNotification;
     permissions: Permission[];
+    is_on_trial: boolean;
 };

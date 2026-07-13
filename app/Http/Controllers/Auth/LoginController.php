@@ -30,7 +30,7 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        if (! $user->shop_id) {
+        if (! $user->shop_id && $user->hasRole('super_admin')) {
             return redirect()->intended(route('admin.plans.index'));
         }
 

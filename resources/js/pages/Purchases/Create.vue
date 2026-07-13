@@ -142,41 +142,38 @@ function submit() {
               Cliquez sur un article du catalogue à droite pour l'ajouter.
             </div>
 
-            <div v-else class="space-y-2">
-              <!-- En-tête colonnes -->
-              <div class="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase tracking-wide px-1">
-                <div class="col-span-6">Désignation</div>
-                <div class="col-span-2">seuil</div>
-                <div class="col-span-2">Qté</div>
-                <div class="col-span-2">Prix unit.</div>
-                <div class="col-span-1">Total</div>
-                <div class="col-span-1" />
-              </div>
+           <div v-else class="space-y-2">
+  <div class="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase tracking-wide px-1">
+    <div class="col-span-5">Désignation</div>
+    <div class="col-span-1">Seuil</div>
+    <div class="col-span-2">Qté</div>
+    <div class="col-span-2">Prix unit.</div>
+    <div class="col-span-1">Total</div>
+    <div class="col-span-12 sm:col-span-1" />
+  </div>
 
-              <div
-                v-for="(line, i) in form.lines"
-                :key="i"
-                class="grid grid-cols-12 gap-2 items-center pb-2 border-b border-gray-50 last:border-0"
-              >
-                <p class="col-span-6 text-sm font-medium text-gray-900 px-1 truncate">{{ line.label }}</p>
-                <div class="col-span-2">
-                  <Input v-model.number="line.alert_quantity" type="number" min="0" placeholder="Non modifié" class="w-28" />
-                </div>
-                <div class="col-span-2">
-                  <Input v-model.number="line.quantity" type="number" min="1" />
-                </div>
-                <div class="col-span-2">
-                  <Input v-model.number="line.unit_price" type="number" step="0.01" min="0" />
-                </div>
-                <div class="col-span-1 text-sm text-gray-700 font-medium">
-                  {{ fmtXof(line.quantity * line.unit_price) }}
-                </div>
-                <div class="col-span-1 text-right">
-                  <button type="button" @click="removeLine(i)"
-                    class="text-gray-400 hover:text-red-500 transition text-lg leading-none">×</button>
-                </div>
-              </div>
-            </div>
+  <div
+    v-for="(line, i) in form.lines"
+    :key="i"
+    class="grid grid-cols-12 gap-2 items-center pb-2 border-b border-gray-50 last:border-0"
+  >
+    <p class="col-span-5 text-sm font-medium text-gray-900 px-1 truncate">{{ line.label }}</p>
+    <div class="col-span-1 min-w-0">
+      <Input v-model.number="line.alert_quantity" type="number" min="0" placeholder="Non modifié" class="w-full" />
+    </div>
+    <div class="col-span-2 min-w-0">
+      <Input v-model.number="line.quantity" type="number" min="1" class="w-full" />
+    </div>
+    <div class="col-span-2 min-w-0">
+      <Input v-model.number="line.unit_price" type="number" step="100" min="0" class="w-full" />
+    </div>
+    <div class="col-span-1 text-sm text-gray-700 font-medium whitespace-nowrap">
+      {{ fmtXof(line.quantity * line.unit_price) }}
+    </div>
+    <button type="button" @click="removeLine(i)"
+      class="col-span-12 sm:col-span-1 text-right text-gray-400 hover:text-red-500 transition text-lg leading-none">×</button>
+  </div>
+</div>
 
             <!-- Totaux -->
             <div v-if="form.lines.length > 0" class="border-t border-gray-100 pt-4 space-y-1 text-sm">

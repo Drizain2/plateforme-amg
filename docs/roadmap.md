@@ -43,10 +43,10 @@
 
 ### ✅ 4. Période d'essai automatique
 **Pourquoi :** `trial_ends_at` existe mais rien ne la gère.
-- [ ] Commande planifiée quotidienne : passer les essais expirés en `Expired`
-- [ ] Email à J-3 avant fin d'essai
-- [ ] Banner "votre essai se termine dans X jours" sur le dashboard
-- [ ] Flow de conversion essai → payant dans l'UI
+- [x] Commande planifiée quotidienne : passer les essais expirés en `Expired`
+- [x] Email à J-3 avant fin d'essai
+- [x] Banner "votre essai se termine dans X jours" sur le dashboard
+- [x] Flow de conversion essai → payant dans l'UI
 
 ### ✅ 5. Dashboard super_admin avec KPIs SaaS
 **Pourquoi :** visibilité indispensable sur la santé du business.
@@ -122,9 +122,9 @@
 ## Priorité 4 — Infrastructure à l'échelle
 
 ### ✅ 15. Sauvegardes automatisées
-- [ ] `spatie/laravel-backup` : BDD + fichiers uploadés
-- [ ] Stockage distant (S3, Google Drive ou FTP)
-- [ ] Notification si la sauvegarde échoue
+- [x] `spatie/laravel-backup` : BDD + fichiers uploadés
+- [x] Stockage distant (S3, Google Drive ou FTP)
+- [x] Notification si la sauvegarde échoue
 
 ### 🔲 16. Monitoring applicatif
 - [ ] Sentry : capture automatique des erreurs PHP + JS

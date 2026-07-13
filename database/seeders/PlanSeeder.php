@@ -19,6 +19,7 @@ class PlanSeeder extends Seeder
                 'description' => 'Pour démarrer avec un seul atelier.',
                 'price' => 0,
                 'max_users' => 3,
+                'disabled_modules' => ['tickets'],
                 'max_depots' => 1,
                 'features' => ['1 dépôt', '3 utilisateurs', 'Tickets & Stock'],
                 'sort_order' => 1,
@@ -62,7 +63,6 @@ class PlanSeeder extends Seeder
                 'max_users' => 10,
                 'max_depots' => null,
                 'features' => ['Dépôts illimités', '10 utilisateurs', 'Achats fournisseurs', 'Analytics'],
-                'disabled_modules' => ['tickets'],
                 'sort_order' => 5,
             ],
         ];

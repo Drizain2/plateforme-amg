@@ -47,7 +47,7 @@ class CheckSubscription
         $shop = app('current_shop');
 
         // Plan gratuit (price = 0) → toujours accessible
-        if ($shop->plan && $shop->plan->price === 0) {
+        if ($shop->plan && $shop->plan->price == 0) {
             return $next($request);
         }
 
@@ -60,9 +60,9 @@ class CheckSubscription
         if ($shop->hasActiveSubscription()) {
             return $next($request);
         }
-
         // Accès bloqué → redirection Inertia vers paramètres/abonnement
         if ($request->header('X-Inertia')) {
+            session()->flash('error', 'Votre abonnement a expiré. Renouvelez-le pour continuer.');
             return Inertia::location(route('settings.edit').'?tab=plan');
         }
 

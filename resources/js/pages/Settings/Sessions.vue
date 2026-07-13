@@ -11,17 +11,35 @@ interface Session {
   is_current: boolean
 }
 
-const props = defineProps<{
+defineProps<{
   sessions: Session[]
 }>()
 
 const parseAgent = (ua: string | null): string => {
-  if (!ua) return 'Navigateur inconnu'
-  if (ua.includes('iPhone') || ua.includes('Android')) return 'Mobile'
-  if (ua.includes('Chrome')) return 'Chrome'
-  if (ua.includes('Firefox')) return 'Firefox'
-  if (ua.includes('Safari')) return 'Safari'
-  if (ua.includes('Edge')) return 'Edge'
+  if (!ua) {
+return 'Navigateur inconnu'
+}
+
+  if (ua.includes('iPhone') || ua.includes('Android')) {
+return 'Mobile'
+}
+
+  if (ua.includes('Chrome')) {
+return 'Chrome'
+}
+
+  if (ua.includes('Firefox')) {
+return 'Firefox'
+}
+
+  if (ua.includes('Safari')) {
+return 'Safari'
+}
+
+  if (ua.includes('Edge')) {
+return 'Edge'
+}
+
   return 'Autre navigateur'
 }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ExpireTrials;
 use App\Console\Commands\ProcessSubscriptionDunning;
 use App\Console\Commands\SendSubscriptionExpiryReminders;
 use App\Console\Commands\SendTrialExpiryReminders;
@@ -11,6 +12,7 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Schedule::command(ExpireTrials::class)->dailyAt('06:00');
 Schedule::command(SendSubscriptionExpiryReminders::class)->dailyAt('09:00');
 Schedule::command(SendTrialExpiryReminders::class)->dailyAt('09:00');
 Schedule::command(ProcessSubscriptionDunning::class)->dailyAt('09:00');

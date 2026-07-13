@@ -4,6 +4,7 @@ export interface StockSearchResult {
     name: string;
     sku: string | null;
     quantity: number;
+    categorie: string | null;
     depot_id: number | null;
     sell_price: number;
     unit_price: number;

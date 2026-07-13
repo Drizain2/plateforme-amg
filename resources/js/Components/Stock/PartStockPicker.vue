@@ -54,6 +54,7 @@ defineExpose({ reload: runSearch })
         <div class="min-w-0">
           <p class="text-sm font-medium text-gray-900 truncate">{{ r.name }}</p>
           <p class="text-xs text-gray-400 font-mono">{{ r.sku ?? '—' }}</p>
+          <p class="text-xs text-blue-600 font-mono">{{ r.categorie ?? '—' }}</p>
         </div>
         <div class="text-right shrink-0">
           <p class="text-xs text-gray-500">{{ r.quantity }} en stock</p>

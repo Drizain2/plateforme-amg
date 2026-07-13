@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Settings/Index.vue -->
 <script setup lang="ts">
-import { useForm, router } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import TwoFactorController from '@/actions/App/Http/Controllers/Auth/TwoFactorController'
 import SettingsController from '@/actions/App/Http/Controllers/SettingsController'

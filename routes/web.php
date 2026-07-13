@@ -36,6 +36,12 @@ use App\Http\Middleware\EnsureTenantScope;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
+Route::get('/up', function () {
+    try {
+    } catch (Exception $e) {
+        return 'error'.$e->getMessage();
+    }
+});
 
 // Page publique (accessible sans auth)
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
