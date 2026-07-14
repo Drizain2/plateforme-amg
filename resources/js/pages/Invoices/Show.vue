@@ -10,6 +10,7 @@ import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import Select from '@/Components/UI/Select.vue'
+import { usePermission } from '@/Composables/usePermission'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { StockSearchResult } from '@/types'
 import type { Invoice, BadgeVariant } from '@/types/models'
@@ -18,7 +19,7 @@ const props = defineProps<{ invoice: Invoice }>()
 
 const page = usePage()
 const depotActive = computed(() => page.props.auth.depotActive)
-
+const { can } = usePermission()
 const fmt = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
 
@@ -121,6 +122,7 @@ return
             <Button variant="secondary" size="sm">Télécharger PDF</Button>
           </a>
           <Button
+          v-show="can('invoices.edit')"
             v-for="s in invoice.next_statuses"
             :key="s.value"
             size="sm"

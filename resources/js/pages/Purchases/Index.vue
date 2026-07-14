@@ -45,7 +45,7 @@ const statusOptions = computed(() => props.statuses.map(s => ({ value: s.value, 
 
 <template>
   <AppLayout title="Achats">
-    <div class="space-y-6">
+    <div class="max-w-7xl m-auto space-y-6">
 
       <!-- Header -->
       <div class="flex items-center justify-between">

@@ -59,7 +59,7 @@ class InvoiceService
                 'ticket_id' => $ticket->id,
                 'customer_id' => $ticket->customer_id,
                 'status' => InvoiceStatus::Draft,
-                'tax_rate' => 20.00,
+                'tax_rate' => 0,
                 'issued_at' => now(),
                 'due_at' => now()->addDays(30),
             ]);

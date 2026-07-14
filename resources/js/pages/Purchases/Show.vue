@@ -27,7 +27,7 @@ function submitTransition(status: string) {
 
 <template>
   <AppLayout :title="`Achat ${purchase.number}`">
-    <div class="max-w-4xl space-y-6">
+    <div class="max-w-7xl m-auto space-y-6">
 
       <!-- Header -->
       <div class="flex items-start justify-between">
