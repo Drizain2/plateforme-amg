@@ -186,7 +186,7 @@ const fmtXof = (v: number) =>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
             </svg>
-            Facturer
+            Vendre
           </Button>
           <Button v-show="can('stock.create')" @click="openCreate">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

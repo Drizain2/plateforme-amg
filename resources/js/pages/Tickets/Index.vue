@@ -21,7 +21,7 @@ const props = defineProps<{
     priorities: { value: string; label: string }[]
 }>()
 
-const { applyFilter } = useFilters('tickets.index')
+const { applyFilter } = useFilters(TicketController.index.url())
 const { can } = usePermission()
 
 const search = ref(props.filters.search ?? '')

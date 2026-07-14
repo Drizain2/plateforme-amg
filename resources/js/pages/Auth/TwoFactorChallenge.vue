@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import TwoFactorController from '@/actions/App/Http/Controllers/Auth/TwoFactorController'
 import Button from '@/Components/UI/Button.vue'
 import Input from '@/Components/UI/Input.vue'

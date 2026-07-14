@@ -15,7 +15,7 @@ const props = defineProps<{
   filters: { search?: string }
 }>()
 
-const { applyFilter } = useFilters('customers.index')
+const { applyFilter } = useFilters(CustomerController.index.url())
 
 const search = ref(props.filters.search ?? '')
 watch(search, val => applyFilter({ search: val || undefined }))

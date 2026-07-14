@@ -113,6 +113,11 @@ function permLabel(perm: string): string {
         'settings.manage': 'Gérer les paramètres',
         'dashboard.view': 'Voir le dashboard',
         'dashboard.analytics': 'Stats avancées',
+        'purchases.view': 'Voir les commandes d\'achat',
+        'purchases.create': 'Créer des commandes d\'achat',
+        'purchases.edit': 'Modifier des commandes d\'achat',
+        'purchases.delete': 'Supprimer des commandes d\'achat',
+        'purchases.mark_paid': 'Valider des commandes d\'achat',
     }
 
     return labels[perm] ?? perm
@@ -121,7 +126,7 @@ function permLabel(perm: string): string {
 
 <template>
     <AppLayout :title="`Permissions — ${targetUser.name}`">
-        <div class="max-w-3xl space-y-6">
+        <div class="max-w-7xl m-auto space-y-6">
 
             <!-- Header -->
             <div class="flex items-center justify-between">

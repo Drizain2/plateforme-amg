@@ -148,6 +148,7 @@ const roleOptions = [
 
 const admins = computed(() => props?.users.filter(u => u.role === 'admin'))
 const techniciens = computed(() => props?.users.filter(u => u.role === 'technicien'))
+const autres = computed(() => props?.users.filter(u => u.role !== 'admin' && u.role !== 'technicien'))
 
 // function roleVariant(role: string) {
 //     return role === 'admin' ? 'warning' : 'info'
@@ -189,7 +190,8 @@ function toggleDepot(form: typeof createForm | typeof editForm, depotId: number)
                 </Button>
             </div>
 
-            <div v-if="can('users.manage') && !canAddUser" class="bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-xl px-4 py-3">
+            <div v-if="can('users.manage') && !canAddUser"
+                class="bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-xl px-4 py-3">
                 Limite d'utilisateurs atteinte pour votre offre actuelle. Passez à une offre supérieure pour en ajouter.
             </div>
 
@@ -217,7 +219,16 @@ function toggleDepot(form: typeof createForm | typeof editForm, depotId: number)
                     :resetting="resettingId === user.id" :deleting="deletingId === user.id" @edit="openEdit"
                     @toggle="toggleActive" @reset-password="resetPassword" @delete="confirmDelete" />
             </div>
-
+            <!-- Autres utilisateurs -->
+            <div class="space-y-3">
+                <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    Autres utilisateurs ({{ autres.length }})
+                </h2>
+                <UserCard v-for="user in autres" :key="user.id" :user="user"
+                    :is-current-user="user.id === currentUserId" :toggling="togglingId === user.id"
+                    :resetting="resettingId === user.id" :deleting="deletingId === user.id" @edit="openEdit"
+                    @toggle="toggleActive" @reset-password="resetPassword" @delete="confirmDelete" />
+            </div>
         </div>
 
         <!-- -----------------------------------------------

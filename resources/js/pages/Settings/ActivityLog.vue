@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
+import SettingsController from '@/actions/App/Http/Controllers/SettingsController'
+import Button from '@/Components/UI/Button.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 interface LaravelPaginator<T> {
   data: T[]
@@ -53,11 +55,21 @@ const fmtDate = (iso: string) =>
 
 <template>
   <AppLayout title="Journal d'audit">
-    <div class="max-w-5xl">
+    <div class="max-w-7xl m-auto space-y-6">
       <!-- En-tête -->
-      <div class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-900">Journal d'activité</h2>
-        <p class="text-sm text-gray-500 mt-1">Historique des actions effectuées sur votre atelier.</p>
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="flex items-center gap-3">
+            <Button variant="ghost" class="cursor-pointer" size="sm" @click="router.visit(SettingsController.edit.url())">
+              ← Retour
+            </Button>
+            <div class="flex  flex-col">
+              <h2 class="text-lg font-semibold text-gray-900">Journal d'activité</h2>
+              <p class="text-sm text-gray-500 mt-1">Historique des actions effectuées sur votre atelier.</p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Tableau -->

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import SessionController from '@/actions/App/Http/Controllers/SessionController'
+import SettingsController from '@/actions/App/Http/Controllers/SettingsController'
+import Button from '@/Components/UI/Button.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+
 
 interface Session {
   id: string
@@ -60,14 +63,22 @@ const revokeAll = () => {
 
 <template>
   <AppLayout title="Sessions actives">
-    <div class="max-w-3xl">
+    <div class="max-w-7xl m-auto space-y-6">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h2 class="text-lg font-semibold text-gray-900">Sessions actives</h2>
-          <p class="text-sm text-gray-500 mt-1">Appareils et navigateurs connectés à votre compte.</p>
+          <div class="flex items-center gap-3">
+            <Button variant="ghost" class="cursor-pointer" size="sm" @click="router.visit(SettingsController.edit.url())">
+              ← Retour
+            </Button>
+            <div class="flex  flex-col">
+              <h2 class="text-lg font-semibold text-gray-900">Sessions actives</h2>
+              <p class="text-sm text-gray-500 mt-1">Appareils et navigateurs connectés à votre compte.</p>
+            </div>
+
+          </div>
+
         </div>
-        <button
-          v-if="sessions.filter(s => !s.is_current).length > 0"
+        <button v-if="sessions.filter(s => !s.is_current).length > 0"
           class="text-sm font-medium text-red-600 hover:text-red-700 transition"
           @click="revokeAll"
         >

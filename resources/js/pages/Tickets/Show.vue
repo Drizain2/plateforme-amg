@@ -157,7 +157,7 @@ const fmt = (v: number) =>
 
 <template>
     <AppLayout :title="`Ticket ${ticketData.reference}`">
-        <div class="space-y-6 max-w-5xl">
+        <div class="max-w-7xl m-auto space-y-6">
 
             <!-- Header -->
             <div class="flex items-start justify-between">

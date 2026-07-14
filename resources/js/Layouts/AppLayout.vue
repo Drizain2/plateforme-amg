@@ -6,6 +6,7 @@ import ImpersonationController from '@/actions/App/Http/Controllers/Admin/Impers
 import SubscriptionController from '@/actions/App/Http/Controllers/SubscriptionController'
 import Header from '@/Components/UI/Header.vue'
 import Sidebar from '@/Components/UI/Sidebar.vue'
+import { usePermission } from '@/Composables/usePermission'
 import type { Auth } from '@/types/auth'
 
 defineProps<{
@@ -14,7 +15,7 @@ defineProps<{
 
 const page = usePage()
 const flash = () => page.props.flash as Record<string, string>
-
+const { can } = usePermission()
 const shop = computed(() => (page.props.auth as Auth).shop)
 const impersonating = computed(() => page.props.impersonating as { id: number; name: string } | null)
 
@@ -122,7 +123,7 @@ toast.info(info)
         <span :class="[trialBannerStyle.text, 'text-sm font-medium']">
           {{ trialLabel }}
         </span>
-        <Link :href="SubscriptionController.index.url()"
+        <Link :href="SubscriptionController.index.url()" v-show="can('settings.manage')"
           :class="[trialBannerStyle.btn, 'shrink-0 text-xs font-semibold px-3 py-1 rounded-md transition-colors']">
           Choisir un plan
         </Link>

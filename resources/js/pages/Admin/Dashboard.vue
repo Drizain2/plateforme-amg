@@ -40,13 +40,13 @@ const fmtDate = (d: string) =>
 
 const maxCount = Math.max(...props.acquisition.map((w) => w.count), 1)
 
-const statusBadge = (status: Payment['status']) =>
-  ({
-    pending: { variant: 'warning' as const, label: 'En attente' },
-    validated: { variant: 'success' as const, label: 'Validé' },
-    rejected: { variant: 'danger' as const, label: 'Rejeté' },
-    refunded: { variant: 'default' as const, label: 'Remboursé' },
-  })[status]
+// const statusBadge = (status: Payment['status']) =>
+//   ({
+//     pending: { variant: 'warning' as const, label: 'En attente' },
+//     validated: { variant: 'success' as const, label: 'Validé' },
+//     rejected: { variant: 'danger' as const, label: 'Rejeté' },
+//     refunded: { variant: 'default' as const, label: 'Remboursé' },
+//   })[status]
 </script>
 
 <template>

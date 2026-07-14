@@ -51,7 +51,9 @@ function approve(payment: Payment) {
   approving.value = payment.id
   router.post(AdminPaymentController.approve.url(payment.id), {}, {
     preserveScroll: true,
-    onFinish: () => { approving.value = null },
+    onFinish: () => {
+ approving.value = null 
+},
   })
 }
 
@@ -71,7 +73,9 @@ function submitReject() {
 
   rejectForm.post(AdminPaymentController.reject.url(rejectingPayment.value.id), {
     preserveScroll: true,
-    onSuccess: () => { rejectingPayment.value = null },
+    onSuccess: () => {
+ rejectingPayment.value = null 
+},
   })
 }
 </script>

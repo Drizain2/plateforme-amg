@@ -114,7 +114,7 @@ function submit() {
   form.customer_name   = selectedCustomer.value?.name || newCustomerName.value
   form.customer_phone  = selectedCustomer.value?.phone || newCustomerPhone.value
   form.customer_email  = selectedCustomer.value?.email || newCustomerEmail.value
-  form.tax_rate        = taxRate.value
+  form.tax_rate        = taxRate.value || 0
   form.lines           = lines.value.map(l => ({
     type: l.type,
     label: l.label,
@@ -130,6 +130,8 @@ function submit() {
       // Une facture créée avec succès redirige vers sa page de détail ;
       // si on est encore sur le stock, c'est qu'une erreur métier (ex.
       // stock insuffisant) a renvoyé ici avec un message flash.
+      console.log(page.props)
+
       if (page.props.flash.error) {
         submitError.value = page.props.flash.error
       } else {
