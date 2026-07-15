@@ -32,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform.admin' => EnsurePlatformAdmin::class,
             'subscription.check' => CheckSubscription::class,
         ]);
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
