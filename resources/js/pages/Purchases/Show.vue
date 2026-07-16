@@ -33,14 +33,22 @@ function submitTransition(status: string) {
       <div class="flex items-start justify-between">
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ purchase.number }}</h1>
+             <Button variant="ghost" class="cursor-pointer" size="sm">
+              <Link href="/purchases">
+                ← Retour
+              </Link>
+            </Button>
+            <div class="flex flex-col">
+              <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ purchase.number }}</h1>
             <Badge :variant="purchase.status_color as BadgeVariant">{{ purchase.status_label }}</Badge>
-          </div>
           <p class="text-sm text-gray-400 mt-1">
             Commandé le {{ purchase.ordered_at }}
             <span v-if="purchase.received_at"> · Reçu le {{ purchase.received_at }}</span>
             <span v-if="purchase.paid_at" class="text-green-600"> · Payé le {{ purchase.paid_at }}</span>
           </p>
+            </div>
+           
+          </div>
         </div>
 
         <!-- Actions -->

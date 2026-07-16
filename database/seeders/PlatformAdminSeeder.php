@@ -14,12 +14,13 @@ class PlatformAdminSeeder extends Seeder
     public function run(): void
     {
         $user = User::firstOrCreate(
-            ['email' => 'platform@sav-platform.fr'],
+            ['email' => 'drizain2.0@gmail.com'],
             [
                 'shop_id' => null,
-                'name' => 'Opérateur Plateforme',
+                'name' => 'Traore Drissa',
                 'password' => Hash::make('password'),
                 'is_active' => true,
+                'email_verified_at' => now()
             ]
         );
 

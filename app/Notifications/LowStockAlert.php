@@ -42,7 +42,7 @@ class LowStockAlert extends Notification implements ShouldQueue
             ->line("**Dépôt :** {$this->stockDepot->depot->name}")
             ->line("**Stock actuel :** {$this->stockDepot->quantity} / Seuil : {$this->stockDepot->alert_quantity}")
             ->action('Voir le stock critique', $url)
-            ->salutation('SAV Platform');
+            ->salutation('Stockora');
     }
 
     /**

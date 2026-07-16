@@ -201,109 +201,101 @@ const userRoleLabel = computed(() => {
 
 <template>
   <div class="contents">
-  <!-- Backdrop mobile -->
-  <div v-if="mobileOpen" class="fixed inset-0 bg-black/40 z-40 lg:hidden" @click="closeMobile" />
+    <!-- Backdrop mobile -->
+    <div v-if="mobileOpen" class="fixed inset-0 bg-black/40 z-40 lg:hidden" @click="closeMobile" />
 
-  <aside
-    class="bg-white border-r border-gray-200 flex flex-col h-screen overflow-y-auto shrink-0 z-50
+    <aside class="bg-white border-r border-gray-200 flex flex-col h-screen overflow-y-auto shrink-0 z-50
       fixed inset-y-0 left-0 w-64 transition-transform duration-200
-      lg:sticky lg:top-0 lg:translate-x-0 lg:transition-[width]"
-    :class="[
-      mobileOpen ? 'translate-x-0' : '-translate-x-full',
-      collapsed ? 'lg:w-16' : 'lg:w-64',
-    ]"
-  >
+      lg:sticky lg:top-0 lg:translate-x-0 lg:transition-[width]" :class="[
+        mobileOpen ? 'translate-x-0' : '-translate-x-full',
+        collapsed ? 'lg:w-16' : 'lg:w-64',
+      ]">
 
-    <!-- Logo -->
-    <div class="px-4 py-5 border-b shrink-0 flex items-center gap-3" :class="collapsed ? 'lg:justify-center lg:px-2' : 'justify-between'">
-      <div class="flex items-center gap-3 min-w-0">
-        <!-- Avatar logo -->
-        <div class="shrink-0 w-9 h-9 rounded-xl overflow-hidden bg-indigo-100 flex items-center justify-center border border-indigo-100">
-          <img
-            v-if="page.props.auth.shop?.logo_url"
-            :src="page.props.auth.shop.logo_url"
-            alt="Logo"
-            class="w-full h-full object-contain p-0.5"
-          />
-          <span v-else class="text-indigo-600 font-bold text-sm leading-none">
-            {{ (page.props.auth.shop?.name ?? 'SA').slice(0, 2).toUpperCase() }}
-          </span>
+      <!-- Logo -->
+      <div class="px-4 py-5 border-b shrink-0 flex items-center gap-3"
+        :class="collapsed ? 'lg:justify-center lg:px-2' : 'justify-between'">
+        <div class="flex items-center gap-3 min-w-0">
+          <!-- Avatar logo -->
+          <div
+            class="shrink-0 w-9 h-9 rounded-xl overflow-hidden bg-indigo-100 flex items-center justify-center border border-indigo-100">
+            <img v-if="page.props.auth.shop?.logo_url" :src="page.props.auth.shop.logo_url" alt="Logo"
+              class="w-full h-full object-contain p-0.5" />
+            <span v-else class="text-indigo-600 font-bold text-sm leading-none">
+              {{ (page.props.auth.shop?.name ?? 'SA').slice(0, 2).toUpperCase() }}
+            </span>
+          </div>
+
+          <!-- Texte (masqué en mode réduit) -->
+          <div class="min-w-0" :class="{ 'lg:hidden': collapsed }">
+            <span class="font-bold text-indigo-600 text-base block truncate">Stockora</span>
+            <p class="text-xs text-gray-400 mt-0.5 truncate">{{ page.props.auth.shop?.name }}</p>
+          </div>
         </div>
 
-        <!-- Texte (masqué en mode réduit) -->
-        <div class="min-w-0" :class="{ 'lg:hidden': collapsed }">
-          <span class="font-bold text-indigo-600 text-base block truncate">SAV Platform</span>
-          <p class="text-xs text-gray-400 mt-0.5 truncate">{{ page.props.auth.shop?.name }}</p>
-        </div>
+        <button type="button"
+          class="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition shrink-0"
+          :title="collapsed ? 'Développer le menu' : 'Réduire le menu'" @click="toggleCollapsed">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path v-if="collapsed" d="M9 5l7 7-7 7" />
+            <path v-else d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
       </div>
 
-      <button
-        type="button"
-        class="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition shrink-0"
-        :title="collapsed ? 'Développer le menu' : 'Réduire le menu'"
-        @click="toggleCollapsed"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path v-if="collapsed" d="M9 5l7 7-7 7" />
-          <path v-else d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-    </div>
+      <!-- Navigation -->
+      <nav class="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+        <div v-for="(group, gi) in visibleGroups" :key="gi">
 
-    <!-- Navigation -->
-    <nav class="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
-      <div v-for="(group, gi) in visibleGroups" :key="gi">
+          <!-- Séparateur de groupe -->
+          <p v-if="group.label" class="px-3 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider truncate"
+            :class="{ 'lg:hidden': collapsed }">
+            {{ group.label }}
+          </p>
 
-        <!-- Séparateur de groupe -->
-        <p v-if="group.label" class="px-3 mb-1 text-xs font-semibold text-gray-400 uppercase tracking-wider truncate"
-          :class="{ 'lg:hidden': collapsed }">
-          {{ group.label }}
-        </p>
+          <div class="space-y-0.5">
+            <Link v-for="item in group.items" :key="item.href" :href="item.href" :title="item.label"
+              class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors" :class="[
+                isActive(item.path) ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                collapsed ? 'lg:justify-center lg:px-2' : '',
+              ]" @click="closeMobile">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path :d="item.icon" />
+              </svg>
+              <span class="truncate" :class="{ 'lg:hidden': collapsed }">{{ item.label }}</span>
+            </Link>
+          </div>
 
-        <div class="space-y-0.5">
-          <Link v-for="item in group.items" :key="item.href" :href="item.href" :title="item.label"
-            class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-            :class="[
-              isActive(item.path) ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-              collapsed ? 'lg:justify-center lg:px-2' : '',
-            ]"
-            @click="closeMobile">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path :d="item.icon" />
-            </svg>
-            <span class="truncate" :class="{ 'lg:hidden': collapsed }">{{ item.label }}</span>
-          </Link>
+        </div>
+      </nav>
+
+      <!-- User footer -->
+      <div class="px-3 py-4 border-t shrink-0 space-y-3">
+        <div class="flex items-center gap-2.5" :class="{ 'lg:justify-center': collapsed }">
+          <div
+            class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0"
+            :title="page.props.auth.user.name">
+            {{ userInitials }}
+          </div>
+          <div class="min-w-0" :class="{ 'lg:hidden': collapsed }">
+            <p class="text-sm font-medium text-gray-900 truncate">{{ page.props.auth.user.name }}</p>
+            <p v-if="userRoleLabel" class="text-xs text-gray-400 truncate">{{ userRoleLabel }}</p>
+          </div>
         </div>
 
-      </div>
-    </nav>
-
-    <!-- User footer -->
-    <div class="px-3 py-4 border-t shrink-0 space-y-3">
-      <div class="flex items-center gap-2.5" :class="{ 'lg:justify-center': collapsed }">
-        <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0"
-          :title="page.props.auth.user.name">
-          {{ userInitials }}
-        </div>
-        <div class="min-w-0" :class="{ 'lg:hidden': collapsed }">
-          <p class="text-sm font-medium text-gray-900 truncate">{{ page.props.auth.user.name }}</p>
-          <p v-if="userRoleLabel" class="text-xs text-gray-400 truncate">{{ userRoleLabel }}</p>
-        </div>
+        <Link :href="LoginController.logout.url()" method="post" as="button" title="Déconnexion"
+          class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer"
+          :class="collapsed ? 'lg:justify-center lg:px-0' : ''">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+          <span :class="{ 'lg:hidden': collapsed }">Déconnexion</span>
+        </Link>
       </div>
 
-      <Link :href="LoginController.logout.url()" method="post" as="button" title="Déconnexion"
-        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer"
-        :class="collapsed ? 'lg:justify-center lg:px-0' : ''">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-        </svg>
-        <span :class="{ 'lg:hidden': collapsed }">Déconnexion</span>
-      </Link>
-    </div>
-
-  </aside>
+    </aside>
   </div>
 </template>

@@ -5,7 +5,7 @@ import { createApp, h } from 'vue';
 import type { DefineComponent } from 'vue';
 import { vPermission } from '@/directives/permission';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Stockora';
 
 if (import.meta.env.DEV) {
     router.on('httpException', (event) => {

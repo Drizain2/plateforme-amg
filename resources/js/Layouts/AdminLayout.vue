@@ -33,7 +33,7 @@ watch(
   <div class="min-h-screen bg-gray-100">
     <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
       <div class="flex items-center gap-8">
-        <span class="font-bold text-indigo-600 text-lg">SAV Platform — Administration</span>
+        <span class="font-bold text-indigo-600 text-lg">Stockora — Administration</span>
         <nav class="flex items-center gap-4 text-sm font-medium">
           <Link :href="AdminDashboardController.index.url()" class="text-gray-600 hover:text-indigo-600 transition">
             Tableau de bord

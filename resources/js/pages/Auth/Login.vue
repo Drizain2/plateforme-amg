@@ -6,9 +6,9 @@ import { login, register } from '@/routes';
 
 
 const form = useForm({
-    email:"",
-    password:'',
-    remember:false,
+  email: "",
+  password: '',
+  remember: false,
 });
 
 function submit() {
@@ -24,55 +24,35 @@ function submit() {
 
       <!-- Logo / titre -->
       <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-indigo-600">SAV Platform</h1>
+        <h1 class="text-2xl font-bold text-indigo-600">Stockora</h1>
         <p class="text-sm text-gray-500 mt-1">Connectez-vous à votre espace</p>
       </div>
 
       <!-- Erreur globale -->
-      <div
-        v-if="form.errors.email"
-        class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700"
-      >
+      <div v-if="form.errors.email"
+        class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
         {{ form.errors.email }}
       </div>
 
       <form @submit.prevent="submit" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <Input
-            v-model="form.email"
-            type="email"
-            placeholder="admin@atelier.fr"
-            :error="form.errors.email"
-            autofocus
-          />
+          <Input v-model="form.email" type="email" placeholder="admin@atelier.fr" :error="form.errors.email"
+            autofocus />
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-          <Input
-            v-model="form.password"
-            type="password"
-            placeholder="••••••••"
-            :error="form.errors.password"
-          />
+          <Input v-model="form.password" type="password" placeholder="••••••••" :error="form.errors.password" />
         </div>
 
         <label class="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            v-model="form.remember"
-            class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-          />
+          <input type="checkbox" v-model="form.remember"
+            class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
           <span class="text-sm text-gray-600">Se souvenir de moi</span>
         </label>
 
-        <Button
-          type="submit"
-          :loading="form.processing"
-          :disabled="form.processing"
-          class="w-full justify-center"
-        >
+        <Button type="submit" :loading="form.processing" :disabled="form.processing" class="w-full justify-center">
           Se connecter
         </Button>
 

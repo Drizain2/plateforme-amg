@@ -106,6 +106,7 @@ return
       <div class="flex items-start justify-between">
         <div>
           <div class="flex items-center gap-3">
+            
             <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ invoice.number }}</h1>
             <Badge :variant="invoice.status_color as BadgeVariant">{{ invoice.status_label }}</Badge>
           </div>
