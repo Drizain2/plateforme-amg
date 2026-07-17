@@ -51,6 +51,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions \
 WORKDIR /app
 
 COPY . .
+COPY ca.pem /app/ca.pem
 COPY --from=build /app/vendor ./vendor
 COPY --from=build /app/public/build ./public/build
 

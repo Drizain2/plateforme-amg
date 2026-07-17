@@ -4,34 +4,14 @@
 # Démarrer :    docker compose up --build
 # App :         http://127.0.0.1:8080
 # phpMyAdmin :  http://127.0.0.1:8081  (user: laravel / password: secret)
-x-app-env: &app-env
-  APP_KEY: ${APP_KEY}
-  APP_ENV: ${APP_ENV}
-  APP_DEBUG: ${APP_DEBUG}
-  FORCE_HTTPS: ${FORCE_HTTPS}
-  APP_URL: ${APP_URL}
-  DB_CONNECTION: ${DB_CONNECTION}
-  DB_HOST: db
-  DB_PORT: 3306
-  DB_DATABASE: ${DB_DATABASE}
-  DB_USERNAME: ${DB_USERNAME}
-  DB_PASSWORD: ${DB_PASSWORD}
-  QUEUE_CONNECTION: database
-  SESSION_DRIVER: database
-  CACHE_STORE: database
-  MAIL_MAILER: ${MAIL_MAILER}
-  MAIL_HOST: ${MAIL_HOST}
-  MAIL_PORT: ${MAIL_PORT}
-  MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
-  MAIL_FROM_NAME: ${MAIL_FROM_NAME}
 
 services:
   app:
     build: .
     ports:
       - '8080:8080'
-    environment:
-      <<: *app-env
+    env_file:
+      - .env.docker
     depends_on:
       db:
         condition: service_healthy
@@ -40,8 +20,8 @@ services:
     build: .
     entrypoint: []
     command: php artisan queue:work --tries=3 --sleep=3
-    environment:
-      <<: *app-env
+    env_file:
+      - .env.docker
     depends_on:
       db:
         condition: service_healthy
@@ -50,38 +30,36 @@ services:
     build: .
     entrypoint: []
     command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
-    environment:
-      <<: *app-env
+    env_file:
+      - .env.docker
     depends_on:
       db:
         condition: service_healthy
 
-  db:
-    image: mysql:8.4
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u${DB_USERNAME}', '-p${DB_PASSWORD}']
-      interval: 5s
-      timeout: 5s
-      retries: 10
+  # db:
+  #   image: mysql:8.4
+  #   env_file:
+  #     - .env.docker
+  #   volumes:
+  #     - mysql-data:/var/lib/mysql
+  #   healthcheck:
+  #     test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u${DB_USERNAME}', '-p${DB_PASSWORD}']
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 10
 
-  phpmyadmin:
-    image: phpmyadmin:latest
-    ports:
-      - '8081:80'
-    environment:
-      PMA_HOST: db
-      PMA_USER: ${DB_USERNAME}
-      PMA_PASSWORD: ${DB_PASSWORD}
-  mailpit:
-    image: axllent/mailpit:latest
-    ports:
-      - '8026:8025'
-volumes:
-  mysql-data:
+#   phpmyadmin:
+#     image: phpmyadmin:latest
+#     ports:
+#       - '8081:80'
+#     env_file:
+#       - .env.docker
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#   mailpit:
+#     image: axllent/mailpit:latest
+#     ports:
+#       - '8026:8025'
+# volumes:
+#   mysql-data:
