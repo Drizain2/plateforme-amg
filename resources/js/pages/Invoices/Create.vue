@@ -115,6 +115,9 @@ function submit() {
     },
   })
 }
+function goBack() {
+  window.history.back()
+}
 </script>
 
 <template>
@@ -123,7 +126,7 @@ function submit() {
 
       <!-- Header -->
       <div class="flex items-center gap-3">
-        <Button variant="ghost" size="sm" @click="router.visit(InvoiceController.index.url())">
+        <Button variant="ghost" size="sm" @click="goBack()">
           ← Retour
         </Button>
         <h1 class="text-xl font-semibold text-gray-900">Nouvelle facture</h1>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
 import SessionController from '@/actions/App/Http/Controllers/SessionController'
-import SettingsController from '@/actions/App/Http/Controllers/SettingsController'
 import Button from '@/Components/UI/Button.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
@@ -59,6 +58,9 @@ const revoke = (sessionId: string) => {
 const revokeAll = () => {
   router.delete(SessionController.destroyAll.url())
 }
+function goBack() {
+  window.history.back()
+}
 </script>
 
 <template>
@@ -67,7 +69,7 @@ const revokeAll = () => {
       <div class="flex items-center justify-between mb-6">
         <div>
           <div class="flex items-center gap-3">
-            <Button variant="ghost" class="cursor-pointer" size="sm" @click="router.visit(SettingsController.edit.url())">
+            <Button variant="ghost" class="cursor-pointer" size="sm" @click="goBack()">
               ← Retour
             </Button>
             <div class="flex  flex-col">

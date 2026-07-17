@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3'
-import SettingsController from '@/actions/App/Http/Controllers/SettingsController'
+import { Link } from '@inertiajs/vue3'
 import Button from '@/Components/UI/Button.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 interface LaravelPaginator<T> {
@@ -51,6 +50,10 @@ const fmtDate = (iso: string) =>
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
+
+function goBack() {
+  window.history.back()
+}
 </script>
 
 <template>
@@ -60,7 +63,7 @@ const fmtDate = (iso: string) =>
       <div class="flex items-center justify-between mb-6">
         <div>
           <div class="flex items-center gap-3">
-            <Button variant="ghost" class="cursor-pointer" size="sm" @click="router.visit(SettingsController.edit.url())">
+            <Button variant="ghost" class="cursor-pointer" size="sm" @click="goBack()">
               ← Retour
             </Button>
             <div class="flex  flex-col">

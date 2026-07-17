@@ -112,20 +112,20 @@ const showPartModal = ref(false)
 const partOptions = computed(() =>
     props.depotParts.map(p => ({ value: p.id, label: `${p.name} (stock: ${p.quantity})` }))
 )
-const submitError = ref<string|null>(null)
+const submitError = ref<string | null>(null)
 function submitPart() {
     submitError.value = null
     partForm.post(TicketController.consumePart.url({ ticket: ticketData.value.id }), {
         preserveScroll: true,
         onSuccess: () => {
-            if(page.props.flash?.error){
+            if (page.props.flash?.error) {
                 submitError.value = page.props.flash.error
-            }else{
+            } else {
                 showPartModal.value = false
                 partForm.reset()
             }
         },
-       
+
     })
 }
 
@@ -153,21 +153,34 @@ const totalParts = computed(() =>
 
 const fmt = (v: number) =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
+
+function goBack() {
+  window.history.back()
+}
 </script>
 
 <template>
     <AppLayout :title="`Ticket ${ticketData.reference}`">
-        <div class="max-w-7xl m-auto space-y-6">
+        <div class="max-w-7xl m-auto space-y-6">    
 
             <!-- Header -->
             <div class="flex items-start justify-between">
                 <div>
-                    <div class="flex items-center gap-3">
-                        <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ ticketData.reference }}</h1>
-                        <Badge :variant="ticketData.status_color as BadgeVariant">{{ ticketData.status_label }}</Badge>
-                        <Badge :variant="ticketData.priority_color as BadgeVariant">{{ ticketData.priority_label }}</Badge>
+                    <div class="flex items-start justify-between gap-2">
+                        <Button variant="ghost" class="cursor-pointer" size="sm" @click="goBack()">
+                            ← Retour
+                        </Button>
+                        <div class="flex flex-col items-start gap-3">
+                            <div class="flex items-center justify-between">
+                                <h1 class="text-xl font-semibold text-gray-900 font-mono mr-2">{{ ticketData.reference }}</h1>
+                                <Badge :variant="ticketData.status_color as BadgeVariant" class="mx-2">{{ ticketData.status_label }}
+                                </Badge>
+                                <Badge :variant="ticketData.priority_color as BadgeVariant" class="mx-2">{{ ticketData.priority_label }}
+                                </Badge>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-1">Créé le {{ ticketData.created_at }}</p>
+                        </div>
                     </div>
-                    <p class="text-sm text-gray-400 mt-1">Créé le {{ ticketData.created_at }}</p>
                 </div>
 
                 <!-- Transitions -->
@@ -179,8 +192,8 @@ const fmt = (v: number) =>
                 </div>
             </div>
             <div v-if="submitError" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-        {{ submitError }}
-      </div>
+                {{ submitError }}
+            </div>
 
             <div class="grid grid-cols-3 gap-6">
 
@@ -192,29 +205,36 @@ const fmt = (v: number) =>
                         <div>
                             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Client</p>
                             <p class="font-medium text-gray-900">{{ ticketData.customer?.name }}</p>
-                            <p v-if="ticketData.customer?.email" class="text-sm text-gray-500">{{ ticketData.customer.email }}</p>
-                            <p v-if="ticketData.customer?.phone" class="text-sm text-gray-500">{{ ticketData.customer.phone }}</p>
+                            <p v-if="ticketData.customer?.email" class="text-sm text-gray-500">{{
+                                ticketData.customer.email }}</p>
+                            <p v-if="ticketData.customer?.phone" class="text-sm text-gray-500">{{
+                                ticketData.customer.phone }}</p>
                         </div>
                         <div>
                             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Appareil</p>
                             <p class="font-medium text-gray-900">{{ ticketData.device?.full_name }}</p>
                             <p class="text-sm text-gray-500 capitalize">{{ ticketData.device?.type }}</p>
-                            <p v-if="ticketData.device?.serial_number" class="text-xs text-gray-400 font-mono">{{ ticketData.device.serial_number }}</p>
-                            <p v-if="ticketData.device?.condition_in" class="text-xs text-gray-400 mt-1 italic">{{ ticketData.device.condition_in }}</p>
+                            <p v-if="ticketData.device?.serial_number" class="text-xs text-gray-400 font-mono">{{
+                                ticketData.device.serial_number }}</p>
+                            <p v-if="ticketData.device?.condition_in" class="text-xs text-gray-400 mt-1 italic">{{
+                                ticketData.device.condition_in }}</p>
                         </div>
                     </div>
 
                     <!-- Description + diagnostic -->
                     <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
                         <div>
-                            <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description client</p>
+                            <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description client
+                            </p>
                             <p class="text-sm text-gray-700">{{ ticketData.description }}</p>
                         </div>
 
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Diagnostic technicien</p>
-                                <Button v-if="can('tickets.edit') && !isClosed" variant="ghost" size="sm" @click="openDiagnosis">
+                                <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Diagnostic
+                                    technicien</p>
+                                <Button v-if="can('tickets.edit') && !isClosed" variant="ghost" size="sm"
+                                    @click="openDiagnosis">
                                     {{ ticketData.diagnosis ? 'Modifier' : '+ Saisir' }}
                                 </Button>
                             </div>
@@ -232,10 +252,12 @@ const fmt = (v: number) =>
                     <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
                         <div class="flex items-center justify-between">
                             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Pièces utilisées</p>
-                            <Button v-if="can('tickets.edit') && !isClosed" variant="ghost" size="sm" @click="showPartModal = true">+ Ajouter</Button>
+                            <Button v-if="can('tickets.edit') && !isClosed" variant="ghost" size="sm"
+                                @click="showPartModal = true">+ Ajouter</Button>
                         </div>
                         <div v-if="ticketData.parts?.length" class="divide-y divide-gray-100">
-                            <div v-for="p in ticketData.parts" :key="p.id" class="flex items-center justify-between py-2">
+                            <div v-for="p in ticketData.parts" :key="p.id"
+                                class="flex items-center justify-between py-2">
                                 <span class="text-sm text-gray-700">{{ p.part.name }}</span>
                                 <span class="text-sm text-gray-500">
                                     {{ p.quantity }} × {{ fmt(p.unit_price) }} =
@@ -243,7 +265,8 @@ const fmt = (v: number) =>
                                 </span>
                             </div>
                             <div class="flex justify-end pt-2">
-                                <span class="text-sm font-semibold text-gray-900">Total pièces : {{ fmt(totalParts) }}</span>
+                                <span class="text-sm font-semibold text-gray-900">Total pièces : {{ fmt(totalParts)
+                                    }}</span>
                             </div>
                         </div>
                         <p v-else class="text-sm text-gray-400 italic">Aucune pièce consommée</p>
@@ -253,7 +276,8 @@ const fmt = (v: number) =>
                     <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
                         <div class="flex items-center justify-between">
                             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Historique</p>
-                            <Button v-if="can('tickets.edit')" variant="ghost" size="sm" @click="showNoteModal = true">+ Note</Button>
+                            <Button v-if="can('tickets.edit')" variant="ghost" size="sm" @click="showNoteModal = true">+
+                                Note</Button>
                         </div>
                         <div class="space-y-3">
                             <div v-for="event in ticketData.events" :key="event.id" class="flex gap-3">
@@ -289,7 +313,8 @@ const fmt = (v: number) =>
                                     {{ ticketData.technicien ? 'Changer' : 'Assigner' }}
                                 </button>
                             </div>
-                            <p class="text-sm font-medium text-gray-900">{{ ticketData.technicien?.name ?? 'Non assigné' }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ ticketData.technicien?.name ?? 'Non assigné'
+                                }}</p>
                         </div>
 
                         <div v-if="ticketData.estimated_return_date">
@@ -316,10 +341,8 @@ const fmt = (v: number) =>
                         </template>
                         <template v-else>
                             <p class="text-sm text-gray-400 italic">Aucune facture</p>
-                            <Button v-if="can('invoices.create') && ticketData.status === 'done'"
-                                class="w-full" size="sm"
-                                :loading="invoiceForm.processing"
-                                @click="createInvoice">
+                            <Button v-if="can('invoices.create') && ticketData.status === 'done'" class="w-full"
+                                size="sm" :loading="invoiceForm.processing" @click="createInvoice">
                                 Créer la facture
                             </Button>
                         </template>
@@ -358,17 +381,21 @@ const fmt = (v: number) =>
         </Modal>
 
         <!-- Modal : diagnostic -->
-        <Modal :show="showDiagnosisModal" title="Diagnostic technicien" max-width="sm" @close="showDiagnosisModal = false">
+        <Modal :show="showDiagnosisModal" title="Diagnostic technicien" max-width="sm"
+            @close="showDiagnosisModal = false">
             <form @submit.prevent="submitDiagnosis" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Diagnostic *</label>
                     <textarea v-model="diagnosisForm.diagnosis" rows="4" placeholder="Décrivez le diagnostic..."
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
-                    <p v-if="diagnosisForm.errors.diagnosis" class="mt-1 text-xs text-red-500">{{ diagnosisForm.errors.diagnosis }}</p>
+                    <p v-if="diagnosisForm.errors.diagnosis" class="mt-1 text-xs text-red-500">{{
+                        diagnosisForm.errors.diagnosis
+                        }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Devis estimé (optionnel)</label>
-                    <Input v-model="diagnosisForm.estimated_price" type="number" placeholder="0" :error="diagnosisForm.errors.estimated_price" />
+                    <Input v-model="diagnosisForm.estimated_price" type="number" placeholder="0"
+                        :error="diagnosisForm.errors.estimated_price" />
                 </div>
                 <div class="flex justify-end gap-2">
                     <Button variant="secondary" @click="showDiagnosisModal = false">Annuler</Button>
@@ -382,7 +409,8 @@ const fmt = (v: number) =>
             <form @submit.prevent="submitAssign" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Technicien *</label>
-                    <Select v-model="assignForm.technician_id" :options="technicianOptions" :error="assignForm.errors.technician_id" />
+                    <Select v-model="assignForm.technician_id" :options="technicianOptions"
+                        :error="assignForm.errors.technician_id" />
                 </div>
                 <div class="flex justify-end gap-2">
                     <Button variant="secondary" @click="showAssignModal = false">Annuler</Button>

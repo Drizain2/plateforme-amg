@@ -1,6 +1,6 @@
 <!-- resources/js/Pages/Invoices/Show.vue -->
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3'
+import { router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController'
 import TicketController from '@/actions/App/Http/Controllers/Ticket/TicketController'
@@ -28,8 +28,8 @@ const transitionForm = useForm({ status: '' })
 
 function submitTransition(status: string) {
   if (!confirm('Confirmer ce changement de statut ?')) {
-return
-}
+    return
+  }
 
   transitionForm.status = status
   transitionForm.post(InvoiceController.transition.url(props.invoice.id), {
@@ -41,31 +41,31 @@ return
 const showLineModal = ref(false)
 const maxQuantity = ref<number | null>(null)
 const lineForm = useForm({
-  type:       'service' as 'service' | 'part',
-  part_id:    null as number | null,
-  label:      '',
-  quantity:   1,
+  type: 'service' as 'service' | 'part',
+  part_id: null as number | null,
+  label: '',
+  quantity: 1,
   unit_price: 0,
 })
 
 const lineTypeOptions = [
   { value: 'service', label: 'Main d\'œuvre' },
-  { value: 'part',    label: 'Pièce' },
+  { value: 'part', label: 'Pièce' },
 ]
 
 watch(() => lineForm.type, () => {
-  lineForm.part_id    = null
-  lineForm.label      = ''
+  lineForm.part_id = null
+  lineForm.label = ''
   lineForm.unit_price = 0
-  maxQuantity.value   = null
+  maxQuantity.value = null
 })
 
 function selectPartForLine(result: StockSearchResult) {
-  lineForm.part_id    = result.id
-  lineForm.label      = result.name
+  lineForm.part_id = result.id
+  lineForm.label = result.name
   lineForm.unit_price = result.sell_price
-  lineForm.quantity   = 1
-  maxQuantity.value   = result.quantity
+  lineForm.quantity = 1
+  maxQuantity.value = result.quantity
 }
 
 function submitLine() {
@@ -86,8 +86,8 @@ const deletingLineId = ref<number | null>(null)
 
 function deleteLine(lineId: number) {
   if (!confirm('Supprimer cette ligne ?')) {
-return
-}
+    return
+  }
 
   deletingLineId.value = lineId
 
@@ -106,15 +106,24 @@ return
       <div class="flex items-start justify-between">
         <div>
           <div class="flex items-center gap-3">
-            
-            <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ invoice.number }}</h1>
-            <Badge :variant="invoice.status_color as BadgeVariant">{{ invoice.status_label }}</Badge>
+            <Button variant="ghost" class="cursor-pointer" size="sm"
+              @click="router.visit(InvoiceController.index.url())">
+              ← Retour
+            </Button>
+            <div class="flex flex-col ">
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ invoice.number }}</h1>
+                <Badge :variant="invoice.status_color as BadgeVariant">{{ invoice.status_label }}</Badge>
+              </div>
+
+              <p class="text-sm text-gray-400 mt-1">
+                Émise le {{ invoice.issued_at }}
+                <span v-if="invoice.due_at"> · Échéance {{ invoice.due_at }}</span>
+                <span v-if="invoice.paid_at" class="text-green-600"> · Payée le {{ invoice.paid_at }}</span>
+              </p>
+            </div>
+
           </div>
-          <p class="text-sm text-gray-400 mt-1">
-            Émise le {{ invoice.issued_at }}
-            <span v-if="invoice.due_at"> · Échéance {{ invoice.due_at }}</span>
-            <span v-if="invoice.paid_at" class="text-green-600"> · Payée le {{ invoice.paid_at }}</span>
-          </p>
         </div>
 
         <!-- Actions -->
@@ -122,14 +131,8 @@ return
           <a :href="InvoiceController.pdf.url(invoice.id)" target="_blank">
             <Button variant="secondary" size="sm">Télécharger PDF</Button>
           </a>
-          <Button
-          v-show="can('invoices.edit')"
-            v-for="s in invoice.next_statuses"
-            :key="s.value"
-            size="sm"
-            :variant="s.value === 'paid' ? 'primary' : 'secondary'"
-            @click="submitTransition(s.value)"
-          >
+          <Button v-show="can('invoices.edit')" v-for="s in invoice.next_statuses" :key="s.value" size="sm"
+            :variant="s.value === 'paid' ? 'primary' : 'secondary'" @click="submitTransition(s.value)">
             → {{ s.label }}
           </Button>
         </div>
@@ -150,10 +153,8 @@ return
             </div>
             <div v-if="invoice.ticket">
               <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Ticket associé</p>
-              <a
-                :href="TicketController.show.url(invoice.ticket.id)"
-                class="font-mono text-sm text-indigo-600 hover:underline"
-              >
+              <a :href="TicketController.show.url(invoice.ticket.id)"
+                class="font-mono text-sm text-indigo-600 hover:underline">
                 {{ invoice.ticket.reference }}
               </a>
             </div>
@@ -163,12 +164,7 @@ return
           <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <div class="px-5 py-4 border-b flex items-center justify-between">
               <p class="text-sm font-medium text-gray-700">Lignes de facturation</p>
-              <Button
-                v-if="invoice.can_edit"
-                variant="ghost"
-                size="sm"
-                @click="showLineModal = true"
-              >
+              <Button v-if="invoice.can_edit" variant="ghost" size="sm" @click="showLineModal = true">
                 + Ajouter
               </Button>
             </div>
@@ -188,11 +184,7 @@ return
                 <tr v-if="!invoice.lines?.length">
                   <td colspan="6" class="px-4 py-8 text-center text-gray-400">Aucune ligne</td>
                 </tr>
-                <tr
-                  v-for="line in invoice.lines"
-                  :key="line.id"
-                  class="hover:bg-gray-50"
-                >
+                <tr v-for="line in invoice.lines" :key="line.id" class="hover:bg-gray-50">
                   <td class="px-4 py-3 text-gray-900">{{ line.label }}</td>
                   <td class="px-4 py-3">
                     <Badge :variant="line.type === 'service' ? 'info' : 'default'">
@@ -203,13 +195,8 @@ return
                   <td class="px-4 py-3 text-right text-gray-600">{{ fmt(line.unit_price) }}</td>
                   <td class="px-4 py-3 text-right font-medium text-gray-900">{{ fmt(line.total) }}</td>
                   <td v-if="invoice.can_edit" class="px-4 py-3 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      :loading="deletingLineId === line.id"
-                      @click="deleteLine(line.id)"
-                      class="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
+                    <Button variant="ghost" size="sm" :loading="deletingLineId === line.id" @click="deleteLine(line.id)"
+                      class="text-red-500 hover:text-red-700 hover:bg-red-50">
                       ✕
                     </Button>
                   </td>
@@ -271,7 +258,8 @@ return
           </div>
           <div v-else class="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2 bg-gray-50">
             <span class="text-sm font-medium text-gray-900">{{ lineForm.label }}</span>
-            <button type="button" class="text-xs text-indigo-600 hover:underline" @click="lineForm.part_id = null; maxQuantity = null">
+            <button type="button" class="text-xs text-indigo-600 hover:underline"
+              @click="lineForm.part_id = null; maxQuantity = null">
               Changer
             </button>
           </div>
@@ -280,7 +268,8 @@ return
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Quantité *</label>
-            <Input v-model="lineForm.quantity" type="number" min="1" :max="maxQuantity ?? undefined" :error="lineForm.errors.quantity" />
+            <Input v-model="lineForm.quantity" type="number" min="1" :max="maxQuantity ?? undefined"
+              :error="lineForm.errors.quantity" />
             <p v-if="maxQuantity != null" class="text-xs text-gray-400 mt-1">{{ maxQuantity }} en stock</p>
           </div>
           <div>
@@ -290,11 +279,8 @@ return
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <Button variant="secondary" @click="closeLineModal">Annuler</Button>
-          <Button
-            type="submit"
-            :loading="lineForm.processing"
-            :disabled="lineForm.type === 'part' && !lineForm.part_id"
-          >
+          <Button type="submit" :loading="lineForm.processing"
+            :disabled="lineForm.type === 'part' && !lineForm.part_id">
             Ajouter
           </Button>
         </div>

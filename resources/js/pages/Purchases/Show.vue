@@ -23,6 +23,10 @@ function submitTransition(status: string) {
     preserveScroll: true,
   })
 }
+
+function goBack() {
+  window.history.back()
+}
 </script>
 
 <template>
@@ -33,33 +37,28 @@ function submitTransition(status: string) {
       <div class="flex items-start justify-between">
         <div>
           <div class="flex items-center gap-3">
-             <Button variant="ghost" class="cursor-pointer" size="sm">
-              <Link href="/purchases">
-                ← Retour
-              </Link>
+            <Button variant="ghost" class="cursor-pointer" size="sm" @click="goBack()">
+              ← Retour
             </Button>
             <div class="flex flex-col">
-              <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ purchase.number }}</h1>
-            <Badge :variant="purchase.status_color as BadgeVariant">{{ purchase.status_label }}</Badge>
-          <p class="text-sm text-gray-400 mt-1">
-            Commandé le {{ purchase.ordered_at }}
-            <span v-if="purchase.received_at"> · Reçu le {{ purchase.received_at }}</span>
-            <span v-if="purchase.paid_at" class="text-green-600"> · Payé le {{ purchase.paid_at }}</span>
-          </p>
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ purchase.number }}</h1>
+                <Badge :variant="purchase.status_color as BadgeVariant">{{ purchase.status_label }}</Badge>
+              </div>
+              <p class="text-sm text-gray-400 mt-1">
+                Commandé le {{ purchase.ordered_at }}
+                <span v-if="purchase.received_at"> · Reçu le {{ purchase.received_at }}</span>
+                <span v-if="purchase.paid_at" class="text-green-600"> · Payé le {{ purchase.paid_at }}</span>
+              </p>
             </div>
-           
+
           </div>
         </div>
 
         <!-- Actions -->
         <div class="flex gap-2">
-          <Button
-            v-for="s in purchase.next_statuses"
-            :key="s.value"
-            size="sm"
-            :variant="s.value === 'paid' ? 'primary' : 'secondary'"
-            @click="submitTransition(s.value)"
-          >
+          <Button v-for="s in purchase.next_statuses" :key="s.value" size="sm"
+            :variant="s.value === 'paid' ? 'primary' : 'secondary'" @click="submitTransition(s.value)">
             → {{ s.label }}
           </Button>
         </div>
@@ -103,11 +102,7 @@ function submitTransition(status: string) {
                 <tr v-if="!purchase.lines?.length">
                   <td colspan="4" class="px-4 py-8 text-center text-gray-400">Aucune ligne</td>
                 </tr>
-                <tr
-                  v-for="line in purchase.lines"
-                  :key="line.id"
-                  class="hover:bg-gray-50"
-                >
+                <tr v-for="line in purchase.lines" :key="line.id" class="hover:bg-gray-50">
                   <td class="px-4 py-3 text-gray-900">{{ line.label }}</td>
                   <td class="px-4 py-3 text-right text-gray-600">{{ line.quantity }}</td>
                   <td class="px-4 py-3 text-right text-gray-600">{{ fmt(line.unit_price) }}</td>

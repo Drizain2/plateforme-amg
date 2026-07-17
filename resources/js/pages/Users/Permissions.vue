@@ -122,6 +122,10 @@ function permLabel(perm: string): string {
 
     return labels[perm] ?? perm
 }
+
+function goBack() {
+  window.history.back()
+}
 </script>
 
 <template>
@@ -130,15 +134,20 @@ function permLabel(perm: string): string {
 
             <!-- Header -->
             <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-xl font-semibold text-gray-900">
-                        Permissions — {{ targetUser.name }}
-                    </h1>
-                    <div class="flex items-center gap-2 mt-1">
-                        <Badge variant="info">{{ targetUser.role }}</Badge>
-                        <span class="text-xs text-gray-400">
-                            {{ effectivePerms.length }} permission{{ effectivePerms.length > 1 ? 's' : '' }} actives
-                        </span>
+                <div class="flex gap-2">
+                    <Button variant="ghost" class="cursor-pointer" size="sm" @click="goBack()">
+                        ← Retour
+                    </Button>
+                    <div class="flex flex-col">
+                        <h1 class="text-xl font-semibold text-gray-900">
+                            Permissions — {{ targetUser.name }}
+                        </h1>
+                        <div class="flex items-center gap-2 mt-1">
+                            <Badge variant="info">{{ targetUser.role }}</Badge>
+                            <span class="text-xs text-gray-400">
+                                {{ effectivePerms.length }} permission{{ effectivePerms.length > 1 ? 's' : '' }} actives
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <Button variant="secondary" size="sm" @click="resetAll" :disabled="Object.keys(overrides).length === 0">

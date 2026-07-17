@@ -55,6 +55,10 @@ const uncountedCount = computed(() =>
 
 const fmtXof = (v: number) =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(v)
+
+function goBack() {
+  window.history.back()
+}
 </script>
 
 <template>
@@ -65,13 +69,20 @@ const fmtXof = (v: number) =>
       <div class="flex items-start justify-between">
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ stockCount.number }}</h1>
-            <Badge :variant="stockCount.status_color as BadgeVariant">{{ stockCount.status_label }}</Badge>
+            <Button variant="ghost" class="cursor-pointer" size="sm" @click="goBack()">
+              ← Retour
+            </Button>
+            <div class="flex flex-col ">
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl font-semibold text-gray-900 font-mono">{{ stockCount.number }}</h1>
+                <Badge :variant="stockCount.status_color as BadgeVariant">{{ stockCount.status_label }}</Badge>
+              </div>
+              <p class="text-sm text-gray-400 mt-1">
+                Dépôt {{ stockCount.depot?.name }} · démarré le {{ stockCount.started_at }}
+                <span v-if="stockCount.user"> par {{ stockCount.user.name }}</span>
+              </p>
+            </div>
           </div>
-          <p class="text-sm text-gray-400 mt-1">
-            Dépôt {{ stockCount.depot?.name }} · démarré le {{ stockCount.started_at }}
-            <span v-if="stockCount.user"> par {{ stockCount.user.name }}</span>
-          </p>
           <p v-if="stockCount.note" class="text-sm text-gray-500 mt-1">{{ stockCount.note }}</p>
         </div>
 
@@ -86,7 +97,8 @@ const fmtXof = (v: number) =>
       </div>
 
       <p v-if="isDraft && uncountedCount > 0" class="text-xs text-amber-600">
-        {{ uncountedCount }} ligne{{ uncountedCount > 1 ? 's' : '' }} non comptée{{ uncountedCount > 1 ? 's' : '' }} — elles seront ignorées à la validation (aucun ajustement appliqué).
+        {{ uncountedCount }} ligne{{ uncountedCount > 1 ? 's' : '' }} non comptée{{ uncountedCount > 1 ? 's' : '' }} —
+        elles seront ignorées à la validation (aucun ajustement appliqué).
       </p>
 
       <!-- Table -->
@@ -114,33 +126,23 @@ const fmtXof = (v: number) =>
                 </td>
                 <td class="px-4 py-3 text-right text-gray-600">{{ original.expected_quantity }}</td>
                 <td class="px-4 py-3 text-right">
-                  <Input
-                    v-if="isDraft"
-                    :model-value="form.lines[i].counted_quantity ?? ''"
+                  <Input v-if="isDraft" :model-value="form.lines[i].counted_quantity ?? ''"
                     @update:model-value="(v) => form.lines[i].counted_quantity = v === '' ? null : Number(v)"
-                    type="number"
-                    min="0"
-                    class="w-24 text-right"
-                  />
+                    type="number" min="0" class="w-24 text-right" />
                   <span v-else class="text-gray-700">{{ original.counted_quantity ?? '—' }}</span>
                 </td>
-                <td class="px-4 py-3 text-right font-semibold"
-                  :class="{
-                    'text-green-600': (difference(original.id) ?? 0) > 0,
-                    'text-red-600': (difference(original.id) ?? 0) < 0,
-                    'text-gray-400': difference(original.id) === null || difference(original.id) === 0,
-                  }"
-                >
-                  {{ difference(original.id) === null ? '—' : (difference(original.id)! > 0 ? '+' : '') + difference(original.id) }}
+                <td class="px-4 py-3 text-right font-semibold" :class="{
+                  'text-green-600': (difference(original.id) ?? 0) > 0,
+                  'text-red-600': (difference(original.id) ?? 0) < 0,
+                  'text-gray-400': difference(original.id) === null || difference(original.id) === 0,
+                }">
+                  {{ difference(original.id) === null ? '—' : (difference(original.id)! > 0 ? '+' : '') +
+                    difference(original.id) }}
                 </td>
                 <td class="px-4 py-3 text-right text-gray-500 text-xs">{{ fmtXof(original.unit_cost) }}</td>
                 <td class="px-4 py-3">
-                  <Input
-                    v-if="isDraft"
-                    v-model="form.lines[i].note"
-                    placeholder="Ex: carton endommagé"
-                    class="text-xs"
-                  />
+                  <Input v-if="isDraft" v-model="form.lines[i].note" placeholder="Ex: carton endommagé"
+                    class="text-xs" />
                   <span v-else class="text-gray-400 text-xs">{{ original.note ?? '—' }}</span>
                 </td>
               </tr>
