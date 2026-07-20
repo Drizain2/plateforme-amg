@@ -18,7 +18,7 @@ if [ "${PROCESS_TYPE:-web}" = "web" ]; then
 fi
 
 # Lance le worker en arrière-plan
-php artisan queue:listen  &
+php artisan queue:work --verbose --timeout=300 &
 
 # Lance le scheduler en arrière-plan
 sh -c 'while true; do php artisan schedule:run --no-interaction; sleep 60; done' &
