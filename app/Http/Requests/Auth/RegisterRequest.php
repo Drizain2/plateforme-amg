@@ -46,14 +46,20 @@ class RegisterRequest extends FormRequest
     {
         return [
             'shop_name.required' => 'Le nom de l\'entreprise est requis.',
-            'name.required' => 'Votre nom est requis.',
-            'email.required' => 'L\'email est requis.',
-            'email.email' => 'L\'email doit être une adresse email valide.',
-            'email.unique' => 'Cet email est déjà utilisé.',
-            'password.required' => 'Le mot de passe est requis.',
-            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
-            'plan_id.required' => 'Veuillez choisir une offre.',
-            'plan_id.exists' => 'L\'offre sélectionnée n\'est pas disponible.',
+        'name.required' => 'Votre nom est requis.',
+        'email.required' => 'L\'email est requis.',
+        'email.email' => 'L\'email doit être une adresse email valide.',
+        'email.unique' => 'Cet email est déjà utilisé.',
+        'password.required' => 'Le mot de passe est requis.',
+        'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+        'password.min' => 'Le mot de passe doit contenir au moins :min caractères.',
+        'password.mixed' => 'Le mot de passe doit contenir au moins une majuscule et une minuscule.',
+        'password.letters' => 'Le mot de passe doit contenir au moins une lettre.',
+        'password.numbers' => 'Le mot de passe doit contenir au moins un chiffre.',
+        'password.symbols' => 'Le mot de passe doit contenir au moins un symbole.',
+        'password.uncompromised' => 'Ce mot de passe a été trouvé dans une fuite de données, veuillez en choisir un autre.',
+        'plan_id.required' => 'Veuillez choisir une offre.',
+        'plan_id.exists' => 'L\'offre sélectionnée n\'est pas disponible.',
         ];
     }
 }
