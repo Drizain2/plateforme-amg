@@ -12,9 +12,6 @@ services:
       - '8080:8080'
     env_file:
       - .env.docker
-    depends_on:
-      db:
-        condition: service_healthy
 
   worker:
     build: .
@@ -22,9 +19,6 @@ services:
     command: php artisan queue:work --tries=3 --sleep=3
     env_file:
       - .env.docker
-    depends_on:
-      db:
-        condition: service_healthy
 
   scheduler:
     build: .
@@ -32,9 +26,6 @@ services:
     command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
     env_file:
       - .env.docker
-    depends_on:
-      db:
-        condition: service_healthy
 
   # db:
   #   image: mysql:8.4
