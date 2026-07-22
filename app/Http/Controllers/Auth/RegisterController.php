@@ -49,6 +49,7 @@ class RegisterController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
+                'email_verified_at' => now(),// pour le test vue qu'on a pas d'hebergement
                 'is_active' => true,
             ]);
 
