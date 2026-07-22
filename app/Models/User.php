@@ -19,7 +19,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['shop_id', 'name', 'email', 'password', 'is_active', 'depot_active_id'])]
+#[Fillable(['shop_id', 'name', 'email', 'password', 'is_active', 'depot_active_id','email_verified_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('plans', function (Blueprint $table) {
             $table->json('disabled_modules')->nullable()->after('features');
+            $table->unsignedInteger('max_tickets')->nullable();
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('plans', function (Blueprint $table) {
             $table->dropColumn('disabled_modules');
+            $table->dropColumn('max_tickets');
         });
     }
 };
