@@ -13,12 +13,12 @@ services:
     env_file:
       - .env.docker
 
-  worker:
-    build: .
-    entrypoint: []
-    command: php artisan queue:work --tries=3 --sleep=3
-    env_file:
-      - .env.docker
+  # worker:
+  #   build: .
+  #   entrypoint: []
+  #   command: php artisan queue:work --tries=3 --sleep=3
+  #   env_file:
+  #     - .env.docker
 
   scheduler:
     build: .
