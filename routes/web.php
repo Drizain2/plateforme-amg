@@ -142,7 +142,7 @@ Route::middleware(['auth', 'verified', EnsureTenantScope::class, 'subscription.c
     Route::prefix('tickets')->name('tickets.')->group(function () {
         Route::get('/', [TicketController::class, 'index'])->name('index');
         Route::get('/create', [TicketController::class, 'create'])->name('create');
-        Route::post('/', [TicketController::class, 'store'])->name('store');
+        Route::post('/', [TicketController::class, 'store'])->name('store')->middleware('plan.limits:tickets');;
         Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
         Route::put('/{ticket}', [TicketController::class, 'update'])->name('update');
         Route::post('/{ticket}/transition', [TicketController::class, 'transition'])->name('transition');
@@ -181,7 +181,7 @@ Route::middleware(['auth', 'verified', EnsureTenantScope::class, 'subscription.c
 
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [ShopUserController::class, 'index'])->name('index');
-        Route::post('/', [ShopUserController::class, 'store'])->name('store');
+        Route::post('/', [ShopUserController::class, 'store'])->name('store')->middleware('plan.limits:users');
         Route::put('/{user}', [ShopUserController::class, 'update'])->name('update');
         Route::delete('/{user}', [ShopUserController::class, 'destroy'])->name('destroy');
         Route::post('/{user}/toggle-active', [ShopUserController::class, 'toggleActive'])->name('toggle-active');

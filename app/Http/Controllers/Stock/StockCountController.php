@@ -17,6 +17,8 @@ class StockCountController extends Controller
     {
         $this->middleware('perm:stock.view')->only(['index', 'show']);
         $this->middleware('perm:stock.count')->only(['store', 'update', 'validateCount']);
+        $this->middleware('plan.limits:module:inventaire')->only(['store']);
+
     }
 
     public function index(): Response

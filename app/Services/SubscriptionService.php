@@ -142,43 +142,95 @@ class SubscriptionService
     {
         $this->cancelCurrentSubscription($shop);
 
-        return Subscription::create([
+        $subscription = Subscription::create([
             'shop_id' => $shop->id,
             'plan_id' => $plan->id,
             'billing_period' => $period,
             'starts_at' => now(),
-            'ends_at' => now()->addYears(10), // plan gratuit = perpétuel
+            'ends_at' => now()->addYears(10),
             'status' => SubscriptionStatus::Active,
             'gateway' => $this->gateway->name(),
         ]);
+
+        $shop->update(['plan_id' => $plan->id]);
+
+        return $subscription;
     }
 
     private function createOrExtendSubscription(Payment $payment): Subscription
     {
         $shop = $payment->shop;
         $period = $payment->billing_period;
+        $newPlan = $payment->plan;
 
-        // Si un abonnement actif existe, on prolonge à partir de sa fin
         $existing = $shop->subscriptions()
             ->whereIn('status', [SubscriptionStatus::Active->value, SubscriptionStatus::Trial->value])
             ->where('ends_at', '>', now())
             ->latest('ends_at')
             ->first();
 
-        $startsAt = $existing ? $existing->ends_at : now();
-        $endsAt = $startsAt->copy()->addMonths($period->months());
+        // Annule tout changement déjà programmé pour éviter les doublons
+        $shop->subscriptions()
+            ->where('status', SubscriptionStatus::Pending->value)
+            ->update(['status' => SubscriptionStatus::Cancelled->value, 'cancelled_at' => now()]);
 
-        $this->cancelCurrentSubscription($shop);
+        if ($existing && $existing->plan_id !== $payment->plan_id) {
+            $isUpgrade = $newPlan->price > $existing->plan->price;
 
-        return Subscription::create([
+            if ($isUpgrade) {
+                $startsAt = now();
+                $creditedDays = $this->prorationCreditDays($existing, $newPlan);
+                $endsAt = $startsAt->copy()->addMonths($period->months())->addDays($creditedDays);
+                $this->cancelCurrentSubscription($shop);
+            } else {
+                $startsAt = $existing->ends_at;
+                $endsAt = $startsAt->copy()->addMonths($period->months());
+            }
+        } else {
+            $startsAt = $existing ? $existing->ends_at : now();
+            $endsAt = $startsAt->copy()->addMonths($period->months());
+            $this->cancelCurrentSubscription($shop);
+        }
+
+        $subscription = Subscription::create([
             'shop_id' => $shop->id,
             'plan_id' => $payment->plan_id,
             'billing_period' => $period,
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
-            'status' => SubscriptionStatus::Active,
+            'status' => $startsAt->isFuture() ? SubscriptionStatus::Pending : SubscriptionStatus::Active,
             'gateway' => $payment->gateway,
         ]);
+
+        if ($subscription->status === SubscriptionStatus::Active) {
+            $shop->update(['plan_id' => $subscription->plan_id]);
+        }
+
+        return $subscription;
+    }
+
+    /**
+     * Convertit le reliquat non consommé de l'ancien plan en jours crédités
+     * sur le nouveau plan (valeur équivalente, pas remboursement cash).
+     */
+    private function prorationCreditDays(Subscription $existing, Plan $newPlan): int
+    {
+        if ($newPlan->price <= 0 || $newPlan->price <= $existing->plan->price) {
+            return 0;
+        }
+
+        $remainingDays = now()->diffInDays($existing->ends_at, false);
+
+        if ($remainingDays <= 0) {
+            return 0;
+        }
+
+        $totalPeriodDays = max(1, $existing->starts_at->diffInDays($existing->ends_at));
+        $remainingValue = ($remainingDays / $totalPeriodDays) * $existing->plan->price;
+
+        $newDailyRate = $newPlan->price / 30; // approximation mensuelle
+
+        return (int) floor($remainingValue / $newDailyRate);
     }
 
     private function cancelCurrentSubscription(Shop $shop): void
@@ -193,6 +245,6 @@ class SubscriptionService
         $year = now()->year;
         $count = Payment::whereYear('created_at', $year)->count() + 1;
 
-        return 'PAY-'.$year.'-'.str_pad($count, 5, '0', STR_PAD_LEFT);
+        return 'PAY-' . $year . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
     }
 }

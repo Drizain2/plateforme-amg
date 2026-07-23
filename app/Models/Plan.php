@@ -20,7 +20,7 @@ class Plan extends Model
      *
      * @var array<int, string>
      */
-    public const DISABLEABLE_MODULES = ['tickets'];
+    public const DISABLEABLE_MODULES = ['tickets','inventaire'];
 
     protected $fillable = [
         'name', 'slug', 'description', 'price', 'max_users', 'max_depots', 'features', 'disabled_modules', 'sort_order', 'is_active',

@@ -65,6 +65,11 @@ class Shop extends Model
     {
         return $this->hasMany(Payment::class);
     }
+    // Tickets
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
+    }
 
     /** Abonnement en cours (actif ou en essai, non expiré). */
     public function activeSubscription(): HasOne
@@ -84,6 +89,18 @@ class Shop extends Model
     {
         return $this->trial_ends_at && $this->trial_ends_at->isFuture();
     }
+
+    public function pendingSubscription(): HasOne
+{
+    return $this->hasOne(Subscription::class)
+        ->where('status', SubscriptionStatus::Pending->value)
+        ->latestOfMany();
+}
+
+public function hasScheduledPlanChange(): bool
+{
+    return $this->pendingSubscription()->exists();
+}
 
     public function canAddDepot(): bool
     {

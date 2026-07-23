@@ -6,12 +6,13 @@ import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import type { Payment, Plan, Subscription } from '@/types'
-import type { PaginatedResponse } from '@/types/pagination'
+import type { PaginatedResource } from '@/types/pagination'
 
 const props = defineProps<{
   shop: { id: number; name: string; plan: Plan }
   subscription: Subscription | null
-  payments: PaginatedResponse<Payment>
+  pendingSubscription: Subscription | null
+  payments: PaginatedResource<Payment>
   plans: Plan[]
   hasPendingPayment: boolean
 }>()
@@ -65,7 +66,20 @@ const subStatusBadge = (status: Subscription['status']) =>
     expired: { variant: 'danger' as const, label: 'Expiré' },
     cancelled: { variant: 'default' as const, label: 'Annulé' },
     suspended: { variant: 'warning' as const, label: 'Suspendu' },
+    pending: { variant: 'info' as const, label: 'Programmé' },
   })[status]
+
+  const changeType = computed(() => {
+  if (!props.shop.plan || !selectedPlan.value) {
+    return 'new'
+  }
+
+  if (selectedPlan.value.id === props.shop.plan.id) {
+    return 'renew'
+  }
+
+  return (selectedPlan.value.sort_order ?? 0) > (props.shop.plan.sort_order ?? 0) ? 'upgrade' : 'downgrade'
+})
 </script>
 
 <template>
@@ -130,6 +144,14 @@ const subStatusBadge = (status: Subscription['status']) =>
         </div>
       </div>
 
+      <!-- Après le bloc "Abonnement actif" -->
+      <div v-if="pendingSubscription" class="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
+        <p class="text-sm text-blue-800">
+          Passage vers <strong>{{ pendingSubscription.plan?.name }}</strong>
+          programmé le <strong>{{ fmtDate(pendingSubscription.ends_at) }}</strong>.
+        </p>
+      </div>
+
       <!-- Panneau souscription -->
       <div v-if="showSubscribePanel" class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 space-y-5">
         <div>
@@ -141,10 +163,18 @@ const subStatusBadge = (status: Subscription['status']) =>
 
         <!-- Avertissement si abonnement actif -->
         <div v-if="subscription?.status === 'active'" class="bg-white border border-indigo-200 rounded-lg px-4 py-3 text-sm text-gray-600">
-          Votre abonnement actuel est valide jusqu'au <strong>{{ fmtDate(subscription.ends_at) }}</strong>.
-          Un renouvellement sera ajouté à la suite.
+          <span v-if="changeType === 'renew'">
+            Votre abonnement actuel est valide jusqu'au <strong>{{ fmtDate(subscription.ends_at) }}</strong>.
+            Un renouvellement sera ajouté à la suite.
+          </span>
+          <span v-else-if="changeType === 'upgrade'">
+            Le passage à <strong>{{ selectedPlan?.name }}</strong> sera <strong>immédiat</strong> après validation du paiement.
+          </span>
+          <span v-else-if="changeType === 'downgrade'">
+            Le passage à <strong>{{ selectedPlan?.name }}</strong> prendra effet le
+            <strong>{{ fmtDate(subscription.ends_at) }}</strong> (fin de votre période en cours).
+          </span>
         </div>
-
         <form @submit.prevent="submit" class="space-y-4">
           <!-- Choix du plan -->
           <div>

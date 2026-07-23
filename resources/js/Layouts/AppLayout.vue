@@ -23,7 +23,7 @@ const isOnTrial = computed(() => (page.props.auth as Auth).is_on_trial === true)
 
 const trialDaysLeft = computed((): number | null => {
   if (!isOnTrial.value || !shop.value?.trial_ends_at) {
-    return null
+    return null 
   }
 
   const endsAt = new Date(shop.value.trial_ends_at)

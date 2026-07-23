@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Gate;
+use App\Services\PermissionService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,7 +43,16 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         if (config('app.force_https')) {
         URL::forceScheme('https');
+        Gate::after(function ($user, $ability, $result) {
+        if ($result === false) {
+            return false; // déjà refusé, rien à ajouter
+        }
+    
+        // Si Spatie/le rôle a autorisé, on revérifie le filtre plan
+        return app(PermissionService::class)->has($user, $ability);
+    });
     }
+
     }
 
     /**

@@ -25,7 +25,7 @@ class SubscriptionController extends Controller
      */
     public function index(): Response
     {
-        $shop = app('current_shop')->load(['plan', 'activeSubscription.plan']);
+        $shop = app('current_shop')->load(['plan', 'activeSubscription.plan', 'pendingSubscription.plan']);
 
         $payments = Payment::where('shop_id', $shop->id)
             ->with('plan')
@@ -34,8 +34,8 @@ class SubscriptionController extends Controller
 
         $plans = Plan::where('is_active', true)
             ->where('price', '>', 0)
-            ->orderBy('price')
-            ->get(['id', 'name', 'slug', 'price', 'description', 'max_users', 'max_depots', 'features']);
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'slug', 'price', 'description', 'max_users', 'max_depots', 'max_tickets', 'features', 'sort_order']);
 
         $hasPendingPayment = Payment::where('shop_id', $shop->id)
             ->where('status', PaymentStatus::Pending)
@@ -44,12 +44,12 @@ class SubscriptionController extends Controller
         return Inertia::render('Subscription/Index', [
             'shop' => $shop,
             'subscription' => $shop->activeSubscription,
+            'pendingSubscription' => $shop->pendingSubscription,
             'payments' => $payments,
             'plans' => $plans,
             'hasPendingPayment' => $hasPendingPayment,
         ]);
     }
-
     /**
      * Initie une demande d'abonnement (crée un paiement pending).
      */
@@ -63,7 +63,12 @@ class SubscriptionController extends Controller
         $shop = app('current_shop');
         $plan = Plan::findOrFail($request->plan_id);
         $period = BillingPeriod::from($request->billing_period);
-
+        $currentPlan = $shop->plan;
+        if ($currentPlan && $plan->sort_order < $currentPlan->sort_order) {
+            if ($error = $shop->exceedsLimitsOf($plan)) {
+                return back()->with('error', $error);
+            }
+        }
         // Annule les paiements pending existants pour éviter les doublons.
         Payment::where('shop_id', $shop->id)
             ->where('status', PaymentStatus::Pending)

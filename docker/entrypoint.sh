@@ -21,7 +21,7 @@ fi
 # php artisan queue:work --sleep=3 --tries=3 &
 
 # Lance le scheduler en arrière-plan
-sh -c 'while true; do php artisan schedule:run --no-interaction; sleep 60; done' &
+# sh -c 'while true; do php artisan schedule:run --no-interaction; sleep 60; done' &
 
 # Le serveur web reste au premier plan (obligatoire : Render surveille ce process)
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"
